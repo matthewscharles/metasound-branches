@@ -13,8 +13,8 @@ namespace Metasound
 {
     namespace TriggerOnNextFrameNodeNames
     {
-        METASOUND_PARAM(InputTrigger, "Trigger", "Trigger input to delay.");
-        METASOUND_PARAM(OutputOnTrigger, "On Trigger", "Delay a trigger by a single frame.");
+        METASOUND_PARAM(InputTrigger, "In", "Trigger input to delay.");
+        METASOUND_PARAM(OutputOnTrigger, "Out", "Delay a trigger by a single frame.");
     }
 
     class FTriggerOnNextFrameOperator : public TExecutableOperator<FTriggerOnNextFrameOperator>
