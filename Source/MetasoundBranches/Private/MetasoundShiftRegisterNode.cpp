@@ -11,7 +11,7 @@
 
 namespace Metasound
 {
-    namespace ShiftRegisterNodeNames
+    namespace ShiftRegisterNodeVertexNames
     {
         METASOUND_PARAM(InputSignal, "In", "Input float to the shift register.");
         METASOUND_PARAM(InputTrigger, "Trigger", "Trigger.");
@@ -57,7 +57,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace ShiftRegisterNodeNames;
+            using namespace ShiftRegisterNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -108,7 +108,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace ShiftRegisterNodeNames;
+            using namespace ShiftRegisterNodeVertexNames;
 
             FDataReferenceCollection InputDataReferences;
 
@@ -120,7 +120,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace ShiftRegisterNodeNames;
+            using namespace ShiftRegisterNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
             
@@ -139,7 +139,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace ShiftRegisterNodeNames;
+            using namespace ShiftRegisterNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();

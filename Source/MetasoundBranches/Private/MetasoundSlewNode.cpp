@@ -12,7 +12,7 @@
 namespace Metasound
 {
     // Vertex Names - define the node's inputs and outputs here
-    namespace SlewNodeNames
+    namespace SlewNodeVertexNames
     {
         METASOUND_PARAM(InputSignal, "In", "Audio signal to smooth.");
         METASOUND_PARAM(InputRiseTime, "Rise Time", "Rise time in seconds.");
@@ -44,7 +44,7 @@ namespace Metasound
         // Helper function for constructing vertex interface
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace SlewNodeNames;
+            using namespace SlewNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -87,7 +87,7 @@ namespace Metasound
         // Input Data References
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace SlewNodeNames;
+            using namespace SlewNodeVertexNames;
 
             FDataReferenceCollection InputDataReferences;
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
@@ -100,7 +100,7 @@ namespace Metasound
         // Output Data References
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace SlewNodeNames;
+            using namespace SlewNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
             OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal), OutputSignal);
@@ -111,7 +111,7 @@ namespace Metasound
         // Operator Factory Method
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace SlewNodeNames;
+            using namespace SlewNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();

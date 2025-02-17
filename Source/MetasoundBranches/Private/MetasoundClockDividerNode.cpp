@@ -11,7 +11,7 @@
 
 namespace Metasound
 {
-    namespace ClockDividerNodeNames
+    namespace ClockDividerNodeVertexNames
     {
         METASOUND_PARAM(InputTrigger, "Trigger", "Input trigger to the clock divider.");
         METASOUND_PARAM(InputReset, "Reset", "Reset the clock divider.");
@@ -49,7 +49,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace ClockDividerNodeNames;
+            using namespace ClockDividerNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -99,7 +99,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace ClockDividerNodeNames;
+            using namespace ClockDividerNodeVertexNames;
 
             FDataReferenceCollection InputDataReferences;
 
@@ -111,7 +111,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace ClockDividerNodeNames;
+            using namespace ClockDividerNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
 
@@ -129,7 +129,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace ClockDividerNodeNames;
+            using namespace ClockDividerNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();

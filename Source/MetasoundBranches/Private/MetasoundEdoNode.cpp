@@ -11,7 +11,7 @@
 
 namespace Metasound
 {
-    namespace EdoNodeNames
+    namespace EdoNodeVertexNames
     {
         METASOUND_PARAM(InputNoteNumber, "Note Number", "Input MIDI note number.");
         METASOUND_PARAM(InputReferenceFrequency, "Reference Frequency", "Reference frequency.");
@@ -39,7 +39,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace EdoNodeNames;
+            using namespace EdoNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -84,7 +84,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace EdoNodeNames;
+            using namespace EdoNodeVertexNames;
 
             FDataReferenceCollection InputDataReferences;
 
@@ -98,7 +98,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace EdoNodeNames;
+            using namespace EdoNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
 
@@ -109,7 +109,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace EdoNodeNames;
+            using namespace EdoNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();

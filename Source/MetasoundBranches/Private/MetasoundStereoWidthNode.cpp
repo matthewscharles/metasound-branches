@@ -11,7 +11,7 @@
 
 namespace Metasound
 {
-    namespace WidthNodeNames
+    namespace WidthNodeVertexNames
     {
         METASOUND_PARAM(InputLeftSignal, "In L", "Left channel.");
         METASOUND_PARAM(InputRightSignal, "In R", "Right channel.");
@@ -39,7 +39,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace WidthNodeNames;
+            using namespace WidthNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -84,7 +84,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace WidthNodeNames;
+            using namespace WidthNodeVertexNames;
 
             FDataReferenceCollection InputDataReferences;
 
@@ -97,7 +97,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace WidthNodeNames;
+            using namespace WidthNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
 
@@ -109,7 +109,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace WidthNodeNames;
+            using namespace WidthNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();

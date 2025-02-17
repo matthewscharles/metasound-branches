@@ -12,7 +12,7 @@
 
 namespace Metasound
 {
-    namespace BalanceNodeNames
+    namespace BalanceNodeVertexNames
     {
         METASOUND_PARAM(InputLeftSignal, "In L", "Left channel audio input.");
         METASOUND_PARAM(InputRightSignal, "In R", "Right channel audio input.");
@@ -40,7 +40,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace BalanceNodeNames;
+            using namespace BalanceNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -85,7 +85,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace BalanceNodeNames;
+            using namespace BalanceNodeVertexNames;
 
             FDataReferenceCollection InputDataReferences;
 
@@ -98,7 +98,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace BalanceNodeNames;
+            using namespace BalanceNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
 
@@ -110,7 +110,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace BalanceNodeNames;
+            using namespace BalanceNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();

@@ -12,7 +12,7 @@
 
 namespace Metasound
 {
-    namespace BoolToAudioNodeNames
+    namespace BoolToAudioNodeVertexNames
     {
         METASOUND_PARAM(InputBool, "Value", "Boolean input to convert to audio.");
         METASOUND_PARAM(InputRiseTime, "Rise Time", "Rise time in seconds.");
@@ -39,7 +39,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace BoolToAudioNodeNames;
+            using namespace BoolToAudioNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -80,7 +80,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace BoolToAudioNodeNames;
+            using namespace BoolToAudioNodeVertexNames;
 
             FDataReferenceCollection InputDataReferences;
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputBool), InputBool);
@@ -92,7 +92,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace BoolToAudioNodeNames;
+            using namespace BoolToAudioNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
             OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal), OutputSignal);
@@ -102,7 +102,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace BoolToAudioNodeNames;
+            using namespace BoolToAudioNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();

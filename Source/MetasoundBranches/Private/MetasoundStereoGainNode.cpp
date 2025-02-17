@@ -11,7 +11,7 @@
 
 namespace Metasound
 {
-    namespace StereoGainNodeNames
+    namespace StereoGainNodeVertexNames
     {
         METASOUND_PARAM(InputLeftSignal, "In L", "Left channel audio input.");
         METASOUND_PARAM(InputRightSignal, "In R", "Right channel audio input.");
@@ -39,7 +39,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace StereoGainNodeNames;
+            using namespace StereoGainNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -83,7 +83,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace StereoGainNodeNames;
+            using namespace StereoGainNodeVertexNames;
 
             FDataReferenceCollection InputDataReferences;
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputLeftSignal), InputLeftSignal);
@@ -95,7 +95,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace StereoGainNodeNames;
+            using namespace StereoGainNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
             OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputLeftSignal), OutputLeftSignal);
@@ -105,7 +105,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace StereoGainNodeNames;
+            using namespace StereoGainNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();
