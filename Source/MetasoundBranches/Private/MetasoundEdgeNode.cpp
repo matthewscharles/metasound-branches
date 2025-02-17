@@ -69,7 +69,7 @@ namespace Metasound
 
                 Metadata.ClassName = { TEXT("UE"), TEXT("Edge"), TEXT("Trigger") };
                 Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 0;
+                Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("EdgeNodeDisplayName", "Edge");
                 Metadata.Description = METASOUND_LOCTEXT("EdgeNodeDesc", "Detect upward and downward changes in an input audio signal, with optional debounce.");
                 Metadata.Author = "Charles Matthews";

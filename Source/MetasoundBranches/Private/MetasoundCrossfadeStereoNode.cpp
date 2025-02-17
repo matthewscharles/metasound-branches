@@ -74,7 +74,7 @@ namespace Metasound
 
                     Metadata.ClassName = { TEXT("UE"), TEXT("Stereo Crossfade"), TEXT("Audio") };
                     Metadata.MajorVersion = 1;
-                    Metadata.MinorVersion = 0;
+                    Metadata.MinorVersion = 1;
                     Metadata.DisplayName = METASOUND_LOCTEXT("CrossfadeStereoNodeDisplayName", "Stereo Crossfade");
                     Metadata.Description = METASOUND_LOCTEXT("CrossfadeStereoNodeDesc", "Crossfades between two stereo signals.");
                     Metadata.Author = "Charles Matthews";

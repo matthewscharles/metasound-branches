@@ -72,7 +72,7 @@ namespace Metasound
 
                     Metadata.ClassName = { TEXT("UE"), TEXT("Dust (Trigger)"), TEXT("Trigger") };
                     Metadata.MajorVersion = 1;
-                    Metadata.MinorVersion = 0;
+                    Metadata.MinorVersion = 1;
                     Metadata.DisplayName = METASOUND_LOCTEXT("DustTriggerNodeDisplayName", "Dust (Trigger)");
                     Metadata.Description = METASOUND_LOCTEXT("DustTriggerNodeDesc", "Generate randomly timed trigger events, with audio-rate modulation.");
                     Metadata.Author = "Charles Matthews";

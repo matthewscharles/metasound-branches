@@ -68,7 +68,7 @@ namespace Metasound
                 FNodeClassMetadata Metadata;
                 Metadata.ClassName = { TEXT("UE"), TEXT("Slew (Float)"), TEXT("Float") };
                 Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 0;
+                Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("SlewFloatDisplayName", "Slew (Float)");
                 Metadata.Description = METASOUND_LOCTEXT("SlewFloatDesc", "Smooth the rise and fall times of an incoming float value.");
                 Metadata.Author = "Charles Matthews";

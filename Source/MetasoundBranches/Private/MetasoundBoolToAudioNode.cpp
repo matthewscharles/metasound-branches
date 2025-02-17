@@ -62,7 +62,7 @@ namespace Metasound
                 FNodeClassMetadata Metadata;
                 Metadata.ClassName = { TEXT("UE"), TEXT("BoolToAudio"), TEXT("Audio") };
                 Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 0;
+                Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("BoolToAudioDisplayName", "Bool To Audio");
                 Metadata.Description = METASOUND_LOCTEXT("BoolToAudioDesc", "Converts a boolean value to an audio signal, with optional rise and fall times.");
                 Metadata.Author = "Charles Matthews";

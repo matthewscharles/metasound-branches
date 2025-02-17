@@ -102,7 +102,7 @@ namespace Metasound
 
                 Metadata.ClassName = { TEXT("UE"), TEXT("Tuning"), TEXT("Float") };
                 Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 0;
+                Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("TuningNodeDisplayName", "Tuning");
                 Metadata.Description = METASOUND_LOCTEXT("TuningNodeDesc", "Generates a frequency based on custom tuning per-note.");
                 Metadata.Author = "Charles Matthews";

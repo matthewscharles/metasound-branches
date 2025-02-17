@@ -64,7 +64,7 @@ namespace Metasound
                 FNodeClassMetadata Metadata;
                 Metadata.ClassName = { TEXT("UE"), TEXT("PhaseDisperser"), TEXT("Audio") };
                 Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 0;
+                Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("PhaseDisperserNodeDisplayName", "Phase Disperser");
                 Metadata.Description = METASOUND_LOCTEXT("PhaseDisperserNodeDesc", "A chain of allpass filters acting as a phase disperser to soften transients.");
                 Metadata.Author = "Charles Matthews";

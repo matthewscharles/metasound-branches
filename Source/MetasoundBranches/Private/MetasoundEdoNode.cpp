@@ -66,7 +66,7 @@ namespace Metasound
 
                 Metadata.ClassName = { TEXT("UE"), TEXT("EDO"), TEXT("Float") };
                 Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 0;
+                Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("EdoNodeDisplayName", "EDO");
                 Metadata.Description = METASOUND_LOCTEXT("EdoNodeDesc", "Generates a frequency based on equal division of the octave.");
                 Metadata.Author = "Charles Matthews";

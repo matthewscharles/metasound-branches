@@ -65,7 +65,7 @@ namespace Metasound
                 FNodeClassMetadata Metadata;
                 Metadata.ClassName = { TEXT("UE"), TEXT("Stereo Gain"), TEXT("Audio") };
                 Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 0;
+                Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("StereoGainNodeDisplayName", "Stereo Gain");
                 Metadata.Description = METASOUND_LOCTEXT("StereoGainNodeDesc", "Scale a stereo input to a gain value.");
                 Metadata.Author = "Charles Matthews";

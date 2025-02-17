@@ -66,7 +66,7 @@ namespace Metasound
 
                     Metadata.ClassName = { TEXT("UE"), TEXT("Stereo Width"), TEXT("Audio") };
                     Metadata.MajorVersion = 1;
-                    Metadata.MinorVersion = 0;
+                    Metadata.MinorVersion = 1;
                     Metadata.DisplayName = METASOUND_LOCTEXT("WidthNodeDisplayName", "Stereo Width");
                     Metadata.Description = METASOUND_LOCTEXT("WidthNodeDesc", "Adjusts the stereo width of a signal.");
                     Metadata.Author = "Charles Matthews";

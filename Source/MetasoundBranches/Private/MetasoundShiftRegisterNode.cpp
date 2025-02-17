@@ -90,7 +90,7 @@ namespace Metasound
 
                     Metadata.ClassName = { TEXT("UE"), TEXT("Shift Register"), TEXT("Float") };
                     Metadata.MajorVersion = 1;
-                    Metadata.MinorVersion = 0;
+                    Metadata.MinorVersion = 1;
                     Metadata.DisplayName = METASOUND_LOCTEXT("ShiftRegisterNodeDisplayName", "Shift Register");
                     Metadata.Description = METASOUND_LOCTEXT("ShiftRegisterNodeDesc", "Shift register node with eight stages.");
                     Metadata.Author = "Charles Matthews";

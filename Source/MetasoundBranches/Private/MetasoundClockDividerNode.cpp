@@ -81,7 +81,7 @@ namespace Metasound
 
                     Metadata.ClassName = { TEXT("UE"), TEXT("Clock Divider"), TEXT("Trigger") };
                     Metadata.MajorVersion = 1;
-                    Metadata.MinorVersion = 0;
+                    Metadata.MinorVersion = 1;
                     Metadata.DisplayName = METASOUND_LOCTEXT("ClockDividerNodeDisplayName", "Clock Divider");
                     Metadata.Description = METASOUND_LOCTEXT("ClockDividerNodeDesc", "Divides an input trigger into multiple outputs.");
                     Metadata.Author = "Charles Matthews";

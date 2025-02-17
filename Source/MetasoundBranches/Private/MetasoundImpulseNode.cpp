@@ -68,7 +68,7 @@ namespace Metasound
 
                     Metadata.ClassName = { TEXT("UE"), TEXT("Impulse"), TEXT("Audio") };
                     Metadata.MajorVersion = 1;
-                    Metadata.MinorVersion = 0;
+                    Metadata.MinorVersion = 1;
                     Metadata.DisplayName = METASOUND_LOCTEXT("ImpulseNodeDisplayName", "Impulse");
                     Metadata.Description = METASOUND_LOCTEXT("ImpulseNodeDesc", "Generates a single-sample impulse when triggered.");
                     Metadata.Author = "Charles Matthews";

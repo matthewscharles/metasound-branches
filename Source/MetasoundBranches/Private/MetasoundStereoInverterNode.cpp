@@ -73,7 +73,7 @@ namespace Metasound
                 FNodeClassMetadata Metadata;
                 Metadata.ClassName = { TEXT("UE"), TEXT("Stereo Inverter"), TEXT("Audio") };
                 Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 0;
+                Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("StereoInverterNodeDisplayName", "Stereo Inverter");
                 Metadata.Description = METASOUND_LOCTEXT("StereoInverterNodeDesc", "Inverts and/or swaps stereo channels.");
                 Metadata.Author = "Charles Matthews";
