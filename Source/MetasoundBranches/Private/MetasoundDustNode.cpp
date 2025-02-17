@@ -20,6 +20,7 @@ namespace Metasound
         METASOUND_PARAM(InputDensity, "Modulation", "Density control signal.");
         METASOUND_PARAM(InputDensityOffset, "Density", "Probability of impulse generation.");
         METASOUND_PARAM(InputEnabled, "Enabled", "Enable or disable generation.");
+        METASOUND_PARAM(InputSeed, "Seed", "Seed for seeding the Random Number Generator, -1 (default) will use current time.");
         METASOUND_PARAM(InputBiPolar, "Bi-Polar", "Toggle between bipolar and unipolar impulse output.");
         METASOUND_PARAM(OutputImpulse, "Impulse Out", "Generated impulse output.");
     }
@@ -189,6 +190,7 @@ namespace Metasound
 
         // Random number generator
         FRandomStream RNGStream;
+        FInt32ReadRef Seed;
         
         // Toggle flag for polarity
         bool SignalIsPositive;
