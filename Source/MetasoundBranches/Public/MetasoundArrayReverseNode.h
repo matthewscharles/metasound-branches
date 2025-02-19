@@ -25,7 +25,6 @@ namespace Metasound
 {
     namespace MetasoundArrayNodesPrivate
     {
-        // Specialize TArrayElementType for TArray<FTime>
         template<>
         struct TArrayElementType<TArray<FTime>>
         {
