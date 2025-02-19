@@ -55,28 +55,31 @@ namespace Metasound
 		}
 
         static const FNodeClassMetadata& GetNodeInfo()
-		{
-			auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
-			{
-				FNodeClassMetadata Metadata;
-				Metadata.ClassName = { TEXT("UE"), TEXT("Reverse"), GetMetasoundDataTypeName<ArrayType>() };
-				Metadata.MajorVersion = 1;
-				Metadata.MinorVersion = 0;
-                Metadata.DisplayName = METASOUND_LOCTEXT_FORMAT("ArrayOpReverseArrayDisplayNamePattern", "Reverse ({0})", GetMetasoundDataTypeDisplayText<ArrayType>());
-				Metadata.Description = LOCTEXT("ReverseArrayDesc", "Outputs a reversed copy of the input array when triggered.");
-				Metadata.Author = TEXT("Charles Matthews");
-				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
-				FVertexInterface NodeInterface = GetDefaultInterface();
-				Metadata.DefaultInterface = NodeInterface;
-				Metadata.CategoryHierarchy = { LOCTEXT("Custom", "Branches") };
-				Metadata.Keywords = TArray<FText>();
-
-				return Metadata;
-			};
-
-			static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
-			return Metadata;
-		}
+        {
+            auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
+            {
+                return MetasoundArrayNodesPrivate::CreateArrayNodeClassMetadata(
+                    GetMetasoundDataTypeName<ArrayType>(),  // DataTypeName
+                    TEXT("Reverse"),  // OperatorName
+                    METASOUND_LOCTEXT_FORMAT("ArrayOpReverseArrayDisplayNamePattern", "Reverse ({0})", GetMetasoundDataTypeDisplayText<ArrayType>()), // DisplayName
+                    LOCTEXT("ReverseArrayDesc", "Outputs a reversed copy of the input array when triggered."), // Description
+                    GetDefaultInterface(), // VertexInterface
+                    1,  // Major Version
+                    0,  // Minor Version
+                    false // IsDeprecated
+                );
+            };
+        
+            static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
+        
+            // Ensure the additional properties are set explicitly
+            const_cast<FNodeClassMetadata&>(Metadata).Author = TEXT("Charles Matthews");
+            const_cast<FNodeClassMetadata&>(Metadata).PromptIfMissing = PluginNodeMissingPrompt;
+            const_cast<FNodeClassMetadata&>(Metadata).CategoryHierarchy = { LOCTEXT("Custom", "Branches") };
+            const_cast<FNodeClassMetadata&>(Metadata).Keywords = TArray<FText>();
+        
+            return Metadata;
+        }
 
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutResults)
 		{
