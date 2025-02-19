@@ -17,6 +17,7 @@
 #include "MetasoundTrigger.h"
 #include "MetasoundVertex.h"
 #include "Misc/ScopeLock.h"
+#include "MetasoundArrayTypeTraits.h"
 #include <numeric>
 
 #define LOCTEXT_NAMESPACE "MetasoundFrontend"

@@ -14,13 +14,14 @@ namespace Metasound
     template class TArraySumOperator<TArray<int32>>;
     template class TArraySumNode<TArray<int32>>;
     
-    // template class TArraySumOperator<TArray<FTime>>;
-    // template class TArraySumNode<TArray<FTime>>;
+    template class TArraySumOperator<TArray<FTime>>;
+    template class TArraySumNode<TArray<FTime>>;
 }
 
 using FSumFloatNodeAlias = Metasound::TArraySumNode<TArray<float>>;
 using FSumIntNodeAlias   = Metasound::TArraySumNode<TArray<int32>>;
-// using FSumTimeNodeAlias   = Metasound::TArraySumNode<TArray<Metasound::Ftime>>;
+using FSumTimeNodeAlias   = Metasound::TArraySumNode<TArray<Metasound::FTime>>;
 
 METASOUND_REGISTER_NODE(FSumFloatNodeAlias);
 METASOUND_REGISTER_NODE(FSumIntNodeAlias);
+METASOUND_REGISTER_NODE(FSumTimeNodeAlias);
