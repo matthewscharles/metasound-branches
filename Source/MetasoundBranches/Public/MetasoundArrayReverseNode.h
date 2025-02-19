@@ -54,14 +54,12 @@ namespace Metasound
 			return DefaultInterface;
 		}
 
-
-        
         static const FNodeClassMetadata& GetNodeInfo()
 		{
 			auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
 			{
 				FNodeClassMetadata Metadata;
-				Metadata.ClassName = { TEXT("UE"), TEXT("Reverse"), TEXT("Audio") };
+				Metadata.ClassName = { TEXT("UE"), TEXT("Reverse"), GetMetasoundDataTypeName<ArrayType>() };
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
                 Metadata.DisplayName = METASOUND_LOCTEXT_FORMAT("ArrayOpReverseArrayDisplayNamePattern", "Reverse ({0})", GetMetasoundDataTypeDisplayText<ArrayType>());
