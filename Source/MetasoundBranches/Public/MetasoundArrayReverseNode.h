@@ -17,11 +17,21 @@
 #include "MetasoundTrigger.h"
 #include "MetasoundVertex.h"
 #include "Misc/ScopeLock.h"
+#include "MetasoundTime.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundFrontend"
 
 namespace Metasound
 {
+    namespace MetasoundArrayNodesPrivate
+    {
+        // Specialize TArrayElementType for TArray<FTime>
+        template<>
+        struct TArrayElementType<TArray<FTime>>
+        {
+            using Type = FTime;
+        };
+    }
 	namespace ArrayReverseNodeVertexNames
 	{
 		METASOUND_PARAM(InputTriggerReverse, "Reverse", "Trigger to reverse the array.")
