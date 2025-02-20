@@ -6,19 +6,14 @@
 #include "Internationalization/Text.h"
 #include "MetasoundArrayNodes.h"
 #include "MetasoundBuilderInterface.h"
-#include "MetasoundDataFactory.h"
-#include "MetasoundExecutableOperator.h"
 #include "MetasoundFacade.h"
-#include "MetasoundLog.h"
 #include "MetasoundNodeInterface.h"
 #include "MetasoundOperatorInterface.h"
 #include "MetasoundParamHelper.h"
 #include "MetasoundPrimitives.h"
 #include "MetasoundTrigger.h"
 #include "MetasoundVertex.h"
-#include "Misc/ScopeLock.h"
 #include "MetasoundArrayTypeTraits.h"
-#include "MetasoundTime.h"
 #include <sstream>
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_ArrayJoin"
@@ -158,9 +153,9 @@ namespace Metasound
 
 		void Execute()
 		{
+            TriggerOnJoin->AdvanceBlock();
 			if (*TriggerJoin)
 			{
-                TriggerOnJoin->AdvanceBlock();
                 
 				const FArrayType& ArrayRef = *InputArray;
 				FString Delim = *Delimiter;
