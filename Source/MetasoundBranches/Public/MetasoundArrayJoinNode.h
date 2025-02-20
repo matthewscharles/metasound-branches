@@ -27,7 +27,7 @@ namespace Metasound
 		METASOUND_PARAM(InputDelimiter, "Delimiter", "Delimiter string to insert between array elements.")
 
 		METASOUND_PARAM(OutputTriggerOnJoin, "On Join", "Triggers when the joined string is output.")
-		METASOUND_PARAM(OutputJoinedString, "Joined String", "The joined string.")
+		METASOUND_PARAM(OutputJoinedString, "String", "The joined string.")
 	}
 
 	template<typename ElementType>
@@ -157,7 +157,7 @@ namespace Metasound
 
             if (*TriggerJoin)
             {
-                if (InputArray->IsEmpty())
+                if (InputArray->Num() == 0)
                 {
                     *OutJoinedString = "";
                     return;
