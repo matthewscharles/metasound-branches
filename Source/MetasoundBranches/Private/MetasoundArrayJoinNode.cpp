@@ -3,28 +3,27 @@
 #pragma once
 
 #include "MetasoundBranches/Public/MetasoundArrayJoinNode.h"
-// #include "MetasoundTime.h"
 #include "MetasoundNodeRegistrationMacro.h"
 
 namespace Metasound
 {
-    template class TArrayJoinOperator<TArray<int32>>;
-    template class TArrayJoinNode<TArray<int32>>;
+    template class TArrayJoinOperator<int32>;
+    template class TArrayJoinNode<int32>;
 
-    template class TArrayJoinOperator<TArray<float>>;
-    template class TArrayJoinNode<TArray<float>>;
+    template class TArrayJoinOperator<float>;
+    template class TArrayJoinNode<float>;
 
-    template class TArrayJoinOperator<TArray<bool>>;
-    template class TArrayJoinNode<TArray<bool>>;
+    template class TArrayJoinOperator<bool>;
+    template class TArrayJoinNode<bool>;
 
-    template class TArrayJoinOperator<TArray<FString>>;
-    template class TArrayJoinNode<TArray<FString>>;
+    template class TArrayJoinOperator<FString>;
+    template class TArrayJoinNode<FString>;
 }
 
-using FArrayJoinNodeInt32Alias = Metasound::TArrayJoinNode<TArray<int32>>;
-using FArrayJoinNodeFloatAlias = Metasound::TArrayJoinNode<TArray<float>>;
-using FArrayJoinNodeBoolAlias  = Metasound::TArrayJoinNode<TArray<bool>>;
-using FArrayJoinNodeStringAlias = Metasound::TArrayJoinNode<TArray<FString>>;
+using FArrayJoinNodeInt32Alias = Metasound::TArrayJoinNode<int32>;
+using FArrayJoinNodeFloatAlias = Metasound::TArrayJoinNode<float>;
+using FArrayJoinNodeBoolAlias  = Metasound::TArrayJoinNode<bool>;
+using FArrayJoinNodeStringAlias = Metasound::TArrayJoinNode<FString>;
 
 METASOUND_REGISTER_NODE(FArrayJoinNodeInt32Alias);
 METASOUND_REGISTER_NODE(FArrayJoinNodeFloatAlias);

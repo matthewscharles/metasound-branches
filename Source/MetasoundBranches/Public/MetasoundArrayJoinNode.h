@@ -152,33 +152,36 @@ namespace Metasound
 		}
 
 		void Execute()
-		{
+        {
             TriggerOnJoin->AdvanceBlock();
-			if (*TriggerJoin)
-			{
-                
-				const FArrayType& ArrayRef = *InputArray;
-				FString Delim = *Delimiter;
-				FString JoinedStr;
 
-				const int32 Count = ArrayRef.Num();
-				for (int32 i = 0; i < Count; ++i)
-				{
-					JoinedStr += LexToString(ArrayRef[i]);
-					if (i < Count - 1)
-					{
-						JoinedStr += Delim;
-					}
-				}
+            if (*TriggerJoin)
+            {
+                if (InputArray->IsEmpty())
+                {
+                    *OutJoinedString = "";
+                    return;
+                }
 
-				*OutJoinedString = JoinedStr;
+                FString JoinedStr;
+                const int32 Count = InputArray->Num();
+                for (int32 i = 0; i < Count; ++i)
+                {
+                    JoinedStr += LexToString((*InputArray)[i]);
+                    if (i < Count - 1)
+                    {
+                        JoinedStr += *Delimiter;
+                    }
+                }
 
-				TriggerJoin->ExecuteBlock(
-					[](int32, int32) {},
-					[this](int32 StartFrame, int32) { TriggerOnJoin->TriggerFrame(StartFrame); }
-				);
-			}
-		}
+                *OutJoinedString = JoinedStr;
+
+                TriggerJoin->ExecuteBlock(
+                    [](int32, int32) {},
+                    [this](int32 StartFrame, int32) { TriggerOnJoin->TriggerFrame(StartFrame); }
+                );
+            }
+        }
 
 	private:
 		TDataReadReference<FTrigger> TriggerJoin;
@@ -189,6 +192,17 @@ namespace Metasound
 		TDataWriteReference<FString> OutJoinedString;
 	};
 
+    template<typename ElementType>
+    class TArrayJoinNode : public FNodeFacade
+    {
+    public:
+        TArrayJoinNode(const FNodeInitData& InInitData)
+            : FNodeFacade(InInitData.InstanceName, InInitData.InstanceID, TFacadeOperatorClass<TArrayJoinOperator<ElementType>>())
+        {
+        }
+    
+        virtual ~TArrayJoinNode() = default;
+    };
 	
 }
 
