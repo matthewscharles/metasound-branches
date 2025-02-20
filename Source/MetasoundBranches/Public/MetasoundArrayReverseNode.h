@@ -138,32 +138,46 @@ namespace Metasound
 		}
 
 		void Execute()
-		{
-			TriggerOnReverse->AdvanceBlock();
+        {
+            // Advance the output trigger block.
+            TriggerOnReverse->AdvanceBlock();
 
-			const ArrayType& InputArrayRef = *InputArray;
-			ArrayType& ReversedArrayRef = *OutReversedArray;
+            const ArrayType& InputArrayRef = *InputArray;
+            ArrayType& ReversedArrayRef = *OutReversedArray;
 
-			ReversedArrayRef.Reset();
+            // Clear the output array.
+            ReversedArrayRef.Reset();
 
-			const int32 ArraySize = InputArrayRef.Num();
-			if (ArraySize > 0)
-			{
-				ReversedArrayRef.Reserve(ArraySize);
-				for (int32 i = ArraySize - 1; i >= 0; --i)
-				{
-					ReversedArrayRef.Add(InputArrayRef[i]);
-				}
-			}
+            // Flag to track whether reversal happened.
+            bool bReversed = false;
 
-			TriggerReverse->ExecuteBlock(
-				[](int32, int32) {},
-				[this](int32 StartFrame, int32)
-				{
-					TriggerOnReverse->TriggerFrame(StartFrame);
-				}
-			);
-		}
+            // Only perform reversal if the input trigger is active.
+            if (*TriggerReverse)
+            {
+                const int32 ArraySize = InputArrayRef.Num();
+                if (ArraySize > 0)
+                {
+                    ReversedArrayRef.Reserve(ArraySize);
+                    for (int32 i = ArraySize - 1; i >= 0; --i)
+                    {
+                        ReversedArrayRef.Add(InputArrayRef[i]);
+                    }
+                    bReversed = true;
+                }
+            }
+
+            // Only trigger output if reversal occurred.
+            if (bReversed)
+            {
+                TriggerReverse->ExecuteBlock(
+                    [](int32, int32) {},
+                    [this](int32 StartFrame, int32)
+                    {
+                        TriggerOnReverse->TriggerFrame(StartFrame);
+                    }
+                );
+            }
+        }
 
 	private:
 		// Input trigger and array.
