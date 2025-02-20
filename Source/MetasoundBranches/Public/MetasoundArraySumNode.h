@@ -141,20 +141,18 @@ namespace Metasound
 
         void Execute()
         {
-            if (*TriggerSum) 
-            {
-                TriggerOnSum->AdvanceBlock();
+            TriggerOnSum->AdvanceBlock();
 
-                const ArrayType& ArrayRef = *InputArray;
+            const ArrayType& ArrayRef = *InputArray;
 
-                FElementType Sum = std::accumulate(ArrayRef.begin(), ArrayRef.end(), FElementType{});
-                *OutSum = Sum;
+            FElementType Sum = std::accumulate(ArrayRef.begin(), ArrayRef.end(), FElementType{});
 
-                TriggerSum->ExecuteBlock(
-                    [](int32, int32) {},
-                    [this](int32 StartFrame, int32) { TriggerOnSum->TriggerFrame(StartFrame); }
-                );
-            }
+            *OutSum = Sum;
+
+            TriggerSum->ExecuteBlock(
+                [](int32, int32) {},
+                [this](int32 StartFrame, int32) { TriggerOnSum->TriggerFrame(StartFrame); }
+            );
         }
 
     private:
