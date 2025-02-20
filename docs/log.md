@@ -1,3 +1,5 @@
+# 2024
+
 | Date   | Activities                                                          |
 |--------|---------------------------------------------------------------------|
 | 10/16  | - Initial commits.<br>- Adapt tutorial code<br>- Work through issues with building. |
@@ -32,6 +34,11 @@
 | 12/15  | - Merge zero crossing into dev.<br>- Refine docs. |
 | 12/16  | - Clean up build script.<br>- Rename Click to Impulse.<br>- Improve consistency of node names and labels. |
 | 12/18  | - Merge dev into main, prepare for next release. |
+
+# 2025
+
+| Date   | Activities                                                          |
+|--------|---------------------------------------------------------------------|
 | 01/03  | - Fix API warnings ([information](https://github.com/matthewscharles/metasound-branches/issues/1#issuecomment-2569965131)). |
 | 01/04  | - Tidy up, test new version Mac/Windows.<br>- Identify remaining warnings for API on Windows, replace DataVertexModel with DataVertex. |
 | 01/08  | - Upload next release for testing ([0.1.2](https://github.com/matthewscharles/metasound-branches/releases/tag/v0.1.2-alpha)). |
@@ -39,3 +46,5 @@
 | 01/14  | - Complete examples, minor updates to docs. |
 | 01/15  | - Add first version of [demo video](https://www.youtube.com/watch?v=HgudP5fzDWM). |
 | 01/21  | - Update documentation.<br>- Add trigger output to Shift Register. |
+| 02/19  | - Add Array Reverse and Array Sum nodes (working in the Sequence branch).  Troubleshoot issues with Reverse |
+| 02/20 | - Start new board for sequence-related ideas.<br>- Start work on printing arrays for debugging purposes. |
