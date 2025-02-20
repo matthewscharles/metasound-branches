@@ -16,191 +16,188 @@
 #include "MetasoundPrimitives.h"
 #include "MetasoundTrigger.h"
 #include "MetasoundVertex.h"
-#include "Misc/ScopeLock.h"
-#include "MetasoundTime.h"
 #include "MetasoundArrayTypeTraits.h"
+#include "MetasoundTime.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundFrontend"
 
 namespace Metasound
 {
-	namespace ArrayReverseNodeVertexNames
-	{
-		METASOUND_PARAM(InputTriggerReverse, "Reverse", "Trigger to reverse the array.")
-		METASOUND_PARAM(InputArray, "Array", "Input array to reverse.")
+    namespace ArrayReverseNodeVertexNames
+    {
+        METASOUND_PARAM(InputTriggerForward, "Forward", "Trigger to store the current input array.")
+        METASOUND_PARAM(InputTriggerReverse, "Reverse", "Trigger to reverse the stored array.")
+        METASOUND_PARAM(InputArray, "Array", "Input array to store or reverse.")
 
-		METASOUND_PARAM(OutputTriggerOnReverse, "On Reverse", "Triggers when the reversed array is output.")
-		METASOUND_PARAM(OutputReversedArray, "Array", "The reversed array.")
-	}
+        METASOUND_PARAM(OutputTriggerOnChange, "On Change", "Triggers when the output array is updated.")
+        METASOUND_PARAM(OutputArray, "Array", "The stored or reversed array.")
+    }
 
-	template<typename ArrayType>
-	class TArrayReverseOperator : public TExecutableOperator<TArrayReverseOperator<ArrayType>>
-	{
-	public:
-		using FArrayDataReadReference = TDataReadReference<ArrayType>;
-		using FArrayDataWriteReference = TDataWriteReference<ArrayType>;
+    template<typename ArrayType>
+    class TArrayReverseOperator : public TExecutableOperator<TArrayReverseOperator<ArrayType>>
+    {
+    public:
+        using FArrayDataReadReference = TDataReadReference<ArrayType>;
+        using FArrayDataWriteReference = TDataWriteReference<ArrayType>;
 
-		static const FVertexInterface& GetDefaultInterface()
-		{
-			using namespace ArrayReverseNodeVertexNames;
-			static const FVertexInterface DefaultInterface(
-				FInputVertexInterface(
-					TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputTriggerReverse)),
-					TInputDataVertex<ArrayType>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputArray))
-				),
-				FOutputVertexInterface(
-					TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTriggerOnReverse)),
-					TOutputDataVertex<ArrayType>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputReversedArray))
-				)
-			);
-			return DefaultInterface;
-		}
+        static const FVertexInterface& GetDefaultInterface()
+        {
+            using namespace ArrayReverseNodeVertexNames;
+            static const FVertexInterface DefaultInterface(
+                FInputVertexInterface(
+                    TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputTriggerForward)),
+                    TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputTriggerReverse)),
+                    TInputDataVertex<ArrayType>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputArray))
+                ),
+                FOutputVertexInterface(
+                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTriggerOnChange)),
+                    TOutputDataVertex<ArrayType>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputArray))
+                )
+            );
+            return DefaultInterface;
+        }
 
         static const FNodeClassMetadata& GetNodeInfo()
         {
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
             {
                 return MetasoundArrayNodesPrivate::CreateArrayNodeClassMetadata(
-                    GetMetasoundDataTypeName<ArrayType>(),  // DataTypeName
-                    TEXT("Reverse"),  // OperatorName
-                    METASOUND_LOCTEXT_FORMAT("ArrayOpReverseArrayDisplayNamePattern", "Reverse ({0})", GetMetasoundDataTypeDisplayText<ArrayType>()), // DisplayName
-                    LOCTEXT("ReverseArrayDesc", "Outputs a reversed copy of the input array when triggered."), // Description
-                    GetDefaultInterface(), // VertexInterface
-                    1,  // Major Version
-                    0,  // Minor Version
-                    false // IsDeprecated
+                    GetMetasoundDataTypeName<ArrayType>(),  
+                    TEXT("HoldReverse"),  
+                    METASOUND_LOCTEXT_FORMAT("ArrayOpHoldReverseArrayDisplayNamePattern", "Hold/Reverse ({0})", GetMetasoundDataTypeDisplayText<ArrayType>()), 
+                    LOCTEXT("HoldReverseArrayDesc", "Stores an array, allows reversing it or updating with a new one on trigger."),  
+                    GetDefaultInterface(),  
+                    1,  
+                    0,  
+                    false 
                 );
             };
-        
+
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
-        
-            // Ensure the additional properties are set explicitly
+
             const_cast<FNodeClassMetadata&>(Metadata).Author = TEXT("Charles Matthews");
             const_cast<FNodeClassMetadata&>(Metadata).PromptIfMissing = PluginNodeMissingPrompt;
             const_cast<FNodeClassMetadata&>(Metadata).CategoryHierarchy = { LOCTEXT("Custom", "Branches") };
             const_cast<FNodeClassMetadata&>(Metadata).Keywords = TArray<FText>();
-        
+
             return Metadata;
         }
 
-		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutResults)
-		{
-			using namespace ArrayReverseNodeVertexNames;
-			const FInputVertexInterfaceData& InputData = InParams.InputData;
-
-			TDataReadReference<FTrigger> InTriggerReverse = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTriggerReverse), InParams.OperatorSettings);
-			FArrayDataReadReference InInputArray = InputData.GetOrCreateDefaultDataReadReference<ArrayType>(METASOUND_GET_PARAM_NAME(InputArray), InParams.OperatorSettings);
-
-			return MakeUnique<TArrayReverseOperator>(InParams, InTriggerReverse, InInputArray);
-		}
-
-		TArrayReverseOperator(
-			const FBuildOperatorParams& InParams,
-			const TDataReadReference<FTrigger>& InTriggerReverse,
-			const FArrayDataReadReference& InInputArray)
-			: TriggerReverse(InTriggerReverse)
-			, InputArray(InInputArray)
-			, TriggerOnReverse(FTriggerWriteRef::CreateNew(InParams.OperatorSettings))
-			, OutReversedArray(TDataWriteReferenceFactory<ArrayType>::CreateAny(InParams.OperatorSettings))
-		{
-		}
-
-		virtual ~TArrayReverseOperator() = default;
-
-		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
-		{
-			using namespace ArrayReverseNodeVertexNames;
-			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTriggerReverse), TriggerReverse);
-			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputArray), InputArray);
-		}
-
-		virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
-		{
-			using namespace ArrayReverseNodeVertexNames;
-			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTriggerOnReverse), TriggerOnReverse);
-			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputReversedArray), OutReversedArray);
-		}
-
-		virtual FDataReferenceCollection GetInputs() const override
-		{
-			// This should never be called. Bind(...) is called instead. This method
-			// exists as a stop-gap until the API can be deprecated and removed.
-			checkNoEntry();
-			return {};
-		}
-
-		virtual FDataReferenceCollection GetOutputs() const override
-		{
-			// This should never be called. Bind(...) is called instead. This method
-			// exists as a stop-gap until the API can be deprecated and removed.
-			checkNoEntry();
-			return {};
-		}
-
-		void Execute()
+        static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutResults)
         {
-            // Advance the output trigger block.
-            TriggerOnReverse->AdvanceBlock();
+            using namespace ArrayReverseNodeVertexNames;
+            const FInputVertexInterfaceData& InputData = InParams.InputData;
 
-            const ArrayType& InputArrayRef = *InputArray;
-            ArrayType& ReversedArrayRef = *OutReversedArray;
+            TDataReadReference<FTrigger> InTriggerForward = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(
+                METASOUND_GET_PARAM_NAME(InputTriggerForward),
+                InParams.OperatorSettings
+            );
 
-            // Clear the output array.
-            ReversedArrayRef.Reset();
+            TDataReadReference<FTrigger> InTriggerReverse = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(
+                METASOUND_GET_PARAM_NAME(InputTriggerReverse),
+                InParams.OperatorSettings
+            );
 
-            // Flag to track whether reversal happened.
-            bool bReversed = false;
+            FArrayDataReadReference InInputArray = InputData.GetOrCreateDefaultDataReadReference<ArrayType>(
+                METASOUND_GET_PARAM_NAME(InputArray),
+                InParams.OperatorSettings
+            );
 
-            // Only perform reversal if the input trigger is active.
-            if (*TriggerReverse)
+            return MakeUnique<TArrayReverseOperator>(InParams, InTriggerForward, InTriggerReverse, InInputArray);
+        }
+
+        TArrayReverseOperator(
+            const FBuildOperatorParams& InParams,
+            const TDataReadReference<FTrigger>& InTriggerForward,
+            const TDataReadReference<FTrigger>& InTriggerReverse,
+            const FArrayDataReadReference& InInputArray)
+            : TriggerForward(InTriggerForward)
+            , TriggerReverse(InTriggerReverse)
+            , InputArray(InInputArray)
+            , TriggerOnChange(FTriggerWriteRef::CreateNew(InParams.OperatorSettings))
+            , OutStoredArray(TDataWriteReferenceFactory<ArrayType>::CreateAny(InParams.OperatorSettings))
+        {
+            // Initialize the stored array with the input array.
+            *OutStoredArray = *InputArray;
+        }
+
+        virtual ~TArrayReverseOperator() = default;
+
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
+        {
+            using namespace ArrayReverseNodeVertexNames;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTriggerForward), TriggerForward);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTriggerReverse), TriggerReverse);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputArray), InputArray);
+        }
+
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
+        {
+            using namespace ArrayReverseNodeVertexNames;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTriggerOnChange), TriggerOnChange);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputArray), OutStoredArray);
+        }
+
+        virtual FDataReferenceCollection GetInputs() const override
+        {
+            checkNoEntry();
+            return {};
+        }
+
+        virtual FDataReferenceCollection GetOutputs() const override
+        {
+            checkNoEntry();
+            return {};
+        }
+
+        void Execute()
+        {
+            TriggerOnChange->AdvanceBlock();
+
+            bool bChanged = false;
+
+            if (*TriggerForward)
             {
-                const int32 ArraySize = InputArrayRef.Num();
-                if (ArraySize > 0)
-                {
-                    ReversedArrayRef.Reserve(ArraySize);
-                    for (int32 i = ArraySize - 1; i >= 0; --i)
-                    {
-                        ReversedArrayRef.Add(InputArrayRef[i]);
-                    }
-                    bReversed = true;
-                }
+                // Store the current input array as the output.
+                *OutStoredArray = *InputArray;
+                bChanged = true;
+            }
+            else if (*TriggerReverse)
+            {
+                // Reverse the currently stored array.
+                Algo::Reverse(*OutStoredArray);
+                bChanged = true;
             }
 
-            // Only trigger output if reversal occurred.
-            if (bReversed)
+            if (bChanged)
             {
-                TriggerReverse->ExecuteBlock(
+                TriggerOnChange->ExecuteBlock(
                     [](int32, int32) {},
-                    [this](int32 StartFrame, int32)
-                    {
-                        TriggerOnReverse->TriggerFrame(StartFrame);
-                    }
+                    [this](int32 StartFrame, int32) { TriggerOnChange->TriggerFrame(StartFrame); }
                 );
             }
         }
 
-	private:
-		// Input trigger and array.
-		TDataReadReference<FTrigger> TriggerReverse;
-		FArrayDataReadReference InputArray;
+    private:
+        TDataReadReference<FTrigger> TriggerForward;
+        TDataReadReference<FTrigger> TriggerReverse;
+        FArrayDataReadReference InputArray;
 
-		// Output trigger and reversed array.
-		TDataWriteReference<FTrigger> TriggerOnReverse;
-		TDataWriteReference<ArrayType> OutReversedArray;
-	};
+        TDataWriteReference<FTrigger> TriggerOnChange;
+        TDataWriteReference<ArrayType> OutStoredArray;
+    };
 
+    template<typename ArrayType>
+    class TArrayReverseNode : public FNodeFacade
+    {
+    public:
+        TArrayReverseNode(const FNodeInitData& InInitData)
+            : FNodeFacade(InInitData.InstanceName, InInitData.InstanceID, TFacadeOperatorClass<TArrayReverseOperator<ArrayType>>())
+        {
+        }
 
-	template<typename ArrayType>
-	class TArrayReverseNode : public FNodeFacade
-	{
-	public:
-		TArrayReverseNode(const FNodeInitData& InInitData)
-			: FNodeFacade(InInitData.InstanceName, InInitData.InstanceID, TFacadeOperatorClass<TArrayReverseOperator<ArrayType>>())
-		{
-		}
-
-		virtual ~TArrayReverseNode() = default;
-	};
+        virtual ~TArrayReverseNode() = default;
+    };
 }
 
 #undef LOCTEXT_NAMESPACE
