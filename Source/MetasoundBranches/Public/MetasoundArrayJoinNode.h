@@ -22,7 +22,7 @@ namespace Metasound
 {
 	namespace ArrayJoinNodeVertexNames
 	{
-		METASOUND_PARAM(InputTriggerJoin, "Join", "Trigger to join the array elements.")
+		METASOUND_PARAM(InputTriggerJoin, "Trigger", "Trigger to join the array elements.")
 		METASOUND_PARAM(InputArray, "Array", "Input array to join.")
 		METASOUND_PARAM(InputDelimiter, "Delimiter", "Delimiter string to insert between array elements.")
 
@@ -63,8 +63,8 @@ namespace Metasound
 			{
 				// Use the array type's name as the third element to differentiate specializations.
 				FName DataTypeName = GetMetasoundDataTypeName<FArrayType>();
-				FName OperatorName = TEXT("Join");
-				FText NodeDisplayName = METASOUND_LOCTEXT_FORMAT("ArrayOpJoinDisplayNamePattern", "Join ({0})", GetMetasoundDataTypeDisplayText<FArrayType>());
+				FName OperatorName = TEXT("Array To String");
+				FText NodeDisplayName = METASOUND_LOCTEXT_FORMAT("ArrayOpJoinDisplayNamePattern", "Array ({0}) To String", GetMetasoundDataTypeDisplayText<FArrayType>());
 				const FText NodeDescription = LOCTEXT("ArrayOpJoinDesc", "Joins the elements of an array into a single string using a specified delimiter.");
 				FVertexInterface NodeInterface = GetDefaultInterface();
 
