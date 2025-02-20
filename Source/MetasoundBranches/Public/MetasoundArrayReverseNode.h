@@ -25,12 +25,13 @@ namespace Metasound
 {
     namespace ArrayReverseNodeVertexNames
     {
-        METASOUND_PARAM(InputTriggerForward, "Forward", "Trigger to store the current input array.")
+        METASOUND_PARAM(InputTriggerHold, "Hold", "Trigger to store the current input array.")
         METASOUND_PARAM(InputTriggerReverse, "Reverse", "Trigger to reverse the stored array.")
-        METASOUND_PARAM(InputArray, "Array", "Input array to store or reverse.")
+        METASOUND_PARAM(InputArray, "Array", "Input array to hold or reverse.")
 
-        METASOUND_PARAM(OutputTriggerOnChange, "On Change", "Triggers when the output array is updated.")
-        METASOUND_PARAM(OutputArray, "Array", "The stored or reversed array.")
+        METASOUND_PARAM(OutputTriggerOnHold, "On Hold", "Triggers when the stored array is updated (Hold).")
+        METASOUND_PARAM(OutputTriggerOnReverse, "On Reverse", "Triggers when the array is reversed.")
+        METASOUND_PARAM(OutputArray, "Array", "The held or reversed array.")
     }
 
     template<typename ArrayType>
@@ -45,12 +46,13 @@ namespace Metasound
             using namespace ArrayReverseNodeVertexNames;
             static const FVertexInterface DefaultInterface(
                 FInputVertexInterface(
-                    TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputTriggerForward)),
+                    TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputTriggerHold)),
                     TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputTriggerReverse)),
                     TInputDataVertex<ArrayType>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputArray))
                 ),
                 FOutputVertexInterface(
-                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTriggerOnChange)),
+                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTriggerOnHold)),
+                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTriggerOnReverse)),
                     TOutputDataVertex<ArrayType>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputArray))
                 )
             );
@@ -63,9 +65,9 @@ namespace Metasound
             {
                 return MetasoundArrayNodesPrivate::CreateArrayNodeClassMetadata(
                     GetMetasoundDataTypeName<ArrayType>(),  
-                    TEXT("HoldReverse"),  
-                    METASOUND_LOCTEXT_FORMAT("ArrayOpHoldReverseArrayDisplayNamePattern", "Hold/Reverse ({0})", GetMetasoundDataTypeDisplayText<ArrayType>()), 
-                    LOCTEXT("HoldReverseArrayDesc", "Stores an array, allows reversing it or updating with a new one on trigger."),  
+                    TEXT("Reverse"),  
+                    METASOUND_LOCTEXT_FORMAT("ArrayOpReverseArrayDisplayNamePattern", "Reverse ({0})", GetMetasoundDataTypeDisplayText<ArrayType>()), 
+                    LOCTEXT("ReverseArrayDesc", "Holds an array, allows reversing it or updating with a new one on trigger."),  
                     GetDefaultInterface(),  
                     1,  
                     0,  
@@ -88,8 +90,8 @@ namespace Metasound
             using namespace ArrayReverseNodeVertexNames;
             const FInputVertexInterfaceData& InputData = InParams.InputData;
 
-            TDataReadReference<FTrigger> InTriggerForward = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(
-                METASOUND_GET_PARAM_NAME(InputTriggerForward),
+            TDataReadReference<FTrigger> InTriggerHold = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(
+                METASOUND_GET_PARAM_NAME(InputTriggerHold),
                 InParams.OperatorSettings
             );
 
@@ -103,18 +105,19 @@ namespace Metasound
                 InParams.OperatorSettings
             );
 
-            return MakeUnique<TArrayReverseOperator>(InParams, InTriggerForward, InTriggerReverse, InInputArray);
+            return MakeUnique<TArrayReverseOperator>(InParams, InTriggerHold, InTriggerReverse, InInputArray);
         }
 
         TArrayReverseOperator(
             const FBuildOperatorParams& InParams,
-            const TDataReadReference<FTrigger>& InTriggerForward,
+            const TDataReadReference<FTrigger>& InTriggerHold,
             const TDataReadReference<FTrigger>& InTriggerReverse,
             const FArrayDataReadReference& InInputArray)
-            : TriggerForward(InTriggerForward)
+            : TriggerHold(InTriggerHold)
             , TriggerReverse(InTriggerReverse)
             , InputArray(InInputArray)
-            , TriggerOnChange(FTriggerWriteRef::CreateNew(InParams.OperatorSettings))
+            , TriggerOnHold(FTriggerWriteRef::CreateNew(InParams.OperatorSettings))
+            , TriggerOnReverse(FTriggerWriteRef::CreateNew(InParams.OperatorSettings))
             , OutStoredArray(TDataWriteReferenceFactory<ArrayType>::CreateAny(InParams.OperatorSettings))
         {
             // Initialize the stored array with the input array.
@@ -126,7 +129,7 @@ namespace Metasound
         virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace ArrayReverseNodeVertexNames;
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTriggerForward), TriggerForward);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTriggerHold), TriggerHold);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTriggerReverse), TriggerReverse);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputArray), InputArray);
         }
@@ -134,7 +137,8 @@ namespace Metasound
         virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace ArrayReverseNodeVertexNames;
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTriggerOnChange), TriggerOnChange);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTriggerOnHold), TriggerOnHold);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTriggerOnReverse), TriggerOnReverse);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputArray), OutStoredArray);
         }
 
@@ -152,38 +156,49 @@ namespace Metasound
 
         void Execute()
         {
-            TriggerOnChange->AdvanceBlock();
-
             bool bChanged = false;
 
-            if (*TriggerForward)
+            // Check if the hold trigger is active
+            if (*TriggerHold)
             {
-                // Store the current input array as the output.
+                // Store the current input array as the output
                 *OutStoredArray = *InputArray;
                 bChanged = true;
+
+                TriggerOnHold->ExecuteBlock(
+                    [](int32, int32) {},
+                    [this](int32 StartFrame, int32) { TriggerOnHold->TriggerFrame(StartFrame); }
+                );
             }
+            // Check if the reverse trigger is active
             else if (*TriggerReverse)
             {
-                // Reverse the currently stored array.
+                // Reverse the stored array
                 Algo::Reverse(*OutStoredArray);
                 bChanged = true;
+
+                TriggerOnReverse->ExecuteBlock(
+                    [](int32, int32) {},
+                    [this](int32 StartFrame, int32) { TriggerOnReverse->TriggerFrame(StartFrame); }
+                );
             }
 
             if (bChanged)
             {
-                TriggerOnChange->ExecuteBlock(
+                TriggerOnHold->ExecuteBlock(
                     [](int32, int32) {},
-                    [this](int32 StartFrame, int32) { TriggerOnChange->TriggerFrame(StartFrame); }
+                    [this](int32 StartFrame, int32) { TriggerOnHold->TriggerFrame(StartFrame); }
                 );
             }
         }
 
     private:
-        TDataReadReference<FTrigger> TriggerForward;
+        TDataReadReference<FTrigger> TriggerHold;
         TDataReadReference<FTrigger> TriggerReverse;
         FArrayDataReadReference InputArray;
 
-        TDataWriteReference<FTrigger> TriggerOnChange;
+        TDataWriteReference<FTrigger> TriggerOnHold;
+        TDataWriteReference<FTrigger> TriggerOnReverse;
         TDataWriteReference<ArrayType> OutStoredArray;
     };
 
