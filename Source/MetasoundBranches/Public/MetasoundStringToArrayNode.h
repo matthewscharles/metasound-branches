@@ -192,6 +192,7 @@ namespace Metasound
 
 				*OutputArray = MoveTemp(NewArray);
 
+
 				TriggerSplit->ExecuteBlock(
 					[](int32, int32) {},
 					[this](int32 StartFrame, int32 EndFrame)
