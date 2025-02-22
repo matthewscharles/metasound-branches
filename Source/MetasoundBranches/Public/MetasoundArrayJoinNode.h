@@ -26,7 +26,7 @@ namespace Metasound
 		METASOUND_PARAM(InputArray, "Array", "Input array to join.")
 		METASOUND_PARAM(InputDelimiter, "Delimiter", "Delimiter string to insert between array elements.")
 
-		METASOUND_PARAM(OutputTriggerOnJoin, "On Join", "Triggers when the joined string is output.")
+		METASOUND_PARAM(OutputTriggerOnJoin, "On Trigger", "Triggers when the converted string is output.")
 		METASOUND_PARAM(OutputJoinedString, "String", "The joined string.")
 	}
 
