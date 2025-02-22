@@ -19,8 +19,8 @@ namespace Metasound
     template class TArrayRouteOperator<TArray<bool>>;
     template class TArrayRouteNode<TArray<bool>>;
     
-    // template class TArrayRouteOperator<TArray<FTime>>;
-    // template class TArrayRouteNode<TArray<FTime>>;
+    template class TArrayRouteOperator<TArray<FTime>>;
+    template class TArrayRouteNode<TArray<FTime>>;
     
     
 }
@@ -29,9 +29,9 @@ namespace Metasound
 using FRouteFloatNodeAlias  = Metasound::TArrayRouteNode<TArray<float>>;
 using FRouteIntNodeAlias    = Metasound::TArrayRouteNode<TArray<int32>>;
 using FRouteBoolNodeAlias   = Metasound::TArrayRouteNode<TArray<bool>>;
-// using FRouteTimeNodeAlias = Metasound::TArrayRouteNode<TArray<Metasound::FTime>>;
+using FRouteTimeNodeAlias = Metasound::TArrayRouteNode<TArray<Metasound::FTime>>;
 
 METASOUND_REGISTER_NODE(FRouteFloatNodeAlias);
 METASOUND_REGISTER_NODE(FRouteIntNodeAlias);
 METASOUND_REGISTER_NODE(FRouteBoolNodeAlias);
-// METASOUND_REGISTER_NODE(FRouteTimeNodeAlias);
+METASOUND_REGISTER_NODE(FRouteTimeNodeAlias);

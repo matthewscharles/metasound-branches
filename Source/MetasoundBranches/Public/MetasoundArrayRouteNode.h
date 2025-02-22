@@ -130,11 +130,11 @@ namespace Metasound
         }
 
         TArrayRouteOperator(
-            const FBuildOperatorParams& InParams,
-            const TDataReadReference<FTrigger>& InSet0,
-            const TDataReadReference<FTrigger>& InSet1,
-            const FArrayDataReadReference& InArray0,
-            const FArrayDataReadReference& InArray1
+            const FBuildOperatorParams&          InParams,
+            const TDataReadReference<FTrigger>&  InSet0,
+            const TDataReadReference<FTrigger>&  InSet1,
+            const FArrayDataReadReference&       InArray0,
+            const FArrayDataReadReference&       InArray1
         )
             : TriggerSet0(InSet0)
             , TriggerSet1(InSet1)
@@ -143,25 +143,8 @@ namespace Metasound
             , TriggerOnSet0(FTriggerWriteRef::CreateNew(InParams.OperatorSettings))
             , TriggerOnSet1(FTriggerWriteRef::CreateNew(InParams.OperatorSettings))
             , OutArray(TDataWriteReferenceFactory<ArrayType>::CreateAny(InParams.OperatorSettings))
-
-            // "Live" copies, updated every block to track late-arriving changes
-            , LiveArray0(*InArray0)
-            , LiveArray1(*InArray1)
-
-            // "Held" arrays store the last triggered (sample-and-hold) values
-            , HeldArray0(*InArray0)
-            , HeldArray1(*InArray1)
-
-            // Waiting & Retry
-            , RetryCount0(0)
-            , RetryCount1(0)
-            , bWaitingForUpdate0(false)
-            , bWaitingForUpdate1(false)
-            , StoredTriggerFrame0(0)
-            , StoredTriggerFrame1(0)
         {
-            // Initially route Array0 to output, just like a typical sample-and-hold node defaulting to one input.
-            *OutArray = HeldArray0;
+            *OutArray = *InputArray0;
         }
 
         virtual ~TArrayRouteOperator() = default;
@@ -169,6 +152,7 @@ namespace Metasound
         virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace ArrayRouteNodeVertexNames;
+
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTriggerSet0), TriggerSet0);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTriggerSet1), TriggerSet1);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputArray0),      InputArray0);
@@ -178,6 +162,7 @@ namespace Metasound
         virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace ArrayRouteNodeVertexNames;
+
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTriggerOnSet0), TriggerOnSet0);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTriggerOnSet1), TriggerOnSet1);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputArray),        OutArray);
@@ -195,179 +180,44 @@ namespace Metasound
             return {};
         }
 
-        template <typename T>
-        FString ArrayToString(const TArray<T>& Array)
-        {
-            FString ArrayString;
-            for (const T& Value : Array)
-            {
-                ArrayString += LexToString(Value) + TEXT(" ");
-            }
-            return ArrayString.TrimEnd(); // Remove trailing space
-        }
-        
         void Execute()
         {
-            // Advance triggers
-            TriggerOnSet0->AdvanceBlock();
-            TriggerOnSet1->AdvanceBlock();
-
-            // Update "live" arrays every block to capture any changes, even if there's no trigger
-            LiveArray0 = *InputArray0;
-            LiveArray1 = *InputArray1;
-
-            // -- Process any waiting states first --
-            if (bWaitingForUpdate0)
+            if (*TriggerSet0)
             {
-                bool bNewChangeDetected = (LiveArray0 != HeldArray0);
-                if (bNewChangeDetected)
-                {
-                    // If we detect a new change while waiting, sample it immediately
-                    HeldArray0 = LiveArray0;
-                    *OutArray  = HeldArray0; 
-                    TriggerOnSet0->TriggerFrame(StoredTriggerFrame0);
+                *OutArray = *InputArray0;
 
-                    UE_LOG(LogTemp, Warning, TEXT("Route: (Waiting) Set 0 fired with new value %s"), *ArrayToString(HeldArray0));
-                    bWaitingForUpdate0 = false;
-                    RetryCount0 = 0;
-                }
-                else if (RetryCount0 < MaxRetries)
-                {
-                    RetryCount0++;
-                    UE_LOG(LogTemp, Warning, TEXT("Route: (Waiting) Set 0, retry %d/%d"), RetryCount0, MaxRetries);
-                }
-                else
-                {
-                    // Timeout: sample the current LiveArray0 anyway
-                    HeldArray0 = LiveArray0;
-                    *OutArray  = HeldArray0;
-                    TriggerOnSet0->TriggerFrame(StoredTriggerFrame0);
-
-                    UE_LOG(LogTemp, Warning, TEXT("Route: (Timeout) Set 0 fired with value %s"), *ArrayToString(HeldArray0));
-                    bWaitingForUpdate0 = false;
-                    RetryCount0 = 0;
-                }
+                TriggerOnSet0->ExecuteBlock(
+                    [](int32, int32) {},
+                    [this](int32 StartFrame, int32) { TriggerOnSet0->TriggerFrame(StartFrame); }
+                );
             }
 
-            if (bWaitingForUpdate1)
+            if (*TriggerSet1)
             {
-                bool bNewChangeDetected = (LiveArray1 != HeldArray1);
-                if (bNewChangeDetected)
-                {
-                    HeldArray1 = LiveArray1;
-                    *OutArray  = HeldArray1;
-                    TriggerOnSet1->TriggerFrame(StoredTriggerFrame1);
+                *OutArray = *InputArray1;
 
-                    UE_LOG(LogTemp, Warning, TEXT("Route: (Waiting) Set 1 fired with new value %s"), *ArrayToString(HeldArray1));
-                    bWaitingForUpdate1 = false;
-                    RetryCount1 = 0;
-                }
-                else if (RetryCount1 < MaxRetries)
-                {
-                    RetryCount1++;
-                    UE_LOG(LogTemp, Warning, TEXT("Route: (Waiting) Set 1, retry %d/%d"), RetryCount1, MaxRetries);
-                }
-                else
-                {
-                    HeldArray1 = LiveArray1;
-                    *OutArray  = HeldArray1;
-                    TriggerOnSet1->TriggerFrame(StoredTriggerFrame1);
-
-                    UE_LOG(LogTemp, Warning, TEXT("Route: (Timeout) Set 1 fired with value %s"), *ArrayToString(HeldArray1));
-                    bWaitingForUpdate1 = false;
-                    RetryCount1 = 0;
-                }
+                TriggerOnSet1->ExecuteBlock(
+                    [](int32, int32) {},
+                    [this](int32 StartFrame, int32) { TriggerOnSet1->TriggerFrame(StartFrame); }
+                );
             }
-
-            // -- Process new triggers --
-            TriggerSet0->ExecuteBlock(
-                [this](int32, int32) {},
-                [this](int32 TriggerFrame, int32)
-                {
-                    // If the live array is different from the last "held" (sampled) array, fire immediately
-                    bool bImmediateChange = (LiveArray0 != HeldArray0);
-                    if (bImmediateChange)
-                    {
-                        HeldArray0 = LiveArray0;
-                        *OutArray  = HeldArray0;
-                        TriggerOnSet0->TriggerFrame(TriggerFrame);
-
-                        UE_LOG(LogTemp, Warning, TEXT("Route: Immediate Set 0 fired with new value %s"), *ArrayToString(HeldArray0));
-                        bWaitingForUpdate0 = false;
-                        RetryCount0        = 0;
-                    }
-                    else
-                    {
-                        // No immediate change: wait for a few blocks to see if the array updates
-                        bWaitingForUpdate0 = true;
-                        StoredTriggerFrame0 = TriggerFrame;
-                        RetryCount0 = 0;
-
-                        UE_LOG(LogTemp, Warning, TEXT("Route: Set 0 triggered, no immediate change, waiting..."));
-                    }
-                }
-            );
-
-            TriggerSet1->ExecuteBlock(
-                [this](int32, int32) {},
-                [this](int32 TriggerFrame, int32)
-                {
-                    bool bImmediateChange = (LiveArray1 != HeldArray1);
-                    if (bImmediateChange)
-                    {
-                        HeldArray1 = LiveArray1;
-                        *OutArray  = HeldArray1;
-                        TriggerOnSet1->TriggerFrame(TriggerFrame);
-
-                        UE_LOG(LogTemp, Warning, TEXT("Route: Immediate Set 1 fired with new value %s"), *ArrayToString(HeldArray1));
-                        bWaitingForUpdate1 = false;
-                        RetryCount1        = 0;
-                    }
-                    else
-                    {
-                        bWaitingForUpdate1  = true;
-                        StoredTriggerFrame1 = TriggerFrame;
-                        RetryCount1         = 0;
-
-                        UE_LOG(LogTemp, Warning, TEXT("Route: Set 1 triggered, no immediate change, waiting..."));
-                    }
-                }
-            );
         }
 
     private:
         // Input triggers
         TDataReadReference<FTrigger> TriggerSet0;
         TDataReadReference<FTrigger> TriggerSet1;
-    
+
         // Input arrays
         FArrayDataReadReference InputArray0;
         FArrayDataReadReference InputArray1;
-    
+
         // Output triggers
         TDataWriteReference<FTrigger> TriggerOnSet0;
         TDataWriteReference<FTrigger> TriggerOnSet1;
-    
-        // Final routed output array
+
+        // Routed output array
         TDataWriteReference<ArrayType> OutArray;
-
-        // "Live" arrays (updated every block to catch changes, even if we don't trigger)
-        ArrayType LiveArray0;
-        ArrayType LiveArray1;
-
-        // "Held" arrays (sample-and-hold: updated only on successful triggers)
-        ArrayType HeldArray0;
-        ArrayType HeldArray1;
-    
-        // Waiting / Retry states for each inlet
-        int32 RetryCount0;
-        int32 RetryCount1;
-        bool  bWaitingForUpdate0;
-        bool  bWaitingForUpdate1;
-        int32 StoredTriggerFrame0;
-        int32 StoredTriggerFrame1;
-
-        static constexpr int32 MaxRetries = 4;  // maximum blocks to wait
     };
 
     template <typename ArrayType>
