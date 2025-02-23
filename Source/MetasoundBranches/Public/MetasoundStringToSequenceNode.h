@@ -18,10 +18,15 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_StringToSequence"
 
+/** Fully generic bracket group struct with a local repeat factor. */
 template<typename T>
 struct FBracketGroup
 {
+	/** The parsed values inside the bracket. */
 	TArray<T> Values;
+
+	/** How many times to repeat bracketed values locally. Defaults to 1. */
+	int32 Repeats = 1;
 };
 
 namespace Metasound
@@ -33,7 +38,7 @@ namespace Metasound
 		METASOUND_PARAM(InputTriggerNext,     "Next",             "Trigger to output the next step in the sequence.")
 		METASOUND_PARAM(InputTriggerReset,    "Reset",            "Reset the sequence and repeats to 0 on next trigger.")
 		METASOUND_PARAM(InputString,          "String",           "The input string to be split.")
-		METASOUND_PARAM(InputDelimiter,       "Delimiter",        "Delimiter string used to split the input.")
+		METASOUND_PARAM(InputDelimiter,       "Delimiter",        "Delimiter string used to split the input (for non-bracket logic).")
 		METASOUND_PARAM(InputNumRepeats,      "Num Repeats",      "Number of full sequence iterations before stopping (if not looping).")
 		METASOUND_PARAM(InputLoop,            "Loop",             "If true, once the sequence is complete, it loops forever (Num Repeats resets on each overall loop).")
 		METASOUND_PARAM(InputOverflow,        "Trigger Overflow", "If true and Loop=false, Next will continue to trigger On Finished instead of doing nothing.")
@@ -43,9 +48,9 @@ namespace Metasound
 		METASOUND_PARAM(OutputTriggerNext,     "On Next",          "Triggers when the sequence outputs the next element.")
 		METASOUND_PARAM(OutputValue,           "Value",            "Current sequence value.")
 		METASOUND_PARAM(OutputPosition,        "Position",         "Current sequence position (0-based).")
-		METASOUND_PARAM(OutputTimeMultiplier,  "Time Multiplier",  "Length of current sub-step = 1.0 / (size of bracket group).")
-		METASOUND_PARAM(OutputTriggerOnRepeat, "On Repeat",        "Triggers each time the sequence finishes a pass.")
-		METASOUND_PARAM(OutputRepeatCount,     "Repeat Count",     "How many times the sequence has played (resets to 0 on loop).")
+		METASOUND_PARAM(OutputTimeMultiplier,  "Time Multiplier",  "Current sub-step fraction = 1 / (GroupSize * Repeats).")
+		METASOUND_PARAM(OutputTriggerOnRepeat, "On Repeat",        "Triggers immediately at the start of each pass (position 0).")
+		METASOUND_PARAM(OutputRepeatCount,     "Repeat Count",     "How many times the sequence has started a new pass.")
 		METASOUND_PARAM(OutputLength,          "Length",           "Number of bracket groups in the sequence.")
 		METASOUND_PARAM(OutputTriggerOnEnd,    "On Finished",      "Triggers when the sequence has finished all repeats (if Loop=false).")
 	}
@@ -56,7 +61,6 @@ namespace Metasound
 	public:
 		using FBracketedGroups = TArray<FBracketGroup<ElementType>>;
 
-		// Data reference types
 		using FStringReadRef  = TDataReadReference<FString>;
 		using FTriggerReadRef = TDataReadReference<FTrigger>;
 		using FInt32ReadRef   = TDataReadReference<int32>;
@@ -112,9 +116,12 @@ namespace Metasound
 
 				const FText NodeDescription = LOCTEXT(
 					"StringToSequenceDesc",
-					"Splits a string into bracketed groups (if any) and single tokens. Each bracketed group counts as one position, but outputs multiple values with partial Time Multiplier."
+					"Splits a string into bracketed groups (if any) and single tokens. Brackets may end with xN to repeat that bracket N times. "
+					"Each bracket counts as one position, but can produce multiple sub-steps. A 'Repeat' triggers immediately when a new pass begins at position=0."
 				);
 
+				// todo: add sub-step division count
+				
 				FVertexInterface NodeInterface = GetDefaultInterface();
 
 				FNodeClassMetadata Metadata;
@@ -281,12 +288,13 @@ namespace Metasound
 
 		void Execute()
 		{
+			// Advance triggers
 			OnSplit->AdvanceBlock();
 			OnNext->AdvanceBlock();
 			OnRepeat->AdvanceBlock();
 			OnEnd->AdvanceBlock();
 
-			// 0) Check Reset
+			// If "Reset" triggered:
 			if (*TriggerReset)
 			{
 				TriggerReset->ExecuteBlock(
@@ -298,7 +306,7 @@ namespace Metasound
 				);
 			}
 
-			// 1) If "Load" triggered, parse string into bracketed groups
+			// If "Load" triggered:
 			if (*TriggerSplit)
 			{
 				TriggerSplit->ExecuteBlock(
@@ -307,6 +315,8 @@ namespace Metasound
 					{
 						ParseBracketedGroups();
 						ResetSequence(); 
+
+						// Update length = number of bracket groups
 						*OutLength = ParsedGroups.Num();
 
 						// Fire "On Load"
@@ -315,69 +325,93 @@ namespace Metasound
 				);
 			}
 
-			// 2) Next step
+			// If "Next" triggered:
 			if (*TriggerNext)
 			{
 				TriggerNext->ExecuteBlock(
 					[](int32, int32){},
 					[this](int32 StartFrame, int32)
 					{
-						// If done, possible Overflow
+						// If the entire sequence is complete
 						if (bSequenceComplete)
 						{
+							// If overflow is true, re-fire OnEnd each time
 							if (*bOverflow)
 							{
 								OnEnd->TriggerFrame(StartFrame);
 							}
 							return;
 						}
+
 						if (ParsedGroups.Num() == 0)
 						{
+							// No data
 							return;
 						}
 
-						// Get current bracket group
-						FBracketGroup<ElementType>& CurrentGroup = ParsedGroups[CurrentGroupIndex];
+						// If we are at groupIndex=0 and subIndex=0, that means
+						// we just started a new pass => Fire OnRepeat immediately
+						if (CurrentGroupIndex == 0 && CurrentSubIndex == 0)
+						{
+							++CurrentRepeatCount;
+							*OutRepeatCount = CurrentRepeatCount;
+							OnRepeat->TriggerFrame(StartFrame);
+						}
 
-						// Output sub-step
-						*OutValue    = CurrentGroup.Values[CurrentSubIndex];
+						// Output the current bracket group sub-step
+						FBracketGroup<ElementType>& CurrentGroup = ParsedGroups[CurrentGroupIndex];
+						const int32 NumValues = CurrentGroup.Values.Num();
+						const int32 EffectiveGroupSize = NumValues * CurrentGroup.Repeats;
+
+						// SubIndex in the repeated bracket
+						const int32 LocalIndex = (CurrentSubIndex % NumValues);
+
+						// Output the actual value
+						*OutValue = CurrentGroup.Values[LocalIndex];
+
+						// The top-level position is the bracket group index
 						*OutPosition = CurrentGroupIndex;
 
-						const int32 GroupSize = CurrentGroup.Values.Num();
-						*OutTimeMultiplier = (GroupSize > 0)
-							? (1.0f / static_cast<float>(GroupSize))
-							: 1.0f;
+						// Time for a single sub-step
+						if (EffectiveGroupSize > 0)
+						{
+							*OutTimeMultiplier = 1.0f / (float)EffectiveGroupSize;
+						}
+						else
+						{
+							*OutTimeMultiplier = 1.0f;
+						}
 
-						// Fire "On Next"
 						OnNext->TriggerFrame(StartFrame);
 
+						// Advance the sub-index
 						++CurrentSubIndex;
-						if (CurrentSubIndex >= GroupSize)
+
+						// If we've output all sub-steps for this bracket group
+						if (CurrentSubIndex >= EffectiveGroupSize)
 						{
-							// move to next group
 							CurrentSubIndex = 0;
 							++CurrentGroupIndex;
 
+							// If we've gone beyond the last bracket group, we've finished a pass
 							if (CurrentGroupIndex >= ParsedGroups.Num())
 							{
-								// completed one full pass
+								// Reset for the next pass
 								CurrentGroupIndex = 0;
-								++CurrentRepeatCount;
 
-								OnRepeat->TriggerFrame(StartFrame);
-								*OutRepeatCount = CurrentRepeatCount;
-
+								// Check if we've hit the max overall repeats
 								const bool bReachedMax = (CurrentRepeatCount >= *NumRepeats);
 								if (!*bLoop && bReachedMax)
 								{
+									// If not looping, we're done
 									OnEnd->TriggerFrame(StartFrame);
 									bSequenceComplete = true;
 								}
 								else if (*bLoop && bReachedMax)
 								{
-									// reset repeats if looping
+									// If looping, reset the pass count
 									CurrentRepeatCount = 0;
-									*OutRepeatCount    = 0;
+									*OutRepeatCount = 0;
 								}
 							}
 						}
@@ -387,19 +421,29 @@ namespace Metasound
 		}
 
 	private:
+		// Reset all sequence state
 		void ResetSequence()
 		{
 			CurrentGroupIndex  = 0;
 			CurrentSubIndex    = 0;
-			CurrentRepeatCount = 0;
 			bSequenceComplete  = false;
+			// Reset restarts from pass 0, otherwise can set CurrentRepeatCount
+			CurrentRepeatCount = 0;
+			*OutRepeatCount = 0;
 		}
 
+		/**
+		 * Parses the input string for bracketed sections. 
+		 * If a bracket section ends with "xN", we set `Repeats = N`.
+		 * E.g. "[2 3] x3" => bracket with {2,3}, repeated 3 times.
+		 * Then we store it as one bracket group with Repeats=3.
+		 */
 		void ParseBracketedGroups()
 		{
 			ParsedGroups.Reset();
 
-			// whitespace only for now
+			// Currently ignoring Delimiter pin for bracket logic,
+			// whitespace parse for demonstration
 			TArray<FString> Tokens;
 			InputString->ParseIntoArrayWS(Tokens);
 
@@ -409,19 +453,22 @@ namespace Metasound
 				const FString& Token = Tokens[i];
 				if (Token.StartsWith("["))
 				{
-					// Begin bracket group
 					FBracketGroup<ElementType> Bracket;
 					FString Trimmed = Token;
 					Trimmed.RemoveFromStart("[");
 					bool bEndFound = false;
 
-					// If it also ends with ']', handle in one token
+					// If this token ends with ']', might also have xN after that
+					bool bCheckForRepeat = false;
+
 					if (Trimmed.EndsWith("]"))
 					{
 						Trimmed.RemoveFromEnd("]");
 						bEndFound = true;
+						bCheckForRepeat = true; 
 					}
-					// Parse trimmed if not empty
+
+					// Parse the first chunk if not empty
 					if (!Trimmed.IsEmpty())
 					{
 						ElementType Parsed{};
@@ -433,14 +480,15 @@ namespace Metasound
 					}
 					++i;
 
-					// read until we see ']' end if not found yet
+					// Read until we see a ']' if not found yet
 					while (!bEndFound && i < Tokens.Num())
 					{
 						FString NextTok = Tokens[i];
 						if (NextTok.EndsWith("]"))
 						{
-							bEndFound = true;
 							NextTok.RemoveFromEnd("]");
+							bEndFound = true;
+							bCheckForRepeat = true;
 						}
 
 						if (!NextTok.IsEmpty())
@@ -453,6 +501,25 @@ namespace Metasound
 							Bracket.Values.Add(SubParsed);
 						}
 						++i;
+					}
+
+					// After the bracket is fully parsed, check if the next token 
+					// is something like x3 to set bracket.Repeats=3
+					if (bCheckForRepeat && i < Tokens.Num())
+					{
+						// e.g. if the next token is "x3"
+						const FString& PotentialRepeat = Tokens[i];
+						if (PotentialRepeat.StartsWith("x") && PotentialRepeat.Len() > 1)
+						{
+							FString NumberPart = PotentialRepeat.Mid(1); // remove 'x'
+							int32 LocalRepeat = 1;
+							if (LexTryParseString(LocalRepeat, *NumberPart))
+							{
+								Bracket.Repeats = FMath::Max(LocalRepeat, 1);
+								// we've consumed this token
+								++i;
+							}
+						}
 					}
 
 					ParsedGroups.Add(MoveTemp(Bracket));
@@ -470,12 +537,30 @@ namespace Metasound
 
 					ParsedGroups.Add(MoveTemp(SingleGrp));
 					++i;
+
+					//* check if next token is xN 
+					//* e.g. "0 x2" => 0 repeated 2 times
+					// if (i < Tokens.Num())
+					// {
+					// 	const FString& PotentialRepeat = Tokens[i];
+					// 	if (PotentialRepeat.StartsWith("x") && PotentialRepeat.Len() > 1)
+					// 	{
+					// 		FString NumberPart = PotentialRepeat.Mid(1);
+					// 		int32 LocalRepeat = 1;
+					// 		if (LexTryParseString(LocalRepeat, *NumberPart))
+					// 		{
+					// 			SingleGrp.Repeats = FMath::Max(LocalRepeat, 1);
+					// 			// Overwrite the bracket in place
+					// 			ParsedGroups.Last().Repeats = SingleGrp.Repeats;
+					// 			++i;
+					// 		}
+					// 	}
+					// }
 				}
 			}
 		}
 
 	private:
-		// Inputs
 		FTriggerReadRef TriggerSplit;
 		FTriggerReadRef TriggerNext;
 		FTriggerReadRef TriggerReset;
@@ -485,7 +570,6 @@ namespace Metasound
 		FBoolReadRef    bLoop;
 		FBoolReadRef    bOverflow;
 
-		// Outputs
 		FTriggerWriteRef  OnSplit;       
 		FTriggerWriteRef  OnNext;        
 		TDataWriteReference<ElementType> OutValue; 
@@ -496,11 +580,19 @@ namespace Metasound
 		TDataWriteReference<int32>       OutLength;
 		FTriggerWriteRef  OnEnd;         
 
-		// Internal State
-		FBracketedGroups ParsedGroups;     // Array of bracket groups
+		/** All bracket groups, each with its local Repeats factor. */
+		FBracketedGroups ParsedGroups;
+
+		/** Index of the bracket group we’re on. */
 		int32 CurrentGroupIndex  = 0;
+
+		/** Which sub-step inside the repeated bracket group. */
 		int32 CurrentSubIndex    = 0;
+
+		/** Count how many times we have begun a new pass. */
 		int32 CurrentRepeatCount = 0;
+
+		/** If the entire sequence is complete (non-loop). */
 		bool  bSequenceComplete  = false;
 	};
 	
