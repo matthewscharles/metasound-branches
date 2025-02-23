@@ -19,8 +19,8 @@ namespace Metasound
     template class TArrayReverseOperator<TArray<bool>>;
     template class TArrayReverseNode<TArray<bool>>;
     
-    template class TArrayReverseOperator<TArray<FTime>>;
-    template class TArrayReverseNode<TArray<FTime>>;
+    // template class TArrayReverseOperator<TArray<FTime>>;
+    // template class TArrayReverseNode<TArray<FTime>>;
     
     
 }
@@ -29,9 +29,9 @@ namespace Metasound
 using FReverseFloatNodeAlias  = Metasound::TArrayReverseNode<TArray<float>>;
 using FReverseIntNodeAlias    = Metasound::TArrayReverseNode<TArray<int32>>;
 using FReverseBoolNodeAlias   = Metasound::TArrayReverseNode<TArray<bool>>;
-using FReverseTimeNodeAlias = Metasound::TArrayReverseNode<TArray<Metasound::FTime>>;
+// using FReverseTimeNodeAlias = Metasound::TArrayReverseNode<TArray<Metasound::FTime>>;
 
 METASOUND_REGISTER_NODE(FReverseFloatNodeAlias);
 METASOUND_REGISTER_NODE(FReverseIntNodeAlias);
 METASOUND_REGISTER_NODE(FReverseBoolNodeAlias);
-METASOUND_REGISTER_NODE(FReverseTimeNodeAlias);
+// METASOUND_REGISTER_NODE(FReverseTimeNodeAlias);
