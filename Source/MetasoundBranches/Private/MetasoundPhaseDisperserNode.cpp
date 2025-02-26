@@ -12,7 +12,7 @@
 
 namespace Metasound
 {
-    namespace PhaseDisperserNodeNames
+    namespace PhaseDisperserNodeVertexNames
     {
         METASOUND_PARAM(InputSignal, "In", "Incoming audio.");
         METASOUND_PARAM(OutputSignal, "Out", "Phase-dispersed audio.");
@@ -40,7 +40,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace PhaseDisperserNodeNames;
+            using namespace PhaseDisperserNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -64,7 +64,7 @@ namespace Metasound
                 FNodeClassMetadata Metadata;
                 Metadata.ClassName = { TEXT("UE"), TEXT("PhaseDisperser"), TEXT("Audio") };
                 Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 0;
+                Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("PhaseDisperserNodeDisplayName", "Phase Disperser");
                 Metadata.Description = METASOUND_LOCTEXT("PhaseDisperserNodeDesc", "A chain of allpass filters acting as a phase disperser to soften transients.");
                 Metadata.Author = "Charles Matthews";
@@ -82,7 +82,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace PhaseDisperserNodeNames;
+            using namespace PhaseDisperserNodeVertexNames;
 
             FDataReferenceCollection InputDataReferences;
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
@@ -93,7 +93,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace PhaseDisperserNodeNames;
+            using namespace PhaseDisperserNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
             OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal), OutputSignal);
@@ -103,7 +103,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace PhaseDisperserNodeNames;
+            using namespace PhaseDisperserNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();

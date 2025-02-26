@@ -11,7 +11,7 @@
 
 namespace Metasound
 {
-    namespace TuningNodeNames
+    namespace TuningNodeVertexNames
     {
         METASOUND_PARAM(InputMIDINoteNumber, "MIDI Note Number", "Input MIDI note number (integer).");
         METASOUND_PARAM(InputTuningCents0, "+/- Cents C", "Tuning adjustment for note 0 in cents.");
@@ -66,7 +66,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace TuningNodeNames;
+            using namespace TuningNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -102,7 +102,7 @@ namespace Metasound
 
                 Metadata.ClassName = { TEXT("UE"), TEXT("Tuning"), TEXT("Float") };
                 Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 0;
+                Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("TuningNodeDisplayName", "Tuning");
                 Metadata.Description = METASOUND_LOCTEXT("TuningNodeDesc", "Generates a frequency based on custom tuning per-note.");
                 Metadata.Author = "Charles Matthews";
@@ -120,7 +120,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace TuningNodeNames;
+            using namespace TuningNodeVertexNames;
 
             FDataReferenceCollection InputDataReferences;
 
@@ -143,7 +143,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace TuningNodeNames;
+            using namespace TuningNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
 
@@ -154,7 +154,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace TuningNodeNames;
+            using namespace TuningNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();

@@ -12,7 +12,7 @@
 
 namespace Metasound
 {
-    namespace BoolToAudioNodeNames
+    namespace BoolToAudioNodeVertexNames
     {
         METASOUND_PARAM(InputBool, "Value", "Boolean input to convert to audio.");
         METASOUND_PARAM(InputRiseTime, "Rise Time", "Rise time in seconds.");
@@ -39,7 +39,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace BoolToAudioNodeNames;
+            using namespace BoolToAudioNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -62,7 +62,7 @@ namespace Metasound
                 FNodeClassMetadata Metadata;
                 Metadata.ClassName = { TEXT("UE"), TEXT("BoolToAudio"), TEXT("Audio") };
                 Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 0;
+                Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("BoolToAudioDisplayName", "Bool To Audio");
                 Metadata.Description = METASOUND_LOCTEXT("BoolToAudioDesc", "Converts a boolean value to an audio signal, with optional rise and fall times.");
                 Metadata.Author = "Charles Matthews";
@@ -80,7 +80,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace BoolToAudioNodeNames;
+            using namespace BoolToAudioNodeVertexNames;
 
             FDataReferenceCollection InputDataReferences;
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputBool), InputBool);
@@ -92,7 +92,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace BoolToAudioNodeNames;
+            using namespace BoolToAudioNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
             OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal), OutputSignal);
@@ -102,7 +102,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace BoolToAudioNodeNames;
+            using namespace BoolToAudioNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();

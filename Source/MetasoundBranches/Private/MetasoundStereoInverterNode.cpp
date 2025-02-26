@@ -11,7 +11,7 @@
 
 namespace Metasound
 {
-    namespace StereoInverterNodeNames
+    namespace StereoInverterNodeVertexNames
     {
         METASOUND_PARAM(InputLeftSignal, "In L", "Left channel audio output.");
         METASOUND_PARAM(InputRightSignal, "In R", "Right channel audio output.");
@@ -45,7 +45,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace StereoInverterNodeNames;
+            using namespace StereoInverterNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -73,7 +73,7 @@ namespace Metasound
                 FNodeClassMetadata Metadata;
                 Metadata.ClassName = { TEXT("UE"), TEXT("Stereo Inverter"), TEXT("Audio") };
                 Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 0;
+                Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("StereoInverterNodeDisplayName", "Stereo Inverter");
                 Metadata.Description = METASOUND_LOCTEXT("StereoInverterNodeDesc", "Inverts and/or swaps stereo channels.");
                 Metadata.Author = "Charles Matthews";
@@ -91,7 +91,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace StereoInverterNodeNames;
+            using namespace StereoInverterNodeVertexNames;
 
             FDataReferenceCollection InputDataReferences;
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputLeftSignal), InputLeftSignal);
@@ -105,7 +105,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace StereoInverterNodeNames;
+            using namespace StereoInverterNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
             OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputLeftSignal), OutputLeftSignal);
@@ -115,7 +115,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace StereoInverterNodeNames;
+            using namespace StereoInverterNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();

@@ -11,7 +11,7 @@
 
 namespace Metasound
 {
-    namespace CrossfadeStereoNodeNames
+    namespace CrossfadeStereoNodeVertexNames
     {
         METASOUND_PARAM(InputLeftSignal1, "In1 L", "Left channel of first input.");
         METASOUND_PARAM(InputRightSignal1, "In1 R", "Right channel of first input.");
@@ -45,7 +45,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace CrossfadeStereoNodeNames;
+            using namespace CrossfadeStereoNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -74,7 +74,7 @@ namespace Metasound
 
                     Metadata.ClassName = { TEXT("UE"), TEXT("Stereo Crossfade"), TEXT("Audio") };
                     Metadata.MajorVersion = 1;
-                    Metadata.MinorVersion = 0;
+                    Metadata.MinorVersion = 1;
                     Metadata.DisplayName = METASOUND_LOCTEXT("CrossfadeStereoNodeDisplayName", "Stereo Crossfade");
                     Metadata.Description = METASOUND_LOCTEXT("CrossfadeStereoNodeDesc", "Crossfades between two stereo signals.");
                     Metadata.Author = "Charles Matthews";
@@ -92,7 +92,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace CrossfadeStereoNodeNames;
+            using namespace CrossfadeStereoNodeVertexNames;
 
             FDataReferenceCollection InputDataReferences;
 
@@ -107,7 +107,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace CrossfadeStereoNodeNames;
+            using namespace CrossfadeStereoNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
 
@@ -119,7 +119,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace CrossfadeStereoNodeNames;
+            using namespace CrossfadeStereoNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();

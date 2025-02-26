@@ -16,7 +16,7 @@
 namespace Metasound
 {
     // Vertex Names - define the node's inputs and outputs here
-    namespace DustTriggerNodeNames
+    namespace DustTriggerNodeVertexNames
     {
         METASOUND_PARAM(InputDensity, "Modulation", "Input density control signal.");
         METASOUND_PARAM(InputDensityOffset, "Density", "Probability of trigger generation.");
@@ -45,7 +45,7 @@ namespace Metasound
         // Helper function for constructing vertex interface
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace DustTriggerNodeNames;
+            using namespace DustTriggerNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -72,7 +72,7 @@ namespace Metasound
 
                     Metadata.ClassName = { TEXT("UE"), TEXT("Dust (Trigger)"), TEXT("Trigger") };
                     Metadata.MajorVersion = 1;
-                    Metadata.MinorVersion = 0;
+                    Metadata.MinorVersion = 1;
                     Metadata.DisplayName = METASOUND_LOCTEXT("DustTriggerNodeDisplayName", "Dust (Trigger)");
                     Metadata.Description = METASOUND_LOCTEXT("DustTriggerNodeDesc", "Generate randomly timed trigger events, with audio-rate modulation.");
                     Metadata.Author = "Charles Matthews";
@@ -91,7 +91,7 @@ namespace Metasound
         // Allows MetaSound graph to interact with the node's inputs
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace DustTriggerNodeNames;
+            using namespace DustTriggerNodeVertexNames;
             FDataReferenceCollection Inputs;
             Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputDensity), InputDensity);
             Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputDensityOffset), InputDensityOffset);
@@ -102,7 +102,7 @@ namespace Metasound
         // Allows MetaSound graph to interact with the node's outputs
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace DustTriggerNodeNames;
+            using namespace DustTriggerNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
 
@@ -114,7 +114,7 @@ namespace Metasound
         // Used to instantiate a new runtime instance of the node
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace DustTriggerNodeNames;
+            using namespace DustTriggerNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();

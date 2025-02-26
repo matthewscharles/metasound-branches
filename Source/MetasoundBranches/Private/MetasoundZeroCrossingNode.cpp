@@ -65,7 +65,7 @@ namespace Metasound
 
                 Metadata.ClassName = { TEXT("UE"), TEXT("Zero Crossing"), TEXT("Trigger") };
                 Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 0;
+                Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("ZeroCrossingNodeDisplayName", "Zero Crossing");
                 Metadata.Description = METASOUND_LOCTEXT("ZeroCrossingNodeDesc", "Detect zero crossings in an input audio signal, with optional debounce.");
                 Metadata.Author = "Charles Matthews";

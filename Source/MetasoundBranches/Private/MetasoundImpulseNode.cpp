@@ -13,7 +13,7 @@
 namespace Metasound
 {
     // Vertex Names - define the node's inputs and outputs here
-    namespace ImpulseNodeNames
+    namespace ImpulseNodeVertexNames
     {
         METASOUND_PARAM(InputTrigger, "Trigger", "Trigger input to generate an impulse.");
         METASOUND_PARAM(InputBiPolar, "Bi-Polar", "Toggle between bipolar and unipolar impulse output.");
@@ -41,7 +41,7 @@ namespace Metasound
         // Helper function for constructing vertex interface
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace ImpulseNodeNames;
+            using namespace ImpulseNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -68,7 +68,7 @@ namespace Metasound
 
                     Metadata.ClassName = { TEXT("UE"), TEXT("Impulse"), TEXT("Audio") };
                     Metadata.MajorVersion = 1;
-                    Metadata.MinorVersion = 0;
+                    Metadata.MinorVersion = 1;
                     Metadata.DisplayName = METASOUND_LOCTEXT("ImpulseNodeDisplayName", "Impulse");
                     Metadata.Description = METASOUND_LOCTEXT("ImpulseNodeDesc", "Generates a single-sample impulse when triggered.");
                     Metadata.Author = "Charles Matthews";
@@ -87,7 +87,7 @@ namespace Metasound
         // Allows MetaSound graph to interact with the node's inputs
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace ImpulseNodeNames;
+            using namespace ImpulseNodeVertexNames;
             FDataReferenceCollection Inputs;
             Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTrigger), InputTrigger);
             Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputBiPolar), InputBiPolar);
@@ -97,7 +97,7 @@ namespace Metasound
         // Allows MetaSound graph to interact with the node's outputs
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace ImpulseNodeNames;
+            using namespace ImpulseNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
             
@@ -109,7 +109,7 @@ namespace Metasound
 
           static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace ImpulseNodeNames;
+            using namespace ImpulseNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();

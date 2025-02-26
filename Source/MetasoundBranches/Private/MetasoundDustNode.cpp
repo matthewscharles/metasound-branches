@@ -15,7 +15,7 @@
 namespace Metasound
 {
     // Vertex Names - define the node's inputs and outputs here
-    namespace DustNodeNames
+    namespace DustNodeVertexNames
     {
         METASOUND_PARAM(InputDensity, "Modulation", "Density control signal.");
         METASOUND_PARAM(InputDensityOffset, "Density", "Probability of impulse generation.");
@@ -48,7 +48,7 @@ namespace Metasound
         // Helper function for constructing vertex interface
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace DustNodeNames;
+            using namespace DustNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -76,7 +76,7 @@ namespace Metasound
 
                     Metadata.ClassName = { TEXT("UE"), TEXT("Dust (Audio)"), TEXT("Audio") };
                     Metadata.MajorVersion = 1;
-                    Metadata.MinorVersion = 0;
+                    Metadata.MinorVersion = 1;
                     Metadata.DisplayName = METASOUND_LOCTEXT("DustNodeDisplayName", "Dust (Audio)");
                     Metadata.Description = METASOUND_LOCTEXT("DustNodeDesc", "Generate randomly timed impulses with audio-rate modulation.");
                     Metadata.Author = "Charles Matthews";
@@ -95,7 +95,7 @@ namespace Metasound
         // Allows MetaSound graph to interact with the node's inputs
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace DustNodeNames;
+            using namespace DustNodeVertexNames;
             FDataReferenceCollection Inputs;
             Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputDensity), InputDensity);
             Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputDensityOffset), InputDensityOffset);
@@ -107,7 +107,7 @@ namespace Metasound
         // Allows MetaSound graph to interact with the node's outputs
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace DustNodeNames;
+            using namespace DustNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
 
@@ -119,7 +119,7 @@ namespace Metasound
         // Used to instantiate a new runtime instance of the node
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace DustNodeNames;
+            using namespace DustNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();
