@@ -36,4 +36,4 @@ namespace MetasoundPattern
     }
 }
 
-REGISTER_METASOUND_DATATYPE(MetasoundPattern::FPatternStream);
+REGISTER_METASOUND_DATATYPE(MetasoundPattern::FPatternStream, "PatternStream");
