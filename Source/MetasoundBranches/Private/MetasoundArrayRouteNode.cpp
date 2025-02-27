@@ -1,6 +1,6 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-#pragma once
+
 
 #include "MetasoundBranches/Public/MetasoundArrayRouteNode.h"
 #include "MetasoundTime.h"
