@@ -16,4 +16,24 @@ namespace MetasoundPattern
     {
         EventsInBlock.Insert(Event, 0);
     }
+
+    FPatternEvent FPatternStream::GetLatestEvent() const
+    {
+        return EventsInBlock.Num() > 0 ? EventsInBlock.Last() : FPatternEvent();
+    }
+
+    TArray<FPatternEvent> FPatternStream::GetEventsUpToFrame(int32 FrameIndex) const
+    {
+        TArray<FPatternEvent> FilteredEvents;
+        for (const FPatternEvent& Event : EventsInBlock)
+        {
+            if (Event.BlockSampleFrameIndex <= FrameIndex)
+            {
+                FilteredEvents.Add(Event);
+            }
+        }
+        return FilteredEvents;
+    }
 }
+
+REGISTER_METASOUND_DATATYPE(MetasoundPattern::FPatternStream);
