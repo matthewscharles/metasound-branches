@@ -29,13 +29,18 @@ namespace MetasoundPattern
     class METASOUNDBRANCHES_API FPatternStream
     {
     public:
+        FPatternStream() = default;
+        FPatternStream(const FPatternStream&) = default;
+        FPatternStream& operator=(const FPatternStream&) = default;
+        FPatternStream(FPatternStream&&) = default;  // * Move constructor (?)
+        FPatternStream& operator=(FPatternStream&&) = default;  // * Move assignment operator (?)
+
         void AddEvent(const FPatternEvent& Event);
         void InsertEvent(const FPatternEvent& Event);
 
         FPatternEvent GetLatestEvent() const;
         TArray<FPatternEvent> GetEventsUpToFrame(int32 FrameIndex) const;
 
-        // Return the entire block of events
         const TArray<FPatternEvent>& GetEventsInBlock() const
         { 
             return EventsInBlock; 
