@@ -125,7 +125,7 @@ namespace Metasound
             while ((SampleCounter - NumFramesInt).GetNumSamples() <= 0)
             {
                 
-                int32 TriggerFrame = static_cast<int32>(SampleCounter.GetNumSamples() - NumFramesInt);
+                int32 TriggerFrame = static_cast<int32>(SampleCounter.GetNumSamples());
                 TriggerFrame = FMath::Clamp(TriggerFrame, 0, NumFramesInt - 1);
                 
                 OnGenerateTrigger->TriggerFrame(TriggerFrame);
