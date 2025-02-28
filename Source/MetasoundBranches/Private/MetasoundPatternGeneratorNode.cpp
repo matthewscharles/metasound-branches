@@ -2,6 +2,7 @@
 // #include "MetasoundBranches/Public/MetasoundPatternStream.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundPrimitives.h"
+#include "MetasoundSampleCounter.h"
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
@@ -22,15 +23,15 @@ namespace Metasound
     {
     public:
         FPatternGeneratorOperator(const FOperatorSettings& InSettings,
-                                  const TDataReadReference<float>& InInterval,
+                                  const FTimeReadRef& InInterval,
                                   const TDataReadReference<bool>& InActive)
             : Interval(InInterval)
             , bActive(InActive)
             , OnGenerateTrigger(FTriggerWriteRef::CreateNew(InSettings))
             , OutRandomFloat(FFloatWriteRef::CreateNew(0.0f))
-            , ElapsedTime(0.0f)
             , SampleRate(InSettings.GetSampleRate())
             , NumFrames(InSettings.GetNumFramesPerBlock())
+            , SampleCounter(0, SampleRate)
         {
             RandomStream.Initialize(FPlatformTime::Cycles());
         }
@@ -40,7 +41,7 @@ namespace Metasound
             using namespace PatternGeneratorNodeVertexNames;
             static const FVertexInterface Interface(
                 FInputVertexInterface(
-                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputInterval), 1.0f),
+                    TInputDataVertex<FTime>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputInterval), 1.0f),
                     TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputActive), true)
                 ),
                 FOutputVertexInterface(
@@ -93,7 +94,7 @@ namespace Metasound
         {
             using namespace PatternGeneratorNodeVertexNames;
             const FInputVertexInterfaceData& InputData = InParams.InputData;
-            TDataReadReference<float> IntervalRef = InputData.GetOrCreateDefaultDataReadReference<float>(
+            FTimeReadRef IntervalRef = InputData.GetOrCreateDefaultDataReadReference<FTime>(
                 METASOUND_GET_PARAM_NAME(InputInterval), InParams.OperatorSettings
             );
             TDataReadReference<bool> ActiveRef = InputData.GetOrCreateDefaultDataReadReference<bool>(
@@ -105,31 +106,38 @@ namespace Metasound
         void Execute()
         {
             OnGenerateTrigger->AdvanceBlock();
+
             if (!(*bActive))
             {
                 return;
             }
-            const float BlockDurationSec = static_cast<float>(NumFrames) / SampleRate;
-            float IntervalSec = FMath::Max(0.001f, *Interval);
-            ElapsedTime += BlockDurationSec;
-            while (ElapsedTime >= IntervalSec)
+
+            FSampleCount IntervalInSamples = FSampleCounter::FromTime(*Interval, SampleRate).GetNumSamples();
+            IntervalInSamples = FMath::Max(static_cast<FSampleCount>(1), IntervalInSamples);
+
+            const int32 NumFramesInt = static_cast<int32>(NumFrames);
+
+            while ((SampleCounter - NumFramesInt).GetNumSamples() <= 0)
             {
+                OnGenerateTrigger->TriggerFrame(static_cast<int32>(SampleCounter.GetNumSamples()));
                 float NewRandom = RandomStream.GetFraction();
-                OnGenerateTrigger->TriggerFrame(0);
                 *OutRandomFloat = NewRandom;
-                ElapsedTime -= IntervalSec;
+
+                SampleCounter += IntervalInSamples;
             }
+
+            SampleCounter -= NumFramesInt;
         }
 
     private:
-        TDataReadReference<float> Interval;
-        TDataReadReference<bool>  bActive;
+        FTimeReadRef Interval;
+        TDataReadReference<bool> bActive;
         FTriggerWriteRef OnGenerateTrigger;
         TDataWriteReference<float> OutRandomFloat;
-        float ElapsedTime;
         float SampleRate;
         float NumFrames;
         FRandomStream RandomStream;
+        FSampleCounter SampleCounter;
     };
 
     class FPatternGeneratorNode : public FNodeFacade
