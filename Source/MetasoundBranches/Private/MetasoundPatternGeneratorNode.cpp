@@ -1,5 +1,5 @@
 #include "MetasoundBranches/Public/MetasoundPatternGeneratorNode.h"
-// #include "MetasoundBranches/Public/MetasoundPatternStream.h"  // * disabled for testing
+// #include "MetasoundBranches/Public/MetasoundPatternStream.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundPrimitives.h"
 #include "MetasoundNodeRegistrationMacro.h"
@@ -16,7 +16,6 @@ namespace Metasound
         METASOUND_PARAM(InputActive, "Active", "Enable generation.");
         METASOUND_PARAM(OutputTrigger, "On Generate", "Trigger output when a new random value is generated.");
         METASOUND_PARAM(OutputRandomFloat, "Random Float", "The newly generated random float.");
-        // METASOUND_PARAM(OutputPatternStream, "Pattern Stream", "Stream output containing the generated events."); // *
     }
 
     class FPatternGeneratorOperator : public TExecutableOperator<FPatternGeneratorOperator>
@@ -29,7 +28,6 @@ namespace Metasound
             , bActive(InActive)
             , OnGenerateTrigger(FTriggerWriteRef::CreateNew(InSettings))
             , OutRandomFloat(FFloatWriteRef::CreateNew(0.0f))
-            // , OutPatternStream(FPatternStreamWriteRef::CreateNew(MetasoundPattern::FPatternStream())) // *
             , ElapsedTime(0.0f)
             , SampleRate(InSettings.GetSampleRate())
             , NumFrames(InSettings.GetNumFramesPerBlock())
@@ -48,7 +46,6 @@ namespace Metasound
                 FOutputVertexInterface(
                     TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTrigger)),
                     TOutputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputRandomFloat))
-                    // , TOutputDataVertex<MetasoundPattern::FPatternStream>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputPatternStream)) // *
                 )
             );
             return Interface;
@@ -89,7 +86,6 @@ namespace Metasound
             FDataReferenceCollection Outputs;
             Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTrigger), OnGenerateTrigger);
             Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputRandomFloat), OutRandomFloat);
-            // Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputPatternStream), OutPatternStream); // *
             return Outputs;
         }
 
@@ -116,25 +112,20 @@ namespace Metasound
             const float BlockDurationSec = static_cast<float>(NumFrames) / SampleRate;
             float IntervalSec = FMath::Max(0.001f, *Interval);
             ElapsedTime += BlockDurationSec;
-            if (ElapsedTime >= IntervalSec)
+            while (ElapsedTime >= IntervalSec)
             {
                 float NewRandom = RandomStream.GetFraction();
                 OnGenerateTrigger->TriggerFrame(0);
                 *OutRandomFloat = NewRandom;
-                // MetasoundPattern::FPatternEvent NewEvent; // *
-                // NewEvent.BlockSampleFrameIndex = 0;
-                // NewEvent.ControlValue = NewRandom;
-                // OutPatternStream->AddEvent(NewEvent);
-                ElapsedTime = 0.0f;
+                ElapsedTime -= IntervalSec;
             }
         }
 
     private:
         TDataReadReference<float> Interval;
         TDataReadReference<bool>  bActive;
-        FTriggerWriteRef           OnGenerateTrigger;
+        FTriggerWriteRef OnGenerateTrigger;
         TDataWriteReference<float> OutRandomFloat;
-        // FPatternStreamWriteRef     OutPatternStream; // *
         float ElapsedTime;
         float SampleRate;
         float NumFrames;
