@@ -17,24 +17,34 @@ namespace Metasound
     {
         METASOUND_PARAM(InputPeriod,          "Period",          "Base time duration for triggers.");
         METASOUND_PARAM(InputTimeMultipliers, "Time Multipliers","Array of multipliers for the base period.");
+        METASOUND_PARAM(InputSetPeriodToTotal,"Set Period To Total", "If true, the entire loop uses 'Period' as total duration. Otherwise, each element uses 'Period' individually.");
         METASOUND_PARAM(InputActive,          "Active",          "Enable generation.");
+
         METASOUND_PARAM(OutputTrigger,        "On Generate",     "Trigger output when a new event is generated.");
         METASOUND_PARAM(OutputCurrentIndex,   "Current Index",   "The current index in the time multipliers array.");
+        METASOUND_PARAM(OutputTimeMultiplier, "Time Multiplier", "The current time multiplier.");
+        METASOUND_PARAM(OutputStepDuration,   "Step Duration",   "The calculated time duration for the current step.");
         METASOUND_PARAM(OutputPatternStream,  "Pattern Stream",  "Stream output containing the generated events.");
     }
 
     class FPatternGeneratorOperator : public TExecutableOperator<FPatternGeneratorOperator>
     {
     public:
-        FPatternGeneratorOperator(const FOperatorSettings& InSettings,
-                                  const FTimeReadRef& InPeriod,
-                                  const TDataReadReference<TArray<float>>& InTimeMultipliers,
-                                  const TDataReadReference<bool>& InActive)
+        FPatternGeneratorOperator(
+            const FOperatorSettings&                   InSettings,
+            const FTimeReadRef&                        InPeriod,
+            const TDataReadReference<TArray<float>>&   InTimeMultipliers,
+            const TDataReadReference<bool>&            bSetPeriodToTotal,
+            const TDataReadReference<bool>&            InActive
+        )
             : InputPeriod(InPeriod)
             , InputTimeMultipliers(InTimeMultipliers)
+            , bUseTotal(bSetPeriodToTotal)
             , bActive(InActive)
             , OnGenerateTrigger(FTriggerWriteRef::CreateNew(InSettings))
             , OutCurrentIndex(FInt32WriteRef::CreateNew(0))
+            , OutTimeMultiplier(FFloatWriteRef::CreateNew(0.0f))
+            , OutStepDuration(FTimeWriteRef::CreateNew(FTime(0.0f)))
             , OutPatternStream(FPatternStreamWriteRef::CreateNew(MetasoundPattern::FPatternStream()))
             , SampleRate(InSettings.GetSampleRate())
             , NumFrames(InSettings.GetNumFramesPerBlock())
@@ -46,20 +56,21 @@ namespace Metasound
         static const FVertexInterface& DeclareVertexInterface()
         {
             using namespace PatternGeneratorNodeVertexNames;
-
             static const FVertexInterface Interface(
                 FInputVertexInterface(
                     TInputDataVertex<FTime>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputPeriod)),
                     TInputDataVertex<TArray<float>>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputTimeMultipliers)),
+                    TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputSetPeriodToTotal)),
                     TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputActive))
                 ),
                 FOutputVertexInterface(
                     TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTrigger)),
                     TOutputDataVertex<int32>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputCurrentIndex)),
+                    TOutputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTimeMultiplier)),
+                    TOutputDataVertex<FTime>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputStepDuration)),
                     TOutputDataVertex<MetasoundPattern::FPatternStream>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputPatternStream))
                 )
             );
-
             return Interface;
         }
 
@@ -69,10 +80,13 @@ namespace Metasound
             {
                 FNodeClassMetadata Metadata;
                 Metadata.ClassName = { TEXT("Branches"), TEXT("PatternGenerator"), TEXT("Audio") };
-                Metadata.MajorVersion = 1;
+                Metadata.MajorVersion = 2;
                 Metadata.MinorVersion = 0;
                 Metadata.DisplayName = LOCTEXT("PatternGeneratorDisplayName", "Pattern Generator");
-                Metadata.Description = LOCTEXT("PatternGeneratorDesc", "Generates triggers based on an array of multipliers applied to a base period.");
+                Metadata.Description = LOCTEXT("PatternGeneratorDesc", 
+                    "Generates triggers based on an array of time multipliers applied to a base period. "
+                    "If 'Set Period To Total' is false, each element uses 'Period' independently. "
+                    "If 'Set Period To Total' is true, the entire loop uses 'Period' as total duration.");
                 Metadata.Author = TEXT("Charles Matthews");
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = DeclareVertexInterface();
@@ -87,22 +101,23 @@ namespace Metasound
         virtual FDataReferenceCollection GetInputs() const override
         {
             using namespace PatternGeneratorNodeVertexNames;
-
             FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputPeriod),         InputPeriod);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTimeMultipliers),InputTimeMultipliers);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputActive),         bActive);
+            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputPeriod),          InputPeriod);
+            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTimeMultipliers), InputTimeMultipliers);
+            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputSetPeriodToTotal), bUseTotal);
+            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputActive),          bActive);
             return Inputs;
         }
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
             using namespace PatternGeneratorNodeVertexNames;
-
             FDataReferenceCollection Outputs;
-            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTrigger),       OnGenerateTrigger);
-            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputCurrentIndex), OutCurrentIndex);
-            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputPatternStream),OutPatternStream);
+            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTrigger),        OnGenerateTrigger);
+            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputCurrentIndex),   OutCurrentIndex);
+            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTimeMultiplier), OutTimeMultiplier);
+            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputStepDuration),   OutStepDuration);
+            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputPatternStream),  OutPatternStream);
             return Outputs;
         }
 
@@ -111,20 +126,26 @@ namespace Metasound
             using namespace PatternGeneratorNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
-
             FTimeReadRef PeriodRef = InputData.GetOrCreateDefaultDataReadReference<FTime>(
                 METASOUND_GET_PARAM_NAME(InputPeriod), InParams.OperatorSettings
             );
-
             TDataReadReference<TArray<float>> TimeMultipliersRef = InputData.GetOrCreateDefaultDataReadReference<TArray<float>>(
                 METASOUND_GET_PARAM_NAME(InputTimeMultipliers), InParams.OperatorSettings
             );
-
+            TDataReadReference<bool> SetTotalRef = InputData.GetOrCreateDefaultDataReadReference<bool>(
+                METASOUND_GET_PARAM_NAME(InputSetPeriodToTotal), InParams.OperatorSettings
+            );
             TDataReadReference<bool> ActiveRef = InputData.GetOrCreateDefaultDataReadReference<bool>(
                 METASOUND_GET_PARAM_NAME(InputActive), InParams.OperatorSettings
             );
 
-            return MakeUnique<FPatternGeneratorOperator>(InParams.OperatorSettings, PeriodRef, TimeMultipliersRef, ActiveRef);
+            return MakeUnique<FPatternGeneratorOperator>(
+                InParams.OperatorSettings, 
+                PeriodRef, 
+                TimeMultipliersRef, 
+                SetTotalRef, 
+                ActiveRef
+            );
         }
 
         void Execute()
@@ -136,23 +157,46 @@ namespace Metasound
                 return;
             }
 
+            float TotalMultiplier = 0.0f;
+            for (float M : *InputTimeMultipliers)
+            {
+                TotalMultiplier += M;
+            }
+
             float CurrentMultiplier = (*InputTimeMultipliers)[CurrentIndex % InputTimeMultipliers->Num()];
-            FSampleCount IntervalInSamples = FSampleCounter::FromTime((*InputPeriod) * CurrentMultiplier, SampleRate).GetNumSamples();
-            IntervalInSamples = FMath::Max(static_cast<FSampleCount>(1), IntervalInSamples);
+            float StepDurationSec   = 0.0f;
+
+            if (!(*bUseTotal))
+            {
+                // Per-element behavior
+                StepDurationSec = InputPeriod->GetSeconds() * CurrentMultiplier;
+            }
+            else
+            {
+                // Entire loop uses 'Period' as total
+                float ClampedTotal = FMath::Max(0.001f, TotalMultiplier);
+                StepDurationSec    = InputPeriod->GetSeconds() * (CurrentMultiplier / ClampedTotal);
+            }
+
+            FTime StepDurationTime = FTime(StepDurationSec);
+            FSampleCount IntervalInSamples = FSampleCounter::FromTime(StepDurationTime, SampleRate).GetNumSamples();
+            IntervalInSamples = FMath::Max<FSampleCount>(1, IntervalInSamples);
 
             const int32 NumFramesInt = static_cast<int32>(NumFrames);
-
             while ((SampleCounter - NumFramesInt).GetNumSamples() <= 0)
             {
                 int32 TriggerFrame = static_cast<int32>(SampleCounter.GetNumSamples());
                 TriggerFrame = FMath::Clamp(TriggerFrame, 0, NumFramesInt - 1);
 
                 OnGenerateTrigger->TriggerFrame(TriggerFrame);
-                *OutCurrentIndex = CurrentIndex;
+                *OutCurrentIndex   = CurrentIndex;
+                *OutTimeMultiplier = CurrentMultiplier;
+                *OutStepDuration   = StepDurationTime;
 
                 MetasoundPattern::FPatternEvent NewEvent;
                 NewEvent.BlockSampleFrameIndex = TriggerFrame;
-                NewEvent.ControlValue = CurrentMultiplier;
+                NewEvent.ControlValue          = CurrentMultiplier;
+
                 OutPatternStream->AddEvent(NewEvent);
 
                 SampleCounter += IntervalInSamples;
@@ -163,16 +207,20 @@ namespace Metasound
         }
 
     private:
-        FTimeReadRef InputPeriod;
-        TDataReadReference<TArray<float>> InputTimeMultipliers;
-        TDataReadReference<bool> bActive;
-        FTriggerWriteRef OnGenerateTrigger;
-        TDataWriteReference<int32> OutCurrentIndex;
-        FPatternStreamWriteRef OutPatternStream;
-        float SampleRate;
-        float NumFrames;
+        FTimeReadRef                           InputPeriod;
+        TDataReadReference<TArray<float>>      InputTimeMultipliers;
+        TDataReadReference<bool>               bUseTotal;
+        TDataReadReference<bool>               bActive;
+        FTriggerWriteRef                       OnGenerateTrigger;
+        TDataWriteReference<int32>             OutCurrentIndex;
+        TDataWriteReference<float>             OutTimeMultiplier;
+        FTimeWriteRef                          OutStepDuration;
+        FPatternStreamWriteRef                 OutPatternStream;
+
+        float          SampleRate;
+        float          NumFrames;
         FSampleCounter SampleCounter;
-        int32 CurrentIndex;
+        int32          CurrentIndex;
     };
 
     class FPatternGeneratorNode : public FNodeFacade
