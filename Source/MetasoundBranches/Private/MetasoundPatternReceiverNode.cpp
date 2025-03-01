@@ -15,8 +15,8 @@ namespace Metasound
     {
         METASOUND_PARAM(InputPatternStream, "Pattern Stream", "The input stream containing generated events.");
         METASOUND_PARAM(InputActive, "Active", "Enable receiving.");
-        METASOUND_PARAM(OutputTrigger, "On Receive", "Trigger output when a new event is detected.");
-        METASOUND_PARAM(OutputRandomFloat, "Random Float", "The random float from the event.");
+        METASOUND_PARAM(OutputTrigger, "Trigger", "Trigger output when a new event is detected.");
+        METASOUND_PARAM(OutputRandomFloat, "Float", "The random float from the event.");
         METASOUND_PARAM(OutputPatternStream, "Pattern Stream", "Pass-through stream output.");
     }
 
