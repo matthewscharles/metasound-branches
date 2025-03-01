@@ -134,7 +134,13 @@ namespace Metasound
 
             int32 SampleRate = InParams.OperatorSettings.GetActualBlockRate(); // For float processing, use block rate
 
-            return MakeUnique<FSlewFloatOperator>(InParams.OperatorSettings, InputSignal, InputRiseTime, InputFallTime, SampleRate);
+            return MakeUnique<FSlewFloatOperator>(
+                InParams.OperatorSettings, 
+                InputSignal, 
+                InputRiseTime, 
+                InputFallTime, 
+                SampleRate
+            );
         }
 
         // Primary node functionality
