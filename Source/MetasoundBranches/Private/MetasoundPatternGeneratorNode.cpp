@@ -50,6 +50,7 @@ namespace Metasound
             , NumFrames(InSettings.GetNumFramesPerBlock())
             , SampleCounter(0, SampleRate)
             , CurrentIndex(0)
+            , CachedTotalMultiplier(0.0f)
         {
         }
 
@@ -151,58 +152,65 @@ namespace Metasound
         void Execute()
         {
             OnGenerateTrigger->AdvanceBlock();
-
             if (!(*bActive) || InputTimeMultipliers->Num() == 0)
             {
                 return;
             }
-
+        
             float TotalMultiplier = 0.0f;
-            for (float M : *InputTimeMultipliers)
+            if (*bUseTotal)
             {
-                TotalMultiplier += M;
+                if (CurrentIndex == 0)
+                {
+                    for (float M : *InputTimeMultipliers)
+                    {
+                        TotalMultiplier += M;
+                    }
+                    CachedTotalMultiplier = TotalMultiplier;
+                }
+                else
+                {
+                    TotalMultiplier = CachedTotalMultiplier;
+                }
             }
-
+            else
+            {
+                for (float M : *InputTimeMultipliers)
+                {
+                    TotalMultiplier += M;
+                }
+            }
+        
             float CurrentMultiplier = (*InputTimeMultipliers)[CurrentIndex % InputTimeMultipliers->Num()];
-            float StepDurationSec   = 0.0f;
-
+            float StepDurationSec = 0.0f;
             if (!(*bUseTotal))
             {
-                // Per-element behavior
                 StepDurationSec = InputPeriod->GetSeconds() * CurrentMultiplier;
             }
             else
             {
-                // Entire loop uses 'Period' as total
-                float ClampedTotal = FMath::Max(0.001f, TotalMultiplier);
-                StepDurationSec    = InputPeriod->GetSeconds() * (CurrentMultiplier / ClampedTotal);
+                StepDurationSec = InputPeriod->GetSeconds() * (CurrentMultiplier / FMath::Max(0.001f, TotalMultiplier));
             }
-
+        
             FTime StepDurationTime = FTime(StepDurationSec);
             FSampleCount IntervalInSamples = FSampleCounter::FromTime(StepDurationTime, SampleRate).GetNumSamples();
             IntervalInSamples = FMath::Max<FSampleCount>(1, IntervalInSamples);
-
             const int32 NumFramesInt = static_cast<int32>(NumFrames);
             while ((SampleCounter - NumFramesInt).GetNumSamples() <= 0)
             {
                 int32 TriggerFrame = static_cast<int32>(SampleCounter.GetNumSamples());
                 TriggerFrame = FMath::Clamp(TriggerFrame, 0, NumFramesInt - 1);
-
                 OnGenerateTrigger->TriggerFrame(TriggerFrame);
-                *OutCurrentIndex   = CurrentIndex;
+                *OutCurrentIndex = CurrentIndex;
                 *OutTimeMultiplier = CurrentMultiplier;
-                *OutStepDuration   = StepDurationTime;
-
+                *OutStepDuration = StepDurationTime;
                 MetasoundPattern::FPatternEvent NewEvent;
                 NewEvent.BlockSampleFrameIndex = TriggerFrame;
-                NewEvent.ControlValue          = CurrentMultiplier;
-
+                NewEvent.ControlValue = CurrentMultiplier;
                 OutPatternStream->AddEvent(NewEvent);
-
                 SampleCounter += IntervalInSamples;
                 CurrentIndex = (CurrentIndex + 1) % InputTimeMultipliers->Num();
             }
-
             SampleCounter -= NumFramesInt;
         }
 
@@ -221,6 +229,7 @@ namespace Metasound
         float          NumFrames;
         FSampleCounter SampleCounter;
         int32          CurrentIndex;
+        float          CachedTotalMultiplier;
     };
 
     class FPatternGeneratorNode : public FNodeFacade
