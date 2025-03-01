@@ -29,8 +29,9 @@ namespace Metasound
     
     struct FVoiceState
     {
-        bool bActive = false;
+        bool Active = false;
         int32 NoteEndSample = 0;
+        float Pitch = 0.0f;
     };
 
 
@@ -58,6 +59,10 @@ namespace Metasound
             , AccumulatedSamples(0)
         {
             OutputArray->Init(0, 2);
+            for (int32 i = 0; i < 128; ++i)
+            {
+                ActiveVoices[i] = FVoiceState{false, 0};
+            }
         }
 
         static const FVertexInterface& DeclareVertexInterface()
@@ -92,7 +97,7 @@ namespace Metasound
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 0;
                 Metadata.DisplayName = METASOUND_LOCTEXT("MakeNoteFloatDisplayName", "Make Note (Float)");
-                Metadata.Description = METASOUND_LOCTEXT("MakeNoteFloatDesc", "Generates note-on and note-off events with a specified duration and allows override.");
+                Metadata.Description = METASOUND_LOCTEXT("MakeNoteFloatDesc", "Generates note-on and note-off events with a specified duration.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.DefaultInterface = DeclareVertexInterface();
                 return Metadata;
@@ -142,81 +147,67 @@ namespace Metasound
             OutputNoteOn->AdvanceBlock();
             OutputNoteOff->AdvanceBlock();
             OutputOverride->AdvanceBlock();
-        
-            // 1) Process Note On triggers in this block
+
+            int32 CurrentSample = AccumulatedSamples;
+
+            // Process Note-On triggers
             InputNoteOn->ExecuteBlock(
-                [](int32 /*StartFrame*/, int32 /*EndFrame*/){},
-                [this](int32 StartFrame, int32 EndFrame)
+                [](int32 StartFrame, int32 EndFrame) {},
+                [this, &CurrentSample](int32 StartFrame, int32 EndFrame)
                 {
-                    // Calculate our block-based sample index
-                    int32 CurrentSample = AccumulatedSamples + StartFrame;
-                    
-                    // Create a new voice entry
-                    FVoiceState NewVoice;
-                    NewVoice.bActive = true;
-                    // Schedule note end in samples
-                    NewVoice.NoteEndSample = CurrentSample + static_cast<int32>(InputDuration->GetSeconds() * SampleRate);
+                    CurrentSample += StartFrame;
+                    int32 PitchIndex = static_cast<int32>(*InputPitch);
 
-                    ActiveVoices.Add(NewVoice);
-
-                    // Output pitch/velocity to the array
-                    (*OutputArray)[0] = *InputPitch;
-                    (*OutputArray)[1] = *InputVelocity;
-
-                    // Fire note-on trigger at StartFrame
-                    OutputNoteOn->TriggerFrame(StartFrame);
-                }
-            );
-
-            // 2) Process Note Off overrides in this block
-            InputNoteOff->ExecuteBlock(
-                [](int32 /*StartFrame*/, int32 /*EndFrame*/){},
-                [this](int32 StartFrame, int32 EndFrame)
-                {
-                    for (int32 i = ActiveVoices.Num() - 1; i >= 0; --i)
+                    // Clamp to MIDI pitch range
+                    if (PitchIndex >= 0 && PitchIndex < 128)
                     {
-                        if (ActiveVoices[i].bActive)
-                        {
-                            ActiveVoices[i].bActive = false;
-                            // Velocity = 0
-                            (*OutputArray)[0] = *InputPitch;
-                            (*OutputArray)[1] = 0.0f;
+                        // Store only one note per pitch at a time
+                        ActiveVoices[PitchIndex].Active = true;
+                        ActiveVoices[PitchIndex].NoteEndSample = CurrentSample + static_cast<int32>(InputDuration->GetSeconds() * SampleRate);
+                        ActiveVoices[PitchIndex].Pitch = *InputPitch;
 
-                            // Fire note-off & override triggers
-                            OutputNoteOff->TriggerFrame(StartFrame);
-                            OutputOverride->TriggerFrame(StartFrame);
-
-                            // Remove the voice
-                            ActiveVoices.RemoveAtSwap(i);
-                        }
+                        (*OutputArray)[0] = *InputPitch;
+                        (*OutputArray)[1] = *InputVelocity;
+                        OutputNoteOn->TriggerFrame(StartFrame);
                     }
                 }
             );
 
-            // 3) Check for auto note-offs
-            // By the end of this block, we've advanced AccumulatedSamples + FramesPerBlock
-            // so let's test it at a block boundary.
-            int32 EndOfBlockSample = AccumulatedSamples + FramesPerBlock;
-
-            for (int32 i = ActiveVoices.Num() - 1; i >= 0; --i)
-            {
-                if (EndOfBlockSample >= ActiveVoices[i].NoteEndSample)
+            // Process Note-Off override triggers
+            InputNoteOff->ExecuteBlock(
+                [](int32 StartFrame, int32 EndFrame) {},
+                [this](int32 StartFrame, int32 EndFrame)
                 {
-                    // The note has expired
-                    ActiveVoices[i].bActive = false;
+                    int32 PitchIndex = static_cast<int32>(*InputPitch);
+                    if (PitchIndex >= 0 && PitchIndex < 128 && ActiveVoices[PitchIndex].Active)
+                    {
+                        ActiveVoices[PitchIndex].Active = false;
+                        (*OutputArray)[0] = *InputPitch;
+                        (*OutputArray)[1] = 0.0f;
+                        OutputNoteOff->TriggerFrame(StartFrame);
+                        OutputOverride->TriggerFrame(StartFrame);
+                    }
+                }
+            );
 
-                    // Output velocity = 0
-                    (*OutputArray)[0] = *InputPitch;
+            // Process Scheduled Note-Offs
+            for (int32 PitchIndex = 0; PitchIndex < 128; ++PitchIndex)
+            {
+                if (ActiveVoices[PitchIndex].Active && ActiveVoices[PitchIndex].NoteEndSample >= AccumulatedSamples &&
+                    ActiveVoices[PitchIndex].NoteEndSample < (AccumulatedSamples + FramesPerBlock))
+                {
+                    int32 TriggerFrame = ActiveVoices[PitchIndex].NoteEndSample - AccumulatedSamples;
+                    TriggerFrame = FMath::Clamp(TriggerFrame, 0, FramesPerBlock - 1);
+
+                    // (*OutputArray)[0] = static_cast<float>(PitchIndex);
+                    (*OutputArray)[0] = ActiveVoices[PitchIndex].Pitch;
                     (*OutputArray)[1] = 0.0f;
+                    OutputNoteOff->TriggerFrame(TriggerFrame);
 
-                    // Fire note-off. We'll do it at the block boundary (0 frame offset).
-                    OutputNoteOff->TriggerFrame(0);
-
-                    ActiveVoices.RemoveAtSwap(i);
+                    ActiveVoices[PitchIndex].Active = false;
                 }
             }
 
-            // Increment total samples processed by one block
             AccumulatedSamples += FramesPerBlock;
         }
 
@@ -234,13 +225,13 @@ namespace Metasound
         TDataWriteReference<TArray<float>> OutputArray;
         FTriggerWriteRef OutputOverride;
     
-        // Voice Management
-        TArray<FVoiceState> ActiveVoices;
+        TStaticArray<FVoiceState, 128> ActiveVoices;
+
 
         // Block / Timing
         int32 FramesPerBlock  = 0;
         float SampleRate      = 0.f;
-        int32 AccumulatedSamples; // Runs continuously block to block
+        int32 AccumulatedSamples;
         
     };
 
