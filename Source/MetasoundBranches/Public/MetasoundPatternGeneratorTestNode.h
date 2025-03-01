@@ -7,9 +7,9 @@
 
 namespace MetasoundBranches
 {
-    class FMetasoundPatternGeneratorNode : public Metasound::FNode
+    class FMetasoundPatternGeneratorTestNode : public Metasound::FNode
     {
     public:
-        FMetasoundPatternGeneratorNode();
+        FMetasoundPatternGeneratorTestNode();
     };
 }
