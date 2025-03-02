@@ -78,7 +78,7 @@ namespace Metasound
                 FTriggerWriteRef::CreateNew(InSettings), // 4
                 FTriggerWriteRef::CreateNew(InSettings), // 5
                 FTriggerWriteRef::CreateNew(InSettings), // 6
-                FTriggerWriteRef::CreateNew(InSettings) // 7
+                FTriggerWriteRef::CreateNew(InSettings)  // 7
             },
               VoiceArrays{TDataWriteReference<TArray<float>>::CreateNew(), TDataWriteReference<TArray<float>>::CreateNew(), TDataWriteReference<TArray<float>>::CreateNew(), TDataWriteReference<TArray<float>>::CreateNew(), TDataWriteReference<TArray<float>>::CreateNew(), TDataWriteReference<TArray<float>>::CreateNew(), TDataWriteReference<TArray<float>>::CreateNew(), TDataWriteReference<TArray<float>>::CreateNew()}, OutputActiveVoices(FInt32WriteRef::CreateNew(0)), OutputOnFlush(FTriggerWriteRef::CreateNew(InSettings)), NextRoundRobinIndex(0)
         {
@@ -174,21 +174,27 @@ namespace Metasound
             using namespace EightVoicePolyNames;
             FDataReferenceCollection Outputs;
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice0Trig), VoiceTriggers[0]);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice1Trig), VoiceTriggers[1]);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice2Trig), VoiceTriggers[2]);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice3Trig), VoiceTriggers[3]);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice4Trig), VoiceTriggers[4]);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice5Trig), VoiceTriggers[5]);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice6Trig), VoiceTriggers[6]);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice7Trig), VoiceTriggers[7]);
-
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice0Array), VoiceArrays[0]);
+            
+            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice1Trig), VoiceTriggers[1]);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice1Array), VoiceArrays[1]);
+            
+            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice2Trig), VoiceTriggers[2]);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice2Array), VoiceArrays[2]);
+            
+            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice3Trig), VoiceTriggers[3]);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice3Array), VoiceArrays[3]);
+            
+            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice4Trig), VoiceTriggers[4]);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice4Array), VoiceArrays[4]);
+            
+            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice5Trig), VoiceTriggers[5]);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice5Array), VoiceArrays[5]);
+            
+            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice6Trig), VoiceTriggers[6]);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice6Array), VoiceArrays[6]);
+            
+            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice7Trig), VoiceTriggers[7]);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice7Array), VoiceArrays[7]);
 
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputActiveVoices), OutputActiveVoices);
