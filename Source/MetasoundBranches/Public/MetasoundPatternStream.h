@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Logging/LogMacros.h"
 #include "MetasoundDataReference.h"
+#include "MetasoundDataReferenceMacro.h"
 #include "MetasoundOperatorSettings.h"
 #include "MetasoundVariable.h"
 #include "MetasoundBranches.h"
