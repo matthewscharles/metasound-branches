@@ -2,6 +2,7 @@
 
 #include "MetasoundBranches/Public/MetasoundPatternStream.h"
 #include "MetasoundFrontendRegistries.h"
+#include "MetasoundDataTypeRegistrationMacro.h"
 
 DEFINE_LOG_CATEGORY(LogPatternStream);
 
