@@ -64,14 +64,16 @@ namespace Metasound
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
             {
                 FNodeClassMetadata Metadata;
-                Metadata.ClassName = { TEXT("UE"), TEXT("BreakNote(Float)"), TEXT("Float") };
+                Metadata.ClassName = { TEXT("UE"), TEXT("Break Note (Float)"), TEXT("Float") };
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 0;
                 Metadata.DisplayName = METASOUND_LOCTEXT("BreakNoteFloatDisplayName", "Break Note (Float)");
                 Metadata.Description = METASOUND_LOCTEXT("BreakNoteFloatDesc", "Provides pitch and velocity from a note array.");
                 Metadata.Author = "Charles Matthews";
+                Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = DeclareVertexInterface();
-                return Metadata;
+                Metadata.CategoryHierarchy = {METASOUND_LOCTEXT("Custom", "Branches")};
+                Metadata.Keywords = TArray<FText>(); // Keywords for searching
             };
 
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();

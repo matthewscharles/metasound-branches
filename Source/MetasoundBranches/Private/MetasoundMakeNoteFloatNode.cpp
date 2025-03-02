@@ -93,13 +93,17 @@ namespace Metasound
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
             {
                 FNodeClassMetadata Metadata;
-                Metadata.ClassName = { TEXT("UE"), TEXT("MakeNote(Float)"), TEXT("Float") };
+                Metadata.ClassName = { TEXT("UE"), TEXT("Make Note (Float)"), TEXT("Float") };
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 0;
                 Metadata.DisplayName = METASOUND_LOCTEXT("MakeNoteFloatDisplayName", "Make Note (Float)");
                 Metadata.Description = METASOUND_LOCTEXT("MakeNoteFloatDesc", "Generates note-on and note-off events with a specified duration.");
                 Metadata.Author = "Charles Matthews";
+                Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = DeclareVertexInterface();
+                Metadata.CategoryHierarchy = {METASOUND_LOCTEXT("Custom", "Branches")};
+                Metadata.Keywords = TArray<FText>(); // Keywords for searching
+                
                 return Metadata;
             };
 

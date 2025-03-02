@@ -146,10 +146,10 @@ namespace Metasound
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
             {
                 FNodeClassMetadata Metadata;
-                Metadata.ClassName = {TEXT("UE"), TEXT("EightVoicePoly"), TEXT("Float")};
+                Metadata.ClassName = {TEXT("UE"), TEXT("Voice Manager"), TEXT("Float")};
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 1;
-                Metadata.DisplayName = LOCTEXT("EightVoicePolyNodeDisplayName", "Eight-Voice Poly");
+                Metadata.DisplayName = LOCTEXT("EightVoicePolyNodeDisplayName", "Voice Manager");
                 Metadata.Description = LOCTEXT("EightVoicePolyNodeDesc", "Manages up to 8 voices with round-robin or LIFO allocation.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
