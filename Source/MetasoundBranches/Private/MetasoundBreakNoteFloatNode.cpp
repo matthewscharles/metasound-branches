@@ -68,7 +68,7 @@ namespace Metasound
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 0;
                 Metadata.DisplayName = METASOUND_LOCTEXT("BreakNoteFloatDisplayName", "Break Note (Float)");
-                Metadata.Description = METASOUND_LOCTEXT("BreakNoteFloatDesc", "Extracts pitch and velocity from a note array.");
+                Metadata.Description = METASOUND_LOCTEXT("BreakNoteFloatDesc", "Provides pitch and velocity from a note array.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.DefaultInterface = DeclareVertexInterface();
                 return Metadata;
