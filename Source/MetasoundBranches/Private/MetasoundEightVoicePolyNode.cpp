@@ -21,31 +21,31 @@ namespace Metasound
     namespace EightVoicePolyNames
     {
         METASOUND_PARAM(InputTriggerNote, "Note", "Triggers a new note allocation.");
-        METASOUND_PARAM(InputNoteData, "NoteData", "Incoming float array [pitch, velocity].");
+        METASOUND_PARAM(InputNoteData, "Note Data", "Incoming float array [pitch, velocity].");
         METASOUND_PARAM(InputNumVoices, "Voices", "Number of voices (1-8).");
         METASOUND_PARAM(InputTriggerFlush, "Flush", "Flush all voices (clear).");
-        METASOUND_PARAM(InputRoundRobin, "RoundRobin", "If true, use round-robin allocation; if false, LIFO.");
+        METASOUND_PARAM(InputRoundRobin, "Round Robin", "True: round-robin allocation; False: LIFO.");
 
-        METASOUND_PARAM(OutputVoice0Trig, "Voice0Note", "Note trigger for voice 0.");
-        METASOUND_PARAM(OutputVoice1Trig, "Voice1Note", "Note trigger for voice 1.");
-        METASOUND_PARAM(OutputVoice2Trig, "Voice2Note", "Note trigger for voice 2.");
-        METASOUND_PARAM(OutputVoice3Trig, "Voice3Note", "Note trigger for voice 3.");
-        METASOUND_PARAM(OutputVoice4Trig, "Voice4Note", "Note trigger for voice 4.");
-        METASOUND_PARAM(OutputVoice5Trig, "Voice5Note", "Note trigger for voice 5.");
-        METASOUND_PARAM(OutputVoice6Trig, "Voice6Note", "Note trigger for voice 6.");
-        METASOUND_PARAM(OutputVoice7Trig, "Voice7Note", "Note trigger for voice 7.");
+        METASOUND_PARAM(OutputVoice0Trig, "0 Trig", "Note trigger for voice 0.");
+        METASOUND_PARAM(OutputVoice1Trig, "1 Trig", "Note trigger for voice 1.");
+        METASOUND_PARAM(OutputVoice2Trig, "2 Trig", "Note trigger for voice 2.");
+        METASOUND_PARAM(OutputVoice3Trig, "3 Trig", "Note trigger for voice 3.");
+        METASOUND_PARAM(OutputVoice4Trig, "4 Trig", "Note trigger for voice 4.");
+        METASOUND_PARAM(OutputVoice5Trig, "5 Trig", "Note trigger for voice 5.");
+        METASOUND_PARAM(OutputVoice6Trig, "6 Trig", "Note trigger for voice 6.");
+        METASOUND_PARAM(OutputVoice7Trig, "7 Trig", "Note trigger for voice 7.");
 
-        METASOUND_PARAM(OutputVoice0Array, "Voice0Data", "Note array for voice 0.");
-        METASOUND_PARAM(OutputVoice1Array, "Voice1Data", "Note array for voice 1.");
-        METASOUND_PARAM(OutputVoice2Array, "Voice2Data", "Note array for voice 2.");
-        METASOUND_PARAM(OutputVoice3Array, "Voice3Data", "Note array for voice 3.");
-        METASOUND_PARAM(OutputVoice4Array, "Voice4Data", "Note array for voice 4.");
-        METASOUND_PARAM(OutputVoice5Array, "Voice5Data", "Note array for voice 5.");
-        METASOUND_PARAM(OutputVoice6Array, "Voice6Data", "Note array for voice 6.");
-        METASOUND_PARAM(OutputVoice7Array, "Voice7Data", "Note array for voice 7.");
+        METASOUND_PARAM(OutputVoice0Array, "0 Data", "Note array for voice 0.");
+        METASOUND_PARAM(OutputVoice1Array, "1 Data", "Note array for voice 1.");
+        METASOUND_PARAM(OutputVoice2Array, "2 Data", "Note array for voice 2.");
+        METASOUND_PARAM(OutputVoice3Array, "3 Data", "Note array for voice 3.");
+        METASOUND_PARAM(OutputVoice4Array, "4 Data", "Note array for voice 4.");
+        METASOUND_PARAM(OutputVoice5Array, "5 Data", "Note array for voice 5.");
+        METASOUND_PARAM(OutputVoice6Array, "6 Data", "Note array for voice 6.");
+        METASOUND_PARAM(OutputVoice7Array, "7 Data", "Note array for voice 7.");
 
-        METASOUND_PARAM(OutputActiveVoices, "ActiveVoices", "How many voices are currently in use.");
-        METASOUND_PARAM(OutputOnFlush, "OnFlush", "Triggers when flush occurs.");
+        METASOUND_PARAM(OutputActiveVoices, "Active Voices", "How many voices are currently in use.");
+        METASOUND_PARAM(OutputOnFlush, "On Flush", "Triggers when flush occurs.");
     }
 
     struct FEightVoiceState
