@@ -57,4 +57,4 @@ DECLARE_METASOUND_DATA_REFERENCE_TYPES(
     FPatternStreamTypeInfo, 
     FPatternStreamReadRef, 
     FPatternStreamWriteRef
-)
+);
