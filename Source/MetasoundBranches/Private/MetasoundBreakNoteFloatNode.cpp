@@ -74,6 +74,8 @@ namespace Metasound
                 Metadata.DefaultInterface = DeclareVertexInterface();
                 Metadata.CategoryHierarchy = {METASOUND_LOCTEXT("Custom", "Branches")};
                 Metadata.Keywords = TArray<FText>(); // Keywords for searching
+                
+                return Metadata;
             };
 
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
