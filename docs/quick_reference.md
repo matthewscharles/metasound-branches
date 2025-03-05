@@ -104,6 +104,19 @@ DataVertex
 ---
 See the post by SynthNudibranch [here](https://forums.unrealengine.com/t/tutorial-creating-metasound-nodes-in-c-quickstart/559789).
 
+### Build errors
+
+| **Error** | **Check** |
+|--------------|---------|
+| Member Initializer Does Not Name a Non-Static Data Member or Base Class | Ensure the member variables being initialized exist in the class. <br>  `private: FTriggerReadRef InputNoteOn;` |
+| Use of Undeclared Identifier | Declare the missing variable or check `#include` statements. <br>  `private: FFloatReadRef InputPitch;` |
+| No Matching Constructor for Initialization | Provide necessary arguments when creating objects. <br>  `OutputNoteOn(FTriggerWriteRef::CreateNew(InSettings));` |
+| Too Few Arguments to Function Call | Ensure all required arguments are passed to the function. <br>  `OutputNoteOn->TriggerFrame(CurrentFrame);` |
+| Excess Elements in Scalar Initializer | Use `.SetNum()` or `.Emplace()` for array assignments. <br>  `OutputArray->SetNum(2);` |
+| Static Assertion Failed | Implement `GetNodeInfo()` in the operator class. <br>  `static const FNodeClassMetadata& GetNodeInfo();` |
+| Forward declaration | Probably missing a header |
+
+
 ## References
 
 - [Creating MetaSound Nodes in C++ Quickstart](https://dev.epicgames.com/community/learning/tutorials/ry7p/unreal-engine-creating-metasound-nodes-in-c-quickstart)
