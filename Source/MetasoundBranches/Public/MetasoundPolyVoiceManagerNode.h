@@ -7,9 +7,9 @@
 
 namespace MetasoundBranches
 {
-    class FMetasoundEightVoicePolyNode : public Metasound::FNode
+    class FMetasoundPolyVoiceManagerNode : public Metasound::FNode
     {
     public:
-        FMetasoundEightVoicePolyNode();
+        FMetasoundPolyVoiceManagerNode();
     };
 }

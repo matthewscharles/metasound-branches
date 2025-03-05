@@ -1,6 +1,6 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundEightVoicePolyNode.h"
+#include "MetasoundBranches/Public/MetasoundPolyVoiceManagerNode.h"
 #include "CoreMinimal.h"
 #include "MetasoundBuilderInterface.h"
 #include "MetasoundDataReferenceCollection.h"
@@ -14,11 +14,11 @@
 #include "MetasoundParamHelper.h"
 #include "MetasoundTime.h"
 
-#define LOCTEXT_NAMESPACE "MEightVoicePolyNode"
+#define LOCTEXT_NAMESPACE "MPolyVoiceManagerNode"
 
 namespace Metasound
 {
-    namespace EightVoicePolyNames
+    namespace PolyVoiceManagerNames
     {
         METASOUND_PARAM(InputTriggerNote, "Note", "Triggers a new note allocation.");
         METASOUND_PARAM(InputNoteData, "Note Data", "Incoming float array [pitch, velocity].");
@@ -26,23 +26,23 @@ namespace Metasound
         METASOUND_PARAM(InputTriggerFlush, "Flush", "Flush all voices (clear).");
         METASOUND_PARAM(InputRoundRobin, "Round Robin", "True: round-robin allocation; False: LIFO.");
 
-        METASOUND_PARAM(OutputVoice0Trig, "0 Trig", "Note trigger for voice 0.");
-        METASOUND_PARAM(OutputVoice1Trig, "1 Trig", "Note trigger for voice 1.");
-        METASOUND_PARAM(OutputVoice2Trig, "2 Trig", "Note trigger for voice 2.");
-        METASOUND_PARAM(OutputVoice3Trig, "3 Trig", "Note trigger for voice 3.");
-        METASOUND_PARAM(OutputVoice4Trig, "4 Trig", "Note trigger for voice 4.");
-        METASOUND_PARAM(OutputVoice5Trig, "5 Trig", "Note trigger for voice 5.");
-        METASOUND_PARAM(OutputVoice6Trig, "6 Trig", "Note trigger for voice 6.");
-        METASOUND_PARAM(OutputVoice7Trig, "7 Trig", "Note trigger for voice 7.");
+        METASOUND_PARAM(OutputVoice0Trig, "Trig 0", "Note trigger for voice 0.");
+        METASOUND_PARAM(OutputVoice1Trig, "Trig 1", "Note trigger for voice 1.");
+        METASOUND_PARAM(OutputVoice2Trig, "Trig 2", "Note trigger for voice 2.");
+        METASOUND_PARAM(OutputVoice3Trig, "Trig 3", "Note trigger for voice 3.");
+        METASOUND_PARAM(OutputVoice4Trig, "Trig 4", "Note trigger for voice 4.");
+        METASOUND_PARAM(OutputVoice5Trig, "Trig 5", "Note trigger for voice 5.");
+        METASOUND_PARAM(OutputVoice6Trig, "Trig 6", "Note trigger for voice 6.");
+        METASOUND_PARAM(OutputVoice7Trig, "Trig 7", "Note trigger for voice 7.");
 
-        METASOUND_PARAM(OutputVoice0Array, "0 Data", "Note array for voice 0.");
-        METASOUND_PARAM(OutputVoice1Array, "1 Data", "Note array for voice 1.");
-        METASOUND_PARAM(OutputVoice2Array, "2 Data", "Note array for voice 2.");
-        METASOUND_PARAM(OutputVoice3Array, "3 Data", "Note array for voice 3.");
-        METASOUND_PARAM(OutputVoice4Array, "4 Data", "Note array for voice 4.");
-        METASOUND_PARAM(OutputVoice5Array, "5 Data", "Note array for voice 5.");
-        METASOUND_PARAM(OutputVoice6Array, "6 Data", "Note array for voice 6.");
-        METASOUND_PARAM(OutputVoice7Array, "7 Data", "Note array for voice 7.");
+        METASOUND_PARAM(OutputVoice0Array, "Data 0", "Note array for voice 0.");
+        METASOUND_PARAM(OutputVoice1Array, "Data 1", "Note array for voice 1.");
+        METASOUND_PARAM(OutputVoice2Array, "Data 2", "Note array for voice 2.");
+        METASOUND_PARAM(OutputVoice3Array, "Data 3", "Note array for voice 3.");
+        METASOUND_PARAM(OutputVoice4Array, "Data 4", "Note array for voice 4.");
+        METASOUND_PARAM(OutputVoice5Array, "Data 5", "Note array for voice 5.");
+        METASOUND_PARAM(OutputVoice6Array, "Data 6", "Note array for voice 6.");
+        METASOUND_PARAM(OutputVoice7Array, "Data 7", "Note array for voice 7.");
 
         METASOUND_PARAM(OutputActiveVoices, "Active Voices", "How many voices are currently in use.");
         METASOUND_PARAM(OutputOnFlush, "On Flush", "Triggers when flush occurs.");
@@ -55,10 +55,10 @@ namespace Metasound
         float Velocity = 0.f;
     };
 
-    class FEightVoicePolyOperator : public TExecutableOperator<FEightVoicePolyOperator>
+    class FPolyVoiceManagerOperator : public TExecutableOperator<FPolyVoiceManagerOperator>
     {
     public:
-        FEightVoicePolyOperator(
+        FPolyVoiceManagerOperator(
             const FOperatorSettings &InSettings,
             const FTriggerReadRef &InNoteTrigger,
             const TDataReadReference<TArray<float>> &InNoteData,
@@ -99,7 +99,7 @@ namespace Metasound
         
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace EightVoicePolyNames;
+            using namespace PolyVoiceManagerNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -149,8 +149,8 @@ namespace Metasound
                 Metadata.ClassName = {TEXT("UE"), TEXT("Voice Manager"), TEXT("Float")};
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 1;
-                Metadata.DisplayName = LOCTEXT("EightVoicePolyNodeDisplayName", "Voice Manager");
-                Metadata.Description = LOCTEXT("EightVoicePolyNodeDesc", "Manages up to 8 voices with round-robin or LIFO allocation.");
+                Metadata.DisplayName = LOCTEXT("PolyVoiceManagerNodeDisplayName", "Voice Manager");
+                Metadata.Description = LOCTEXT("PolyVoiceManagerNodeDesc", "Manages up to 8 voices with round-robin or LIFO allocation.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = DeclareVertexInterface();
@@ -166,7 +166,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace EightVoicePolyNames;
+            using namespace PolyVoiceManagerNames;
             FDataReferenceCollection Inputs;
             Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTriggerNote), NoteTrigger);
             Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputNoteData), NoteData);
@@ -178,7 +178,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace EightVoicePolyNames;
+            using namespace PolyVoiceManagerNames;
             FDataReferenceCollection Outputs;
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice0Trig), VoiceTriggers[0]);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice0Array), VoiceArrays[0]);
@@ -211,7 +211,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams &InParams, FBuildResults &OutErrors)
         {
-            using namespace EightVoicePolyNames;
+            using namespace PolyVoiceManagerNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
 
@@ -221,7 +221,7 @@ namespace Metasound
             FTriggerReadRef FlushTrig = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTriggerFlush), InParams.OperatorSettings);
             FBoolReadRef RoundRob = InputData.GetOrCreateDefaultDataReadReference<bool>(METASOUND_GET_PARAM_NAME(InputRoundRobin), InParams.OperatorSettings);
 
-            return MakeUnique<FEightVoicePolyOperator>(
+            return MakeUnique<FPolyVoiceManagerOperator>(
                 InParams.OperatorSettings,
                 NoteTrig,
                 NoteArr,
@@ -260,7 +260,7 @@ namespace Metasound
                     OutputOnFlush->TriggerFrame(StartFrame);
                 });
 
-            // 2) Handle note triggers (now checks for zero-velocity note-offs)
+            // 2) Handle note triggers
             NoteTrigger->ExecuteBlock(
                 [](int32 StartFrame, int32 EndFrame) {},
                 [this](int32 StartFrame, int32 EndFrame)
@@ -384,20 +384,20 @@ namespace Metasound
         int32 NextRoundRobinIndex;
     };
 
-    class FEightVoicePolyNode : public FNodeFacade
+    class FPolyVoiceManagerNode : public FNodeFacade
     {
     public:
-        FEightVoicePolyNode(const FNodeInitData& InitData)
+        FPolyVoiceManagerNode(const FNodeInitData& InitData)
             : FNodeFacade(
                   InitData.InstanceName,
                   InitData.InstanceID,
-                  TFacadeOperatorClass<FEightVoicePolyOperator>())
+                  TFacadeOperatorClass<FPolyVoiceManagerOperator>())
         {
         }
     };
 
     // Register the node
-    METASOUND_REGISTER_NODE(FEightVoicePolyNode)
+    METASOUND_REGISTER_NODE(FPolyVoiceManagerNode)
 }
 
 #undef LOCTEXT_NAMESPACE
