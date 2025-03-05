@@ -19,7 +19,7 @@ namespace Metasound
         METASOUND_PARAM(InputTimeMultipliers, "Time Multipliers", "Array of multipliers for the base period.");
         METASOUND_PARAM(InputSetPeriodToTotal,"Set Period To Total", "If true, the entire loop uses 'Period' as total duration.");
         METASOUND_PARAM(InputActive,          "Active",           "Enable generation.");
-        METASOUND_PARAM(OutputTrigger,        "On Generate",      "Trigger output when a new event is generated.");
+        METASOUND_PARAM(OutputTrigger,        "On Event",         "Trigger output when a new event is generated.");
         METASOUND_PARAM(OutputCurrentIndex,   "Current Index",    "The current index in the time multipliers array.");
         METASOUND_PARAM(OutputTimeMultiplier, "Time Multiplier",  "The current time multiplier.");
         METASOUND_PARAM(OutputStepDuration,   "Step Duration",    "The calculated time duration for the current step.");
@@ -79,7 +79,7 @@ namespace Metasound
             {
                 FNodeClassMetadata Metadata;
                 Metadata.ClassName = { TEXT("Branches"), TEXT("PatternGenerator"), TEXT("Audio") };
-                Metadata.MajorVersion = 2;
+                Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 0;
                 Metadata.DisplayName = LOCTEXT("PatternGeneratorDisplayName", "Pattern Generator");
                 Metadata.Description = LOCTEXT("PatternGeneratorDesc", "Generates triggers based on an array of time multipliers applied to a base time period.");
