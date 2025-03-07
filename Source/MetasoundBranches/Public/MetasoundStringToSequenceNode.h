@@ -435,7 +435,7 @@ namespace Metasound
 		/**
 		 * Parses the input string for bracketed sections. 
 		 * If a bracket section ends with "xN", we set `Repeats = N`.
-		 * E.g. "[2 3] x3" => bracket with {2,3}, repeated 3 times.
+		 * E.g. "[2 3] *3" => bracket with {2,3}, repeated 3 times.
 		 * Then we store it as one bracket group with Repeats=3.
 		 */
 		void ParseBracketedGroups()
@@ -504,12 +504,12 @@ namespace Metasound
 					}
 
 					// After the bracket is fully parsed, check if the next token 
-					// is something like x3 to set bracket.Repeats=3
+					// is something like *3 to set bracket.Repeats=3
 					if (bCheckForRepeat && i < Tokens.Num())
 					{
-						// e.g. if the next token is "x3"
+						// e.g. if the next token is "*3"
 						const FString& PotentialRepeat = Tokens[i];
-						if (PotentialRepeat.StartsWith("x") && PotentialRepeat.Len() > 1)
+						if (PotentialRepeat.StartsWith("*") && PotentialRepeat.Len() > 1)
 						{
 							FString NumberPart = PotentialRepeat.Mid(1); // remove 'x'
 							int32 LocalRepeat = 1;
@@ -539,7 +539,7 @@ namespace Metasound
 					++i;
 
 					//* check if next token is xN 
-					//* e.g. "0 x2" => 0 repeated 2 times
+					//* e.g. "0 *2" => 0 repeated 2 times
 					// if (i < Tokens.Num())
 					// {
 					// 	const FString& PotentialRepeat = Tokens[i];
