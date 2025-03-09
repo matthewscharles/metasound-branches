@@ -1,7 +1,5 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-// Note: this could work with a optional struct to incorporate duration, but it would be less portable; probably better for a pattern event.
-
 #include "MetasoundBranches/Public/MetasoundMakeNoteFloatNode.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundBranches/Public/MetasoundVoiceState.h"  // Shared FVoiceState
