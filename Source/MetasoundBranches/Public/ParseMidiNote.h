@@ -6,26 +6,68 @@
 
 namespace Metasound
 {
-    constexpr uint8_t kNoteOffsets[7] = { 0, 2, 4, 5, 7, 9, 11 };
+    constexpr int PitchIndex(char NoteChar)
+    {
+        char c = (NoteChar | 0x20);
+        switch (c)
+        {
+            case 'c': return 0;
+            case 'd': return 1;
+            case 'e': return 2;
+            case 'f': return 3;
+            case 'g': return 4;
+            case 'a': return 5;
+            case 'b': return 6;
+            default:  return 0;
+        }
+    }
 
-    // direct ascii indexing 
-    constexpr int8_t kAccidentalOffsets[256] = {
-        ['#'] = 1, ['b'] = -1,
-        // avoid garbage values
-        ['0'] = 0, ['1'] = 0, ['2'] = 0, ['3'] = 0, ['4'] = 0, ['5'] = 0, ['6'] = 0, ['7'] = 0, ['8'] = 0, ['9'] = 0,
-        // null terminator
-        ['\0'] = 0, 
+    constexpr float kPitchOffsets[7] = {
+        0.f, 2.f, 4.f, 5.f, 7.f, 9.f, 11.f
     };
 
-    constexpr int ParseMidiNote(const char* note)
+    constexpr float kAccidentalOffsets[256] = {
+        ['#'] =  1.0f,
+        ['b'] = -1.0f,
+        ['^'] =  0.5f,
+        ['_'] = -0.5f
+    };
+
+    constexpr float ParseMidiNote(const char* Note)
     {
-        uint8_t pitchIndex = (note[0] | 0x20) - 'a';
+        int pIndex = PitchIndex(Note[0]);
 
-        int accidental = kAccidentalOffsets[static_cast<unsigned char>(note[1])] 
-                       + kAccidentalOffsets[static_cast<unsigned char>(note[2])];
+        // Start reading accidentals from Note[1].
+        int i = 1;
 
-        int octave = note[1 + (accidental != 0) + (accidental == 2 || accidental == -2)] - '0';
+        // Unrolled reading of up to 4 accidentals.
+        float a0 = kAccidentalOffsets[(unsigned char)Note[i]];
+        i += (a0 != 0.f) ? 1 : 0;
 
-        return 12 + (octave * 12) + kNoteOffsets[pitchIndex] + accidental;
+        float a1 = kAccidentalOffsets[(unsigned char)Note[i]];
+        i += (a1 != 0.f) ? 1 : 0;
+
+        float a2 = kAccidentalOffsets[(unsigned char)Note[i]];
+        i += (a2 != 0.f) ? 1 : 0;
+
+        float a3 = kAccidentalOffsets[(unsigned char)Note[i]];
+        i += (a3 != 0.f) ? 1 : 0;
+
+        float accidentalSum = a0 + a1 + a2 + a3;
+
+        bool isNegative = (Note[i] == '-');
+        i += isNegative ? 1 : 0;
+
+        // Read the single-digit octave
+        int octaveDigit = Note[i] - '0';
+        i++;
+
+        int octave = isNegative ? -octaveDigit : octaveDigit;
+
+        // C-2 = 0
+        octave += 2;
+
+        float base = kPitchOffsets[pIndex];
+        return octave * 12.f + base + accidentalSum;
     }
 }
