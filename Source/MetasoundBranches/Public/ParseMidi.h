@@ -1,3 +1,5 @@
+// Copyright 2025 Charles Matthews. All Rights Reserved.
+
 #pragma once
 
 #include <cstdint>
@@ -17,7 +19,7 @@ namespace Metasound
 
     constexpr int ParseMidi(const char* note)
     {
-        uint8_t pitchIndex = note[0] - 'a'; 
+        uint8_t pitchIndex = (note[0] | 0x20) - 'a';
 
         int accidental = kAccidentalOffsets[note[1]] + kAccidentalOffsets[note[2]];
 
