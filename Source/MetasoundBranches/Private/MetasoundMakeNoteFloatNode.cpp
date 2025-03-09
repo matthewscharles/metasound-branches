@@ -4,6 +4,7 @@
 
 #include "MetasoundBranches/Public/MetasoundMakeNoteFloatNode.h"
 #include "MetasoundExecutableOperator.h"
+#include "MetasoundBranches/Public/MetasoundVoiceState.h"  // Shared FVoiceState
 #include "MetasoundPrimitives.h"
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundFacade.h"
@@ -29,14 +30,6 @@ namespace Metasound
         METASOUND_PARAM(OutputOverride, "Override", "Triggers when note-off is overridden.");
     }
     
-    struct FVoiceState
-    {
-        bool Active = false;
-        int32 NoteEndSample = 0;
-        float Pitch = 0.0f;
-    };
-
-
     class FMakeNoteFloatOperator : public TExecutableOperator<FMakeNoteFloatOperator>
     {
         public:

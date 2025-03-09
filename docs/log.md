@@ -48,3 +48,4 @@
 | 01/21  | - Update documentation.<br>- Add trigger output to Shift Register. |
 | 02/19  | - Add Array Reverse and Array Sum nodes (working in the Sequence branch).  Troubleshoot issues with Reverse |
 | 02/20 | - Start new board for sequence-related ideas.<br>- Start work on printing arrays for debugging purposes. |
+| 03/09 | - Draft note parser with quarter tones, integrate into a Make Note variant (quarter tones not yet integrated into voice management).<br>- Move VoiceState struct into header. |
