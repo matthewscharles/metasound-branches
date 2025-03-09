@@ -17,11 +17,12 @@ namespace Metasound
         ['\0'] = 0, 
     };
 
-    constexpr int ParseMidi(const char* note)
+    constexpr int ParseMidiNote(const char* note)
     {
         uint8_t pitchIndex = (note[0] | 0x20) - 'a';
 
-        int accidental = kAccidentalOffsets[note[1]] + kAccidentalOffsets[note[2]];
+        int accidental = kAccidentalOffsets[static_cast<unsigned char>(note[1])] 
+                       + kAccidentalOffsets[static_cast<unsigned char>(note[2])];
 
         int octave = note[1 + (accidental != 0) + (accidental == 2 || accidental == -2)] - '0';
 
