@@ -143,8 +143,8 @@ namespace Metasound
             TriggerOnParse->AdvanceBlock();
             if (*TriggerParse)
             {
-                int ParsedValue = ParseMidiNote(TCHAR_TO_ANSI(**NoteString));
-                *OutValue = static_cast<ElementType>(ParsedValue);
+                float ParsedFloat = static_cast<float>(ParseMidiNote(TCHAR_TO_ANSI(**NoteString)));
+                *OutValue = static_cast<ElementType>(ParsedFloat);
                 TriggerParse->ExecuteBlock(
                     [](int32, int32) {},
                     [this](int32 StartFrame, int32) { TriggerOnParse->TriggerFrame(StartFrame); }
