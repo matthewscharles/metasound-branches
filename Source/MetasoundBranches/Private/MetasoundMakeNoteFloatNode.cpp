@@ -22,9 +22,10 @@ namespace Metasound
         METASOUND_PARAM(InputVelocity, "Velocity", "Velocity of the note.");
         METASOUND_PARAM(InputDuration, "Duration", "Duration of the note before auto note-off.");
 
-        METASOUND_PARAM(OutputNoteOn, "Note On", "Triggers a note-on event.");
-        METASOUND_PARAM(OutputNoteOff, "Note Off", "Triggers a note-off event.");
+        METASOUND_PARAM(OutputNoteOn, "Note On", "Trigger on note-on event.");
+        METASOUND_PARAM(OutputNoteOff, "Note Off", "Trigger on note-off event.");
         METASOUND_PARAM(OutputArray, "Note Data", "Array containing pitch and velocity.");
+        METASOUND_PARAM(OutputEvent, "Event", "Triggers on both note-on and off.");
         METASOUND_PARAM(OutputOverride, "Override", "Triggers when note-off is overridden.");
     }
     
@@ -46,6 +47,7 @@ namespace Metasound
             , OutputNoteOn(FTriggerWriteRef::CreateNew(InSettings))
             , OutputNoteOff(FTriggerWriteRef::CreateNew(InSettings))
             , OutputArray(TDataWriteReference<TArray<float>>::CreateNew())
+            , OutputEvent(FTriggerWriteRef::CreateNew(InSettings))
             , OutputOverride(FTriggerWriteRef::CreateNew(InSettings))
             , FramesPerBlock(InSettings.GetNumFramesPerBlock())
             , SampleRate(InSettings.GetSampleRate())
@@ -74,6 +76,7 @@ namespace Metasound
                     TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputNoteOn)),
                     TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputNoteOff)),
                     TOutputDataVertex<TArray<float>>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputArray)),
+                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputEvent)),
                     TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputOverride))
                 )
             );
@@ -123,6 +126,7 @@ namespace Metasound
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputNoteOn), OutputNoteOn);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputNoteOff), OutputNoteOff);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputArray), OutputArray);
+            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputEvent), OutputEvent);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputOverride), OutputOverride);
             return Outputs;
         }
@@ -144,6 +148,7 @@ namespace Metasound
             OutputNoteOn->AdvanceBlock();
             OutputNoteOff->AdvanceBlock();
             OutputOverride->AdvanceBlock();
+            OutputEvent->AdvanceBlock();
 
             int32 CurrentSample = AccumulatedSamples;
 
@@ -166,6 +171,7 @@ namespace Metasound
                         (*OutputArray)[0] = *InputPitch;
                         (*OutputArray)[1] = *InputVelocity;
                         OutputNoteOn->TriggerFrame(StartFrame);
+                        OutputEvent->TriggerFrame(StartFrame);
                     }
                 }
             );
@@ -183,6 +189,7 @@ namespace Metasound
                         (*OutputArray)[1] = 0.0f;
                         OutputNoteOff->TriggerFrame(StartFrame);
                         OutputOverride->TriggerFrame(StartFrame);
+                        OutputEvent->TriggerFrame(StartFrame);
                     }
                 }
             );
@@ -200,6 +207,7 @@ namespace Metasound
                     (*OutputArray)[0] = ActiveVoices[PitchIndex].Pitch;
                     (*OutputArray)[1] = 0.0f;
                     OutputNoteOff->TriggerFrame(TriggerFrame);
+                    OutputEvent->TriggerFrame(TriggerFrame);
 
                     ActiveVoices[PitchIndex].Active = false;
                 }
@@ -220,6 +228,7 @@ namespace Metasound
         FTriggerWriteRef OutputNoteOn;
         FTriggerWriteRef OutputNoteOff;
         TDataWriteReference<TArray<float>> OutputArray;
+        FTriggerWriteRef OutputEvent;
         FTriggerWriteRef OutputOverride;
     
         TStaticArray<FVoiceState, 128> ActiveVoices;
