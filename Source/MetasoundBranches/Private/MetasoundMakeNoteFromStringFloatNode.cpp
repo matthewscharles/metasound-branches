@@ -26,6 +26,7 @@ namespace Metasound
         METASOUND_PARAM(OutputNoteOn, "Note On", "Triggers a note-on event.");
         METASOUND_PARAM(OutputNoteOff, "Note Off", "Triggers a note-off event.");
         METASOUND_PARAM(OutputArray, "Note Data", "Array containing parsed pitch and velocity.");
+        METASOUND_PARAM(OutputEvent, "Event", "Triggers on both note-on and off.");
         METASOUND_PARAM(OutputOverride, "Override", "Triggers when note-off is overridden.");
     }
     
@@ -47,6 +48,7 @@ namespace Metasound
             , OutputNoteOn(FTriggerWriteRef::CreateNew(InSettings))
             , OutputNoteOff(FTriggerWriteRef::CreateNew(InSettings))
             , OutputArray(TDataWriteReference<TArray<float>>::CreateNew(TArray<float>{0.0f, 0.0f}))
+            , OutputEvent(FTriggerWriteRef::CreateNew(InSettings))
             , OutputOverride(FTriggerWriteRef::CreateNew(InSettings))
             , FramesPerBlock(InSettings.GetNumFramesPerBlock())
             , SampleRate(InSettings.GetSampleRate())
@@ -74,6 +76,7 @@ namespace Metasound
                     TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputNoteOn)),
                     TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputNoteOff)),
                     TOutputDataVertex<TArray<float>>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputArray)),
+                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputEvent)),
                     TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputOverride))
                 )
             );
@@ -123,6 +126,7 @@ namespace Metasound
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputNoteOn), OutputNoteOn);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputNoteOff), OutputNoteOff);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputArray), OutputArray);
+            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputEvent), OutputEvent);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputOverride), OutputOverride);
             return Outputs;
         }
@@ -145,6 +149,7 @@ namespace Metasound
             OutputNoteOn->AdvanceBlock();
             OutputNoteOff->AdvanceBlock();
             OutputOverride->AdvanceBlock();
+            OutputEvent->AdvanceBlock();
 
             InputNoteOn->ExecuteBlock(
                 [](int32, int32) {},
@@ -162,6 +167,7 @@ namespace Metasound
                         (*OutputArray)[0] = ParsedPitch;
                         (*OutputArray)[1] = *InputVelocity;
                         OutputNoteOn->TriggerFrame(StartFrame);
+                        OutputEvent->TriggerFrame(StartFrame);
                     }
                 }
             );
@@ -200,6 +206,7 @@ namespace Metasound
                     (*OutputArray)[0] = ActiveVoices[PitchIndex].Pitch;
                     (*OutputArray)[1] = 0.0f;
                     OutputNoteOff->TriggerFrame(TriggerFrame);
+                    OutputEvent->TriggerFrame(TriggerFrame);
 
                     ActiveVoices[PitchIndex].Active = false;
                 }
@@ -218,6 +225,7 @@ namespace Metasound
         FTriggerWriteRef OutputNoteOn;
         FTriggerWriteRef OutputNoteOff;
         TDataWriteReference<TArray<float>> OutputArray;
+        FTriggerWriteRef OutputEvent;
         FTriggerWriteRef OutputOverride;
 
         TStaticArray<FVoiceState, 128> ActiveVoices;

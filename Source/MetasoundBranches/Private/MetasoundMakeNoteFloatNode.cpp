@@ -233,7 +233,6 @@ namespace Metasound
     
         TStaticArray<FVoiceState, 128> ActiveVoices;
 
-
         // Block / Timing
         int32 FramesPerBlock  = 0;
         float SampleRate      = 0.f;
