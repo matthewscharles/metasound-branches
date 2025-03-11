@@ -229,20 +229,20 @@ namespace Metasound
                 FlushTrig,
                 RoundRob);
         }
-        // Audio block execution
-        virtual void Execute()
+        
+        void Execute()
         {
-            // Advance triggers each block
+            // Advance triggers
             for (int32 i = 0; i < 8; i++)
             {
                 VoiceTriggers[i]->AdvanceBlock();
             }
             OutputOnFlush->AdvanceBlock();
 
-            // 1) Handle note flush
+            // 1) Handle flush
             FlushTrigger->ExecuteBlock(
-                [](int32 StartFrame, int32 EndFrame) {},
-                [this](int32 StartFrame, int32 EndFrame)
+                [](int32, int32) {},
+                [this](int32 StartFrame, int32)
                 {
                     // Clear all voices
                     for (int32 v = 0; v < 8; ++v)
@@ -251,76 +251,65 @@ namespace Metasound
                         Voices[v].Pitch = 0.f;
                         Voices[v].Velocity = 0.f;
 
-                        // Fire note-off for all voices
+                        // Force a note-off trigger
                         (*VoiceArrays[v])[0] = Voices[v].Pitch;
-                        (*VoiceArrays[v])[1] = 0.0f;
+                        (*VoiceArrays[v])[1] = 0.f;
                         VoiceTriggers[v]->TriggerFrame(StartFrame);
                     }
-                    // Fire flush trigger
                     OutputOnFlush->TriggerFrame(StartFrame);
                 });
 
-            // 2) Handle note triggers
+            // 2) Process incoming pairs on NoteTrigger
             NoteTrigger->ExecuteBlock(
-                [](int32 StartFrame, int32 EndFrame) {},
-                [this](int32 StartFrame, int32 EndFrame)
+                [](int32, int32) {},
+                [this](int32 StartFrame, int32)
                 {
-                    // Ensure the incoming array has at least two elements
-                    if (NoteData->Num() >= 2)
+                    const int32 InSize = NoteData->Num();
+                    if (InSize < 2)
                     {
-                        float Pitch = (*NoteData)[0];
-                        float Velocity = (*NoteData)[1];
+                        return; // Not enough data
+                    }
 
-                    // Check if this is a note-off event (velocity == 0)
-                    if (Velocity == 0.0f)
+                    // i increments in steps of 2
+                    for (int32 i = 0; i < InSize - 1; i += 2)
                     {
-                        bool FoundActiveNote = false;
+                        float Pitch = (*NoteData)[i];
+                        float Velocity = (*NoteData)[i + 1];
 
-                        // Find all active voices that match this pitch
-                        for (int32 i = 0; i < 8; i++)
+                        if (Velocity == 0.f)
                         {
-                            if (Voices[i].bActive && Voices[i].Pitch == Pitch)
+                            // note off
+                            for (int32 v = 0; v < 8; v++)
                             {
-                                Voices[i].bActive = false;
-                                Voices[i].Velocity = 0.0f;
-
-                                // Output note-off data
-                                (*VoiceArrays[i])[0] = Pitch;
-                                (*VoiceArrays[i])[1] = 0.0f;
-
-                                // Trigger note-off event
-                                VoiceTriggers[i]->TriggerFrame(StartFrame);
-
-                                FoundActiveNote = true;
+                                if (Voices[v].bActive && Voices[v].Pitch == Pitch)
+                                {
+                                    Voices[v].bActive = false;
+                                    Voices[v].Velocity = 0.f;
+                                    (*VoiceArrays[v])[0] = Pitch;
+                                    (*VoiceArrays[v])[1] = 0.f;
+                                    VoiceTriggers[v]->TriggerFrame(StartFrame);
+                                }
                             }
                         }
-
-                        return; 
-                    }
-                        else // Normal note-on behavior
+                        else
                         {
-                            // Determine max voices user wants
+                            // note on
                             int32 MaxVoices = FMath::Clamp(*NumVoices, 1, 8);
-
-                            // Acquire a voice index
                             int32 VoiceIndex = AcquireVoiceIndex(MaxVoices);
 
-                            // Store new note data
                             Voices[VoiceIndex].bActive = true;
                             Voices[VoiceIndex].Pitch = Pitch;
                             Voices[VoiceIndex].Velocity = Velocity;
 
-                            // Output to the array
                             (*VoiceArrays[VoiceIndex])[0] = Pitch;
                             (*VoiceArrays[VoiceIndex])[1] = Velocity;
-
-                            // Trigger the voice
                             VoiceTriggers[VoiceIndex]->TriggerFrame(StartFrame);
                         }
                     }
-                });
+                }
+            );
 
-            // 3) Calculate number of active voices
+            // 3) Update ActiveCount
             int32 ActiveCount = 0;
             for (int32 i = 0; i < 8; i++)
             {
@@ -329,6 +318,7 @@ namespace Metasound
                     ActiveCount++;
                 }
             }
+            
             *OutputActiveVoices = ActiveCount;
         }
 
@@ -336,31 +326,36 @@ namespace Metasound
         int32 AcquireVoiceIndex(int32 MaxVoices)
         {
             // 1) Try finding a free voice
-            for (int32 i = 0; i < MaxVoices; i++)
-            {
-                int32 index = (*bRoundRobin ? (NextRoundRobinIndex + i) % MaxVoices : i);
-                if (!Voices[index].bActive)
-                {
-                    if (*bRoundRobin)
-                    {
-                        NextRoundRobinIndex = (index + 1) % MaxVoices;
-                    }
-                    return index;
-                }
-            }
-
-            // 2) No free voice found -> voice theft
             if (*bRoundRobin)
             {
-                // Round-robin: just pick NextRoundRobinIndex
+                // Round-robin approach
+                for (int32 i = 0; i < MaxVoices; i++)
+                {
+                    // Start from NextRoundRobinIndex
+                    int32 idx = (NextRoundRobinIndex + i) % MaxVoices;
+                    if (!Voices[idx].bActive)
+                    {
+                        NextRoundRobinIndex = (idx + 1) % MaxVoices;
+                        return idx;
+                    }
+                }
+                // If no free voice, steal
                 int32 StealIndex = NextRoundRobinIndex;
                 NextRoundRobinIndex = (NextRoundRobinIndex + 1) % MaxVoices;
                 return StealIndex;
             }
             else
             {
-                // LIFO: steal the highest voice index used
-                // i.e., from the top if any
+                // LIFO approach
+                // Try to find a free voice from bottom up
+                for (int32 i = 0; i < MaxVoices; i++)
+                {
+                    if (!Voices[i].bActive)
+                    {
+                        return i;
+                    }
+                }
+                // Otherwise steal from top
                 return MaxVoices - 1;
             }
         }
