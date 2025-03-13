@@ -1,7 +1,5 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-
-
 #include "MetasoundBranches/Public/MetasoundStringToSequenceNode.h"
 #include "MetasoundNodeRegistrationMacro.h"
 

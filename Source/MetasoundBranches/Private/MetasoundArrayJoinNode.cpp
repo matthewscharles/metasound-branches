@@ -1,7 +1,5 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-
-
 #include "MetasoundBranches/Public/MetasoundArrayJoinNode.h"
 #include "MetasoundNodeRegistrationMacro.h"
 

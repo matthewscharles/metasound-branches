@@ -23,7 +23,6 @@ namespace Metasound
     class FPhaseDisperserOperator : public TExecutableOperator<FPhaseDisperserOperator>
     {
     public:
-        // Maximum number of allowed allpass filters
         static constexpr int32 MaxAllowedFilters = 128;
 
         FPhaseDisperserOperator(const FAudioBufferReadRef& InSignal, const TDataReadReference<int32>& InNumFilters)

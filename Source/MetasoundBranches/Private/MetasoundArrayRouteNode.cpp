@@ -1,12 +1,9 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-
-
 #include "MetasoundBranches/Public/MetasoundArrayRouteNode.h"
 #include "MetasoundTime.h"
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundDataTypeRegistrationMacro.h"
-
 
 namespace Metasound
 {
@@ -21,7 +18,6 @@ namespace Metasound
     
     template class TArrayRouteOperator<TArray<FTime>>;
     template class TArrayRouteNode<TArray<FTime>>;
-    
     
 }
 

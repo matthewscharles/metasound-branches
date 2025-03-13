@@ -22,7 +22,6 @@ namespace Metasound
     class FZeroCrossingOperator : public TExecutableOperator<FZeroCrossingOperator>
     {
     public:
-        // Constructor
         FZeroCrossingOperator(
             const FAudioBufferReadRef& InSignal,
             const FTimeReadRef& InDebounce,
@@ -122,7 +121,6 @@ namespace Metasound
 
         virtual void Reset(const IOperator::FResetParams& InParams)
         {
-            // Reset trigger
             OutputTriggerZeroCrossing->Reset();
 
             // Initialize PreviousSignalValue
@@ -135,7 +133,6 @@ namespace Metasound
                 PreviousSignalValue = 0.0f;
             }
 
-            // Reset debounce counter
             DebounceCounter = 0;
         }
 

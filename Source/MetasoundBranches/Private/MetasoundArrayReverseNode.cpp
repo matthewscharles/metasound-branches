@@ -1,12 +1,9 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-
-
 #include "MetasoundBranches/Public/MetasoundArrayReverseNode.h"
 #include "MetasoundTime.h"
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundDataTypeRegistrationMacro.h"
-
 
 namespace Metasound
 {
@@ -21,8 +18,7 @@ namespace Metasound
     
     // template class TArrayReverseOperator<TArray<FTime>>;
     // template class TArrayReverseNode<TArray<FTime>>;
-    
-    
+     
 }
 
 // alias workaround (because I can't use the template class directly in the METASOUND_REGISTER_NODE macro)
