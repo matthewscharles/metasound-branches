@@ -17,7 +17,6 @@ namespace Metasound
     template class TStringToSequenceNode<bool>;
 }
 
-// Register each type with Metasound
 using FStringToSequenceNodeInt32Alias = Metasound::TStringToSequenceNode<int32>;
 METASOUND_REGISTER_NODE(FStringToSequenceNodeInt32Alias);
 

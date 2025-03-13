@@ -216,8 +216,6 @@ namespace Metasound
             AccumulatedSamples += FramesPerBlock;
         }
 
-
-        
         private:
         FTriggerReadRef InputNoteOn;
         FTriggerReadRef InputNoteOff;

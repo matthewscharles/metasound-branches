@@ -201,8 +201,6 @@ namespace Metasound
                     int32 TriggerFrame = ActiveVoices[PitchIndex].NoteEndSample - AccumulatedSamples;
                     TriggerFrame = FMath::Clamp(TriggerFrame, 0, FramesPerBlock - 1);
 
-                    // UE_LOG(LogTemp, Warning, TEXT("Note-Off triggered for Pitch %d at Frame %d"), PitchIndex, TriggerFrame);
-
                     (*OutputArray)[0] = ActiveVoices[PitchIndex].Pitch;
                     (*OutputArray)[1] = 0.0f;
                     OutputNoteOff->TriggerFrame(TriggerFrame);

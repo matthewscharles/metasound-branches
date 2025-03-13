@@ -99,7 +99,6 @@ namespace Metasound
         {
             *OutArray = *InputArray;
             Algo::Reverse(*OutArray);
-            // UE_LOG(LogTemp, Warning, TEXT("Reverse Operator constructed. Initial reversed array: %s"), *ArrayToString(*OutArray));
         }
 
         virtual ~TArrayReverseOperator() = default;
