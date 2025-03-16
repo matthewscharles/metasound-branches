@@ -69,6 +69,23 @@ Check that the correct namespace (as defined alongside the vertex names) is used
 int32 SampleRate = InParams.OperatorSettings.GetSampleRate();
 ```
 
+### Get number of frames
+
+If there is an audio pin to measure from:
+```CPP
+int32 NumFrames = InputSignal->Num();
+```
+
+Otherwise:
+```CPP
+const int32 NumFrames = InParams.OperatorSettings.GetNumFramesPerBlock();
+```
+
+or in the constructor initialisation list:
+```CPP
+NumFrames (InSettings.GetNumFramesPerBlock())
+```
+
 ## Update nodes from tutorials for the new API
 
 - This can generally be handled by a global find and replace:
