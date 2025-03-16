@@ -33,6 +33,49 @@
     ]
   },
   {
+    "name": "Break Note (Float)",
+    "description": "Unpacks pitch and velocity from a note array.",
+    "className": "UE Break Note (Float) Float",
+    "majorVersion": "1",
+    "minorVersion": "0",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Note",
+        "description": "Incoming note trigger.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Note Data",
+        "description": "Array containing pitch and velocity.",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Pitch",
+        "description": "Extracted pitch value.",
+        "type": "float"
+      },
+      {
+        "name": "Velocity",
+        "description": "Extracted velocity value.",
+        "type": "float"
+      },
+      {
+        "name": "Note On",
+        "description": "Triggers a note-on event.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Note Off",
+        "description": "Triggers a note-off event.",
+        "type": "FTrigger"
+      }
+    ]
+  },
+  {
     "name": "Clock Divider",
     "description": "Divides an input trigger into multiple outputs.",
     "className": "UE Clock Divider Trigger",
@@ -286,6 +329,43 @@
     ]
   },
   {
+    "name": "Get Wave Cue Points",
+    "description": "Extracts cue points from a wave asset when triggered.",
+    "className": "UE GetWaveCuePoints Audio",
+    "majorVersion": "1",
+    "minorVersion": "0",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Wave",
+        "description": "Input Wave Asset",
+        "type": "FWaveAsset"
+      },
+      {
+        "name": "Get Cue Points",
+        "description": "Trigger to extract cue points",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Cue Point IDs",
+        "description": "Array of Cue Point IDs",
+        "type": "Audio"
+      },
+      {
+        "name": "Cue Point Times",
+        "description": "Array of Cue Point Times",
+        "type": "Audio"
+      },
+      {
+        "name": "Cue Point Labels",
+        "description": "Array of Cue Point Labels",
+        "type": "Audio"
+      }
+    ],
+    "outputs": []
+  },
+  {
     "name": "Impulse",
     "description": "Generates a single-sample impulse when triggered.",
     "className": "UE Impulse Audio",
@@ -319,6 +399,266 @@
     ]
   },
   {
+    "name": "Make Note (Float)",
+    "description": "Generates note-on and note-off events with a specified duration.",
+    "className": "UE Make Note (Float) Float",
+    "majorVersion": "1",
+    "minorVersion": "0",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Note On",
+        "description": "Triggers a note-on event.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Note Off",
+        "description": "Triggers a note-off event (override).",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Pitch",
+        "description": "Pitch value of the note.",
+        "type": "float"
+      },
+      {
+        "name": "Velocity",
+        "description": "Velocity of the note.",
+        "type": "float"
+      },
+      {
+        "name": "Duration",
+        "description": "Duration of the note before auto note-off.",
+        "type": "Time"
+      },
+      {
+        "name": "Note Data",
+        "description": "Array containing pitch and velocity.",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Note On",
+        "description": "Trigger on note-on event.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Note Off",
+        "description": "Trigger on note-off event.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Event",
+        "description": "Triggers on both note-on and off.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Override",
+        "description": "Triggers when note-off is overridden.",
+        "type": "FTrigger"
+      }
+    ]
+  },
+  {
+    "name": "Make Note From String (Float)",
+    "description": "Generates note-on and note-off events with a specified duration.",
+    "className": "UE Make Note From String (Float) Float",
+    "majorVersion": "1",
+    "minorVersion": "0",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Note On",
+        "description": "Triggers a note-on event.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Note Off",
+        "description": "Triggers a note-off event (override).",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Note",
+        "description": "Note string input (e.g., C4, A#3, G^2).",
+        "type": "FString"
+      },
+      {
+        "name": "Velocity",
+        "description": "Velocity of the note.",
+        "type": "float"
+      },
+      {
+        "name": "Duration",
+        "description": "Duration of the note before auto note-off.",
+        "type": "Time"
+      },
+      {
+        "name": "Note Data",
+        "description": "Array containing parsed pitch and velocity.",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Note On",
+        "description": "Triggers a note-on event.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Note Off",
+        "description": "Triggers a note-off event.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Event",
+        "description": "Triggers on both note-on and off.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Override",
+        "description": "Triggers when note-off is overridden.",
+        "type": "FTrigger"
+      }
+    ]
+  },
+  {
+    "name": "",
+    "description": "",
+    "className": "Branches PatternGenerator Audio",
+    "majorVersion": "1",
+    "minorVersion": "0",
+    "author": "",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Period",
+        "description": "Base time duration for triggers.",
+        "type": "Time"
+      },
+      {
+        "name": "Time Multipliers",
+        "description": "Array of multipliers for the base period.",
+        "type": "Audio"
+      },
+      {
+        "name": "Set Period To Total",
+        "description": "If true, the entire loop uses 'Period' as total duration.",
+        "type": "Bool"
+      },
+      {
+        "name": "Active",
+        "description": "Enable generation.",
+        "type": "Bool"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "On Event",
+        "description": "Trigger output when a new event is generated.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Current Index",
+        "description": "The current index in the time multipliers array.",
+        "type": "int32"
+      },
+      {
+        "name": "Time Multiplier",
+        "description": "The current time multiplier.",
+        "type": "float"
+      },
+      {
+        "name": "Step Duration",
+        "description": "The calculated time duration for the current step.",
+        "type": "Time"
+      },
+      {
+        "name": "Pattern Stream",
+        "description": "Stream output containing the generated events.",
+        "type": "MetasoundPattern::FPatternStream"
+      }
+    ]
+  },
+  {
+    "name": "",
+    "description": "",
+    "className": "Branches PatternGeneratorTest Audio",
+    "majorVersion": "1",
+    "minorVersion": "0",
+    "author": "",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Interval",
+        "description": "Time in seconds between each random value generation.",
+        "type": "Audio"
+      },
+      {
+        "name": "Active",
+        "description": "Enable generation.",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "On Generate",
+        "description": "Trigger output when a new random value is generated.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Random Float",
+        "description": "The newly generated random float.",
+        "type": "float"
+      },
+      {
+        "name": "Pattern Stream",
+        "description": "Stream output containing the generated events.",
+        "type": "MetasoundPattern::FPatternStream"
+      }
+    ]
+  },
+  {
+    "name": "",
+    "description": "",
+    "className": "Branches PatternReceiver Audio",
+    "majorVersion": "1",
+    "minorVersion": "0",
+    "author": "",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Pattern Stream",
+        "description": "The input stream containing generated events.",
+        "type": "MetasoundPattern::FPatternStream"
+      },
+      {
+        "name": "Active",
+        "description": "Enable receiving.",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "On Event",
+        "description": "Trigger output when a new event is detected.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Float",
+        "description": "The random float from the event.",
+        "type": "float"
+      },
+      {
+        "name": "Pattern Stream",
+        "description": "Pass-through stream output.",
+        "type": "MetasoundPattern::FPatternStream"
+      }
+    ]
+  },
+  {
     "name": "Phase Disperser",
     "description": "A chain of allpass filters acting as a phase disperser to soften transients.",
     "className": "UE PhaseDisperser Audio",
@@ -342,6 +682,177 @@
       {
         "name": "Out",
         "description": "Phase-dispersed audio.",
+        "type": "Audio"
+      }
+    ]
+  },
+  {
+    "name": "Voice Manager",
+    "description": "Manages up to 8 voices with round-robin or LIFO allocation.",
+    "className": "UE Voice Manager Float",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Note",
+        "description": "Triggers a new note allocation.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Note Data",
+        "description": "Incoming float array [pitch, velocity].",
+        "type": "Audio"
+      },
+      {
+        "name": "Voices",
+        "description": "Number of voices (1-8).",
+        "type": "Audio"
+      },
+      {
+        "name": "Flush",
+        "description": "Flush all voices (clear).",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Round Robin",
+        "description": "True: round-robin allocation; False: LIFO.",
+        "type": "Audio"
+      },
+      {
+        "name": "Data 0",
+        "description": "Note array for voice 0.",
+        "type": "Audio"
+      },
+      {
+        "name": "Data 1",
+        "description": "Note array for voice 1.",
+        "type": "Audio"
+      },
+      {
+        "name": "Data 2",
+        "description": "Note array for voice 2.",
+        "type": "Audio"
+      },
+      {
+        "name": "Data 3",
+        "description": "Note array for voice 3.",
+        "type": "Audio"
+      },
+      {
+        "name": "Data 4",
+        "description": "Note array for voice 4.",
+        "type": "Audio"
+      },
+      {
+        "name": "Data 5",
+        "description": "Note array for voice 5.",
+        "type": "Audio"
+      },
+      {
+        "name": "Data 6",
+        "description": "Note array for voice 6.",
+        "type": "Audio"
+      },
+      {
+        "name": "Data 7",
+        "description": "Note array for voice 7.",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Trig 0",
+        "description": "Note trigger for voice 0.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Trig 1",
+        "description": "Note trigger for voice 1.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Trig 2",
+        "description": "Note trigger for voice 2.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Trig 3",
+        "description": "Note trigger for voice 3.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Trig 4",
+        "description": "Note trigger for voice 4.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Trig 5",
+        "description": "Note trigger for voice 5.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Trig 6",
+        "description": "Note trigger for voice 6.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Trig 7",
+        "description": "Note trigger for voice 7.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Active Voices",
+        "description": "How many voices are currently in use.",
+        "type": "int32"
+      },
+      {
+        "name": "On Flush",
+        "description": "Triggers when flush occurs.",
+        "type": "FTrigger"
+      }
+    ]
+  },
+  {
+    "name": "FM Oscillator (Sawtooth)",
+    "description": "Generate a sawtooth wave oscillator with phase-based FM and feedback.",
+    "className": "UE FM Oscillator Sawtooth",
+    "majorVersion": "1",
+    "minorVersion": "0",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Enabled",
+        "description": "Enable or disable oscillator.",
+        "type": "Audio"
+      },
+      {
+        "name": "Bi Polar",
+        "description": "Output bipolar signal if true, unipolar if false.",
+        "type": "Audio"
+      },
+      {
+        "name": "Phase",
+        "description": "Audio rate phase modulation input.",
+        "type": "Audio"
+      },
+      {
+        "name": "Feedback Amount",
+        "description": "Feedback intensity (0-1).",
+        "type": "Audio"
+      },
+      {
+        "name": "Feedback Modulation",
+        "description": "Audio-rate feedback modulation.",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Audio Out",
+        "description": "Generated audio output.",
         "type": "Audio"
       }
     ]
@@ -411,6 +922,49 @@
         "name": "Stage 8",
         "description": "Shifted output at stage 8.",
         "type": "float"
+      }
+    ]
+  },
+  {
+    "name": "FM Oscillator (Cosine)",
+    "description": "Generate a cosine wave oscillator with phase-based FM and feedback.",
+    "className": "UE FM Oscillator Cosine",
+    "majorVersion": "1",
+    "minorVersion": "0",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Enabled",
+        "description": "Enable or disable oscillator.",
+        "type": "Audio"
+      },
+      {
+        "name": "Bi Polar",
+        "description": "Output bipolar signal if true, unipolar if false.",
+        "type": "Audio"
+      },
+      {
+        "name": "Phase",
+        "description": "Audio rate phase modulation input.",
+        "type": "Audio"
+      },
+      {
+        "name": "Feedback Amount",
+        "description": "Feedback intensity (0-1).",
+        "type": "Audio"
+      },
+      {
+        "name": "Feedback Modulation",
+        "description": "Audio-rate feedback modulation.",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Audio Out",
+        "description": "Generated audio output.",
+        "type": "Audio"
       }
     ]
   },
@@ -749,6 +1303,104 @@
       {
         "name": "Zero Crossing",
         "description": "Trigger on zero crossing.",
+        "type": "FTrigger"
+      }
+    ]
+  },
+  {
+    "name": "",
+    "description": "",
+    "className": "Metasound",
+    "majorVersion": "1",
+    "minorVersion": "0",
+    "author": "",
+    "category": [],
+    "inputs": [
+      {
+        "name": "InputTriggerSplit",
+        "description": "",
+        "type": "FTrigger"
+      },
+      {
+        "name": "InputTriggerNext",
+        "description": "",
+        "type": "FTrigger"
+      },
+      {
+        "name": "InputTriggerReset",
+        "description": "",
+        "type": "FTrigger"
+      },
+      {
+        "name": "InputString",
+        "description": "",
+        "type": "FString"
+      },
+      {
+        "name": "InputDelimiter",
+        "description": "",
+        "type": "FString"
+      },
+      {
+        "name": "InputNumRepeats",
+        "description": "",
+        "type": "int32"
+      },
+      {
+        "name": "InputLoop",
+        "description": "",
+        "type": "Bool"
+      },
+      {
+        "name": "InputOverflow",
+        "description": "",
+        "type": "Bool"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "OutputTriggerOnSplit",
+        "description": "",
+        "type": "FTrigger"
+      },
+      {
+        "name": "OutputTriggerNext",
+        "description": "",
+        "type": "FTrigger"
+      },
+      {
+        "name": "OutputValue",
+        "description": "",
+        "type": "ElementType"
+      },
+      {
+        "name": "OutputPosition",
+        "description": "",
+        "type": "int32"
+      },
+      {
+        "name": "OutputTimeMultiplier",
+        "description": "",
+        "type": "float"
+      },
+      {
+        "name": "OutputTriggerOnRepeat",
+        "description": "",
+        "type": "FTrigger"
+      },
+      {
+        "name": "OutputRepeatCount",
+        "description": "",
+        "type": "int32"
+      },
+      {
+        "name": "OutputLength",
+        "description": "",
+        "type": "int32"
+      },
+      {
+        "name": "OutputTriggerOnEnd",
+        "description": "",
         "type": "FTrigger"
       }
     ]
