@@ -1,0 +1,756 @@
+[
+  {
+    "name": "Bool To Audio",
+    "description": "Converts a boolean value to an audio signal, with optional rise and fall times.",
+    "className": "UE BoolToAudio Audio",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Value",
+        "description": "Boolean input to convert to audio.",
+        "type": "Bool"
+      },
+      {
+        "name": "Rise Time",
+        "description": "Rise time in seconds.",
+        "type": "Time"
+      },
+      {
+        "name": "Fall Time",
+        "description": "Fall time in seconds.",
+        "type": "Time"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Out",
+        "description": "Audio signal.",
+        "type": "Audio"
+      }
+    ]
+  },
+  {
+    "name": "Clock Divider",
+    "description": "Divides an input trigger into multiple outputs.",
+    "className": "UE Clock Divider Trigger",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Trigger",
+        "description": "Input trigger to the clock divider.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Reset",
+        "description": "Reset the clock divider.",
+        "type": "FTrigger"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "1",
+        "description": "Output trigger for division 1.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "2",
+        "description": "Output trigger for division 2.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "3",
+        "description": "Output trigger for division 3.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "4",
+        "description": "Output trigger for division 4.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "5",
+        "description": "Output trigger for division 5.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "6",
+        "description": "Output trigger for division 6.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "7",
+        "description": "Output trigger for division 7.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "8",
+        "description": "Output trigger for division 8.",
+        "type": "FTrigger"
+      }
+    ]
+  },
+  {
+    "name": "Stereo Crossfade",
+    "description": "Crossfades between two stereo signals.",
+    "className": "UE Stereo Crossfade Audio",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "In1 L",
+        "description": "Left channel of first input.",
+        "type": "Audio"
+      },
+      {
+        "name": "In1 R",
+        "description": "Right channel of first input.",
+        "type": "Audio"
+      },
+      {
+        "name": "In2 L",
+        "description": "Left channel of second input.",
+        "type": "Audio"
+      },
+      {
+        "name": "In2 R",
+        "description": "Right channel of second input.",
+        "type": "Audio"
+      },
+      {
+        "name": "Crossfade",
+        "description": "Crossfade between the two inputs (0.0 to 1.0).",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Out L",
+        "description": "Left channel of the output signal.",
+        "type": "Audio"
+      },
+      {
+        "name": "Out R",
+        "description": "Right channel of the output signal.",
+        "type": "Audio"
+      }
+    ]
+  },
+  {
+    "name": "Dust (Audio)",
+    "description": "Generate randomly timed impulses with audio-rate modulation.",
+    "className": "UE Dust (Audio) Audio",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Modulation",
+        "description": "Density control signal.",
+        "type": "Audio"
+      },
+      {
+        "name": "Density",
+        "description": "Probability of impulse generation.",
+        "type": "Audio"
+      },
+      {
+        "name": "Enabled",
+        "description": "Enable or disable generation.",
+        "type": "Audio"
+      },
+      {
+        "name": "Bi-Polar",
+        "description": "Toggle between bipolar and unipolar impulse output.",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Impulse Out",
+        "description": "Generated impulse output.",
+        "type": "Audio"
+      }
+    ]
+  },
+  {
+    "name": "Dust (Trigger)",
+    "description": "Generate randomly timed trigger events, with audio-rate modulation.",
+    "className": "UE Dust (Trigger) Trigger",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Modulation",
+        "description": "Input density control signal.",
+        "type": "Audio"
+      },
+      {
+        "name": "Density",
+        "description": "Probability of trigger generation.",
+        "type": "Audio"
+      },
+      {
+        "name": "Enabled",
+        "description": "Enable or disable generation.",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Trigger Out",
+        "description": "Generated trigger output.",
+        "type": "FTrigger"
+      }
+    ]
+  },
+  {
+    "name": "Edge",
+    "description": "Detect upward and downward changes in an input audio signal, with optional debounce.",
+    "className": "UE Edge Trigger",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "In",
+        "description": "Input audio to monitor for edge detection.",
+        "type": "Audio"
+      },
+      {
+        "name": "Debounce",
+        "description": "Debounce time in seconds.",
+        "type": "Time"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Rise",
+        "description": "Trigger on rise.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Fall",
+        "description": "Trigger on fall.",
+        "type": "FTrigger"
+      }
+    ]
+  },
+  {
+    "name": "EDO",
+    "description": "Generates a frequency based on equal division of the octave.",
+    "className": "UE EDO Float",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Note Number",
+        "description": "Input MIDI note number.",
+        "type": "int32"
+      },
+      {
+        "name": "Reference Frequency",
+        "description": "Reference frequency.",
+        "type": "Audio"
+      },
+      {
+        "name": "Reference Note",
+        "description": "Reference MIDI note.",
+        "type": "Audio"
+      },
+      {
+        "name": "Divisions",
+        "description": "Number of divisions of the octave.",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Frequency",
+        "description": "Output frequency.",
+        "type": "float"
+      }
+    ]
+  },
+  {
+    "name": "Impulse",
+    "description": "Generates a single-sample impulse when triggered.",
+    "className": "UE Impulse Audio",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "Trigger",
+        "description": "Trigger input to generate an impulse.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Bi-Polar",
+        "description": "Toggle between bipolar and unipolar impulse output.",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "On Trigger",
+        "description": "Trigger output when the node is triggered.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Impulse Out",
+        "description": "Generated impulse output.",
+        "type": "Audio"
+      }
+    ]
+  },
+  {
+    "name": "Phase Disperser",
+    "description": "A chain of allpass filters acting as a phase disperser to soften transients.",
+    "className": "UE PhaseDisperser Audio",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "In",
+        "description": "Incoming audio.",
+        "type": "Audio"
+      },
+      {
+        "name": "Stages",
+        "description": "Number of allpass filter stages to apply (maximum 128).",
+        "type": "int32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Out",
+        "description": "Phase-dispersed audio.",
+        "type": "Audio"
+      }
+    ]
+  },
+  {
+    "name": "Shift Register",
+    "description": "Shift register node with eight stages.",
+    "className": "UE Shift Register Float",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "In",
+        "description": "Input float to the shift register.",
+        "type": "float"
+      },
+      {
+        "name": "Trigger",
+        "description": "Trigger.",
+        "type": "FTrigger"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "On Trigger",
+        "description": "Output trigger following the shift.",
+        "type": "FTrigger"
+      },
+      {
+        "name": "Stage 1",
+        "description": "Shifted output at stage 1.",
+        "type": "float"
+      },
+      {
+        "name": "Stage 2",
+        "description": "Shifted output at stage 2.",
+        "type": "float"
+      },
+      {
+        "name": "Stage 3",
+        "description": "Shifted output at stage 3.",
+        "type": "float"
+      },
+      {
+        "name": "Stage 4",
+        "description": "Shifted output at stage 4.",
+        "type": "float"
+      },
+      {
+        "name": "Stage 5",
+        "description": "Shifted output at stage 5.",
+        "type": "float"
+      },
+      {
+        "name": "Stage 6",
+        "description": "Shifted output at stage 6.",
+        "type": "float"
+      },
+      {
+        "name": "Stage 7",
+        "description": "Shifted output at stage 7.",
+        "type": "float"
+      },
+      {
+        "name": "Stage 8",
+        "description": "Shifted output at stage 8.",
+        "type": "float"
+      }
+    ]
+  },
+  {
+    "name": "Slew (Float)",
+    "description": "Smooth the rise and fall times of an incoming float value.",
+    "className": "UE Slew (Float) Float",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "In",
+        "description": "Value to smooth.",
+        "type": "float"
+      },
+      {
+        "name": "Rise Time",
+        "description": "Rise time in seconds.",
+        "type": "Time"
+      },
+      {
+        "name": "Fall Time",
+        "description": "Fall time in seconds.",
+        "type": "Time"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Out",
+        "description": "Slew rate limited float.",
+        "type": "float"
+      }
+    ]
+  },
+  {
+    "name": "Slew (Audio)",
+    "description": "Smooth the rise and fall times of an incoming signal.",
+    "className": "UE Slew (Audio) Audio",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "In",
+        "description": "Audio signal to smooth.",
+        "type": "Audio"
+      },
+      {
+        "name": "Rise Time",
+        "description": "Rise time in seconds.",
+        "type": "Time"
+      },
+      {
+        "name": "Fall Time",
+        "description": "Fall time in seconds.",
+        "type": "Time"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Out",
+        "description": "Slew rate limited signal.",
+        "type": "Audio"
+      }
+    ]
+  },
+  {
+    "name": "Stereo Balance",
+    "description": "Adjusts the balance of a stereo signal.",
+    "className": "UE Stereo Balance Audio",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "In L",
+        "description": "Left channel audio input.",
+        "type": "Audio"
+      },
+      {
+        "name": "In R",
+        "description": "Right channel audio input.",
+        "type": "Audio"
+      },
+      {
+        "name": "Balance",
+        "description": "Balance control ranging from -1.0 (full left) to 1.0 (full right).",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Out L",
+        "description": "Left output channel.",
+        "type": "Audio"
+      },
+      {
+        "name": "Out R",
+        "description": "Right output channel.",
+        "type": "Audio"
+      }
+    ]
+  },
+  {
+    "name": "Stereo Gain",
+    "description": "Scale a stereo input to a gain value.",
+    "className": "UE Stereo Gain Audio",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "In L",
+        "description": "Left channel audio input.",
+        "type": "Audio"
+      },
+      {
+        "name": "In R",
+        "description": "Right channel audio input.",
+        "type": "Audio"
+      },
+      {
+        "name": "Gain (Lin)",
+        "description": "Gain control (0.0 to 1.0).",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Out L",
+        "description": "Left output channel.",
+        "type": "Audio"
+      },
+      {
+        "name": "Out R",
+        "description": "Right output channel.",
+        "type": "Audio"
+      }
+    ]
+  },
+  {
+    "name": "Stereo Inverter",
+    "description": "Inverts and/or swaps stereo channels.",
+    "className": "UE Stereo Inverter Audio",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "In L",
+        "description": "Left channel audio output.",
+        "type": "Audio"
+      },
+      {
+        "name": "In R",
+        "description": "Right channel audio output.",
+        "type": "Audio"
+      },
+      {
+        "name": "Invert L",
+        "description": "Invert the polarity of the left channel.",
+        "type": "Audio"
+      },
+      {
+        "name": "Invert R",
+        "description": "Invert the polarity of the right channel.",
+        "type": "Audio"
+      },
+      {
+        "name": "Swap L/R",
+        "description": "Swap the left and right channels.",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Out L",
+        "description": "Left output channel.",
+        "type": "Audio"
+      },
+      {
+        "name": "Out R",
+        "description": "Right output channel.",
+        "type": "Audio"
+      }
+    ]
+  },
+  {
+    "name": "Stereo Width",
+    "description": "Adjusts the stereo width of a signal.",
+    "className": "UE Stereo Width Audio",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "In L",
+        "description": "Left channel.",
+        "type": "Audio"
+      },
+      {
+        "name": "In R",
+        "description": "Right channel.",
+        "type": "Audio"
+      },
+      {
+        "name": "Width",
+        "description": "Stereo width factor ranging from 0 to 200% (0 - 2).",
+        "type": "Audio"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Out L",
+        "description": "Left channel of the adjusted stereo output signal.",
+        "type": "Audio"
+      },
+      {
+        "name": "Out R",
+        "description": "Right channel of the adjusted stereo output signal.",
+        "type": "Audio"
+      }
+    ]
+  },
+  {
+    "name": "Tuning",
+    "description": "Generates a frequency based on custom tuning per-note.",
+    "className": "UE Tuning Float",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "MIDI Note Number",
+        "description": "Input MIDI note number (integer).",
+        "type": "int32"
+      },
+      {
+        "name": "+/- Cents C",
+        "description": "Tuning adjustment for note 0 in cents.",
+        "type": "float"
+      },
+      {
+        "name": "+/- Cents C♯ / D♭",
+        "description": "Tuning adjustment for note 1 in cents.",
+        "type": "float"
+      },
+      {
+        "name": "+/- Cents D",
+        "description": "Tuning adjustment for note 2 in cents.",
+        "type": "float"
+      },
+      {
+        "name": "+/- Cents D♯ / E♭",
+        "description": "Tuning adjustment for note 3 in cents.",
+        "type": "float"
+      },
+      {
+        "name": "+/- Cents E",
+        "description": "Tuning adjustment for note 4 in cents.",
+        "type": "float"
+      },
+      {
+        "name": "+/- Cents F",
+        "description": "Tuning adjustment for note 5 in cents.",
+        "type": "float"
+      },
+      {
+        "name": "+/- Cents F♯ / G♭",
+        "description": "Tuning adjustment for note 6 in cents.",
+        "type": "float"
+      },
+      {
+        "name": "+/- Cents G",
+        "description": "Tuning adjustment for note 7 in cents.",
+        "type": "float"
+      },
+      {
+        "name": "+/- Cents G♯ / A♭",
+        "description": "Tuning adjustment for note 8 in cents.",
+        "type": "float"
+      },
+      {
+        "name": "+/- Cents A",
+        "description": "Tuning adjustment for note 9 in cents.",
+        "type": "float"
+      },
+      {
+        "name": "+/- Cents A♯ / B♭",
+        "description": "Tuning adjustment for note 10 in cents.",
+        "type": "float"
+      },
+      {
+        "name": "+/- Cents B",
+        "description": "Tuning adjustment for note 11 in cents.",
+        "type": "float"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Frequency",
+        "description": "Output frequency.",
+        "type": "float"
+      }
+    ]
+  },
+  {
+    "name": "Zero Crossing",
+    "description": "Detect zero crossings in an input audio signal, with optional debounce.",
+    "className": "UE Zero Crossing Trigger",
+    "majorVersion": "1",
+    "minorVersion": "1",
+    "author": "Charles Matthews",
+    "category": [],
+    "inputs": [
+      {
+        "name": "In",
+        "description": "Input audio to monitor for zero crossings.",
+        "type": "Audio"
+      },
+      {
+        "name": "Debounce",
+        "description": "Debounce time in seconds.",
+        "type": "Time"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Zero Crossing",
+        "description": "Trigger on zero crossing.",
+        "type": "FTrigger"
+      }
+    ]
+  }
+]

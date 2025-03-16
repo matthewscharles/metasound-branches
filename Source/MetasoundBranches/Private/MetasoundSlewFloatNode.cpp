@@ -23,7 +23,6 @@ namespace Metasound
     class FSlewFloatOperator : public TExecutableOperator<FSlewFloatOperator>
     {
     public:
-        // Constructor
         FSlewFloatOperator(
             const FOperatorSettings& InSettings,
             const FFloatReadRef& InSignal,
@@ -109,7 +108,6 @@ namespace Metasound
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();
 
-            // Retrieve input references or use default values
             TDataReadReference<float> InputSignal = InputData.GetOrCreateDefaultDataReadReference<float>(
                 METASOUND_GET_PARAM_NAME(InputSignal),
                 InParams.OperatorSettings

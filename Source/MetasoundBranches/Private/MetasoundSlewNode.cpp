@@ -23,7 +23,6 @@ namespace Metasound
     class FSlewOperator : public TExecutableOperator<FSlewOperator>
     {
     public:
-        // Constructor
         FSlewOperator(
             const FOperatorSettings& InSettings,
             const FAudioBufferReadRef& InSignal,
