@@ -1,49 +1,189 @@
 const fs = require('fs');
 const path = require('path');
 
-const projectRoot = '../../'; 
-const metaSoundNodes = [];
+const ROOT_DIR = path.resolve(__dirname, '../../Source');
+const TARGET_EXTENSIONS = ['.cpp', '.h'];
+const OUTPUT_FILE = path.resolve(__dirname, 'node_data.json');
 
-const vertexRegex = /METASOUND_GET_PARAM_NAME(?:_AND_METADATA)?\s*\(\s*([\w\d_]+)\s*(?:,\s*([\w\d_"\s]+))?\)/g;
-const nodeMetadataRegex = /FNodeClassMetadata\s+([\w\d_]+)\s*=\s*{([\s\S]*?)}/g;
+const METASOUND_PARAM_REGEX = /METASOUND_PARAM\s*\(\s*(\w+)\s*,\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)\s*;/g;
+const IO_VERTEX_REGEX = /\bT(Input|Output)DataVertex\s*<\s*([\w:]+)\s*>\s*\(\s*METASOUND_GET_PARAM_NAME_AND_METADATA\s*\(\s*(\w+)\s*\)\s*\)/g;
+const CLASS_NAME_REGEX = /Metadata\.ClassName\s*=\s*\{\s*([^\}]+)\};/;
+const MAJOR_VERSION_REGEX = /Metadata\.MajorVersion\s*=\s*(\d+)\s*;/;
+const MINOR_VERSION_REGEX = /Metadata\.MinorVersion\s*=\s*(\d+)\s*;/;
+const AUTHOR_REGEX = /Metadata\.Author\s*=\s*"([^"]+)"\s*;/;
+const DISPLAY_NAME_REGEX = /Metadata\.DisplayName\s*=\s*METASOUND_LOCTEXT\s*\(\s*"[^"]+"\s*,\s*"([^"]+)"\);/;
+const DESCRIPTION_REGEX = /Metadata\.Description\s*=\s*METASOUND_LOCTEXT\s*\(\s*"[^"]+"\s*,\s*"([^"]+)"\);/;
+const CATEGORY_REGEX = /Metadata\.CategoryHierarchy\s*=\s*\{\s*([^\}]+)\};/;
+
+function getAllMatches(regex, content) {
+  let matches = [];
+  let match;
+  while ((match = regex.exec(content)) !== null) {
+    matches.push(match);
+  }
+  return matches;
+}
+
+function parseClassNameTextBlock(textBlock) {
+  const pattern = /TEXT\s*\(\s*"([^"]+)"\s*\)/g;
+  let results = [];
+  let match;
+  while ((match = pattern.exec(textBlock)) !== null) {
+    results.push(match[1]);
+  }
+  return results;
+}
+
+function guessParamType(cppType) {
+  if (cppType === 'bool') return 'Bool';
+  if (cppType === 'FTime') return 'Time';
+  if (cppType === 'FAudioBuffer') return 'Audio';
+  return cppType;
+}
+
+function parseSource(filePath) {
+  const content = fs.readFileSync(filePath, 'utf8');
+
+  const result = {
+    file: filePath,
+    nodes: []
+  };
+
+  const classNameMatch = CLASS_NAME_REGEX.exec(content);
+  if (!classNameMatch) {
+    return [];
+  }
+
+  let nodeData = {
+    name: '',
+    description: '',
+    className: '',
+    majorVersion: '',
+    minorVersion: '',
+    author: '',
+    category: [],
+    inputs: [],
+    outputs: []
+  };
+
+  const textBlock = classNameMatch[1];
+  const segments = parseClassNameTextBlock(textBlock);
+  nodeData.className = segments.join(' ');
+
+  let majorMatch = MAJOR_VERSION_REGEX.exec(content);
+  if (majorMatch) nodeData.majorVersion = majorMatch[1];
+
+  let minorMatch = MINOR_VERSION_REGEX.exec(content);
+  if (minorMatch) nodeData.minorVersion = minorMatch[1];
+
+  let authorMatch = AUTHOR_REGEX.exec(content);
+  if (authorMatch) nodeData.author = authorMatch[1];
+
+  let displayNameMatch = DISPLAY_NAME_REGEX.exec(content);
+  if (displayNameMatch) nodeData.name = displayNameMatch[1];
+
+  let descMatch = DESCRIPTION_REGEX.exec(content);
+  if (descMatch) nodeData.description = descMatch[1];
+
+  let categoryMatch = CATEGORY_REGEX.exec(content);
+  if (categoryMatch) {
+    nodeData.category = parseClassNameTextBlock(categoryMatch[1]);
+  }
+
+  const paramMatches = getAllMatches(METASOUND_PARAM_REGEX, content);
+  
+  const paramMap = {}; 
+  paramMatches.forEach(m => {
+    const symbolName = m[1];
+    const displayName = m[2];
+    const description = m[3];
+    paramMap[symbolName] = {
+      name: displayName,
+      description: description,
+      type: 'Audio'
+    };
+  });
+
+  const ioMatches = getAllMatches(IO_VERTEX_REGEX, content);
+  ioMatches.forEach(m => {
+    let direction = m[1];
+    let cType = m[2];
+    let symbol = m[3];
+    let shortType = guessParamType(cType);
+
+    if (paramMap[symbol]) {
+      paramMap[symbol].type = shortType;
+    } else {
+      paramMap[symbol] = {
+        name: symbol,
+        description: "",
+        type: shortType
+      };
+    }
+  });
+
+  const directionMap = {};
+  ioMatches.forEach(m => {
+    const direction = m[1];
+    const symbol = m[3];
+    directionMap[symbol] = direction;
+  });
+
+  for (let symbolName in paramMap) {
+    let paramInfo = paramMap[symbolName];
+    let dir = directionMap[symbolName] || 'Input';
+    if (dir === 'Input') {
+      nodeData.inputs.push({
+        name: paramInfo.name,
+        description: paramInfo.description,
+        type: paramInfo.type
+      });
+    } else {
+      nodeData.outputs.push({
+        name: paramInfo.name,
+        description: paramInfo.description,
+        type: paramInfo.type
+      });
+    }
+  }
+
+  result.nodes.push(nodeData);
+  return [result];
+}
 
 function scanDirectory(dir) {
-    const files = fs.readdirSync(dir);
-    for (const file of files) {
-        const filePath = path.join(dir, file);
-        const stat = fs.statSync(filePath);
-        if (stat.isDirectory()) {
-            scanDirectory(filePath);
-        } else if (file.endsWith('.h') || file.endsWith('.cpp')) {
-            processFile(filePath);
+  let allNodes = [];
+  const entries = fs.readdirSync(dir);
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry);
+    const stat = fs.statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      allNodes = allNodes.concat(scanDirectory(fullPath));
+    } else {
+      const ext = path.extname(entry);
+      if (TARGET_EXTENSIONS.includes(ext)) {
+        const nodesInFile = parseSource(fullPath);
+        if (nodesInFile.length > 0) {
+          allNodes = allNodes.concat(nodesInFile);
         }
+      }
     }
+  }
+  return allNodes;
 }
 
-function processFile(filePath) {
-    const content = fs.readFileSync(filePath, 'utf8');
+const allParsed = scanDirectory(ROOT_DIR);
 
-    let match;
-    let node = { file: filePath, vertices: [] };
-
-    while ((match = vertexRegex.exec(content)) !== null) {
-        node.vertices.push({
-            name: match[1],
-            description: match[2] ? match[2].replace(/["]/g, '') : ''
-        });
-    }
-
-    while ((match = nodeMetadataRegex.exec(content)) !== null) {
-        node.metadata = match[2].trim();
-    }
-
-    if (node.vertices.length > 0 || node.metadata) {
-        metaSoundNodes.push(node);
-    }
+const finalOutput = [];
+for (const fileObj of allParsed) {
+  for (const nodeObj of fileObj.nodes) {
+    finalOutput.push({
+      ...nodeObj 
+    });
+  }
 }
 
-scanDirectory(path.join(projectRoot, 'Source'));
-
-fs.writeFileSync('node_data.json', JSON.stringify(metaSoundNodes, null, 2), 'utf8');
-
-console.log('Done.');
+fs.writeFileSync(OUTPUT_FILE, JSON.stringify(finalOutput, null, 2), 'utf8');
+console.log(`Done! Created: ${OUTPUT_FILE}`);
