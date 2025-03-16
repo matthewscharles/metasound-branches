@@ -51,4 +51,5 @@
 | 03/09 | - Draft note parser with quarter tones, integrate into a Make Note variant (quarter tones not yet integrated into voice management).<br>- Move VoiceState struct into header.|
 | 03/10 | - Add Event trigger out to Make Note.<br>- Add multi-length array functionality to voice manager|
 | 03/11 | - Add Event trigger out to Make Note From String.|
-
+| 03/15 | - Docs: sketch a script for metadata extraction from source. |
+| 03/16 | - Create Get Wave Cue Points prototype. |
