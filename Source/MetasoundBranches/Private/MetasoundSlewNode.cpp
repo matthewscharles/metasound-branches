@@ -11,7 +11,6 @@
 
 namespace Metasound
 {
-    // Vertex Names - define the node's inputs and outputs here
     namespace SlewNodeVertexNames
     {
         METASOUND_PARAM(InputSignal, "In", "Audio signal to smooth.");
@@ -21,11 +20,9 @@ namespace Metasound
         METASOUND_PARAM(OutputSignal, "Out", "Slew rate limited signal.");
     }
 
-    // Operator Class - defines the way the node is described, created, and executed
     class FSlewOperator : public TExecutableOperator<FSlewOperator>
     {
     public:
-        // Constructor
         FSlewOperator(
             const FOperatorSettings& InSettings,
             const FAudioBufferReadRef& InSignal,
@@ -41,7 +38,6 @@ namespace Metasound
         {
         }
 
-        // Helper function for constructing vertex interface
         static const FVertexInterface& DeclareVertexInterface()
         {
             using namespace SlewNodeVertexNames;
@@ -60,7 +56,6 @@ namespace Metasound
             return Interface;
         }
 
-        // Metadata about the node
         static const FNodeClassMetadata& GetNodeInfo()
         {
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
@@ -84,7 +79,6 @@ namespace Metasound
             return Metadata;
         }
 
-        // Input Data References
         virtual FDataReferenceCollection GetInputs() const override
         {
             using namespace SlewNodeVertexNames;
@@ -97,7 +91,6 @@ namespace Metasound
             return InputDataReferences;
         }
 
-        // Output Data References
         virtual FDataReferenceCollection GetOutputs() const override
         {
             using namespace SlewNodeVertexNames;
@@ -108,7 +101,6 @@ namespace Metasound
             return OutputDataReferences;
         }
 
-        // Operator Factory Method
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
             using namespace SlewNodeVertexNames;
@@ -116,7 +108,6 @@ namespace Metasound
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();
 
-            // Retrieve input references or use default values
             TDataReadReference<FAudioBuffer> InputSignal = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(
                 METASOUND_GET_PARAM_NAME(InputSignal),
                 InParams.OperatorSettings
@@ -137,7 +128,6 @@ namespace Metasound
             return MakeUnique<FSlewOperator>(InParams.OperatorSettings, InputSignal, InputRiseTime, InputFallTime, SampleRate);
         }
 
-        // Primary node functionality
         virtual void Execute()
         {
             int32 NumFrames = InputSignal->Num();
@@ -192,7 +182,6 @@ namespace Metasound
         int32 SampleRate;
     };
 
-    // Node Facade Class
     class FSlewNode : public FNodeFacade
     {
     public:
@@ -202,7 +191,6 @@ namespace Metasound
         }
     };
 
-    // Register the Node
     METASOUND_REGISTER_NODE(FSlewNode);
 }
 

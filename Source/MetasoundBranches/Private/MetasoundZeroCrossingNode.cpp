@@ -12,7 +12,7 @@
 
 namespace Metasound
 {
-    namespace ZeroCrossingNames
+    namespace ZeroCrossingVertexNames
     {
         METASOUND_PARAM(InputSignal, "In", "Input audio to monitor for zero crossings.");
         METASOUND_PARAM(InputDebounce, "Debounce", "Debounce time in seconds.");
@@ -22,7 +22,6 @@ namespace Metasound
     class FZeroCrossingOperator : public TExecutableOperator<FZeroCrossingOperator>
     {
     public:
-        // Constructor
         FZeroCrossingOperator(
             const FAudioBufferReadRef& InSignal,
             const FTimeReadRef& InDebounce,
@@ -40,7 +39,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace ZeroCrossingNames;
+            using namespace ZeroCrossingVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -83,7 +82,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace ZeroCrossingNames;
+            using namespace ZeroCrossingVertexNames;
 
             FDataReferenceCollection InputDataReferences;
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
@@ -94,7 +93,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace ZeroCrossingNames;
+            using namespace ZeroCrossingVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
             OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTriggerZeroCrossing), OutputTriggerZeroCrossing);
@@ -104,7 +103,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace ZeroCrossingNames;
+            using namespace ZeroCrossingVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();
@@ -122,7 +121,6 @@ namespace Metasound
 
         virtual void Reset(const IOperator::FResetParams& InParams)
         {
-            // Reset trigger
             OutputTriggerZeroCrossing->Reset();
 
             // Initialize PreviousSignalValue
@@ -135,7 +133,6 @@ namespace Metasound
                 PreviousSignalValue = 0.0f;
             }
 
-            // Reset debounce counter
             DebounceCounter = 0;
         }
 

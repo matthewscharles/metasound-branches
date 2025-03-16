@@ -9,7 +9,6 @@
 #include "Math/UnrealMathUtility.h"          // For FMath functions
 #include "Misc/DateTime.h"                   // For FDateTime::UtcNow()
 
-// Required for ensuring the node is supported by all languages in engine. Must be unique per MetaSound.
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_DustNode"
 
 namespace Metasound
