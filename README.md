@@ -3,6 +3,8 @@ This repository contains a collection of custom nodes for Unreal Engine's MetaSo
 > [MetaSound Branches on Fab.com](https://www.fab.com/listings/68a9df1a-6576-4edb-a61d-c4ca4894572b)
 
 ## Getting started
+> [Video: getting started with the Branches plugin](https://www.youtube.com/playlist?list=PLyaaHTyXd8jFk4KFjPJTPzIwHcse9_xeC)
+
 This plugin works within the existing MetaSound system. For an introduction, please see the official [MetaSounds Reference Guide](https://dev.epicgames.com/documentation/en-us/unreal-engine/metasounds-reference-guide-in-unreal-engine).
 
 Once installed, create a new MetaSound Source and right-click in the editor to add a new node class.  A new `Branches` category will appear under `Functions`.
