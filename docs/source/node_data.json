@@ -525,8 +525,8 @@
     ]
   },
   {
-    "name": "",
-    "description": "",
+    "name": "Pattern Generator",
+    "description": "Generates triggers based on an array of time multipliers applied to a base time period.",
     "className": "Branches PatternGenerator Audio",
     "majorVersion": "1",
     "minorVersion": "0",
@@ -583,8 +583,8 @@
     ]
   },
   {
-    "name": "",
-    "description": "",
+    "name": "Pattern Generator Basic",
+    "description": "Generates a random float at a specified interval.",
     "className": "Branches PatternGeneratorTest Audio",
     "majorVersion": "1",
     "minorVersion": "0",
@@ -621,8 +621,8 @@
     ]
   },
   {
-    "name": "",
-    "description": "",
+    "name": "Pattern Receiver",
+    "description": "Receives a pattern stream and reproduces the trigger and random float.",
     "className": "Branches PatternReceiver Audio",
     "majorVersion": "1",
     "minorVersion": "0",

@@ -11,8 +11,8 @@ const CLASS_NAME_REGEX = /Metadata\.ClassName\s*=\s*\{\s*([^\}]+)\};/;
 const MAJOR_VERSION_REGEX = /Metadata\.MajorVersion\s*=\s*(\d+)\s*;/;
 const MINOR_VERSION_REGEX = /Metadata\.MinorVersion\s*=\s*(\d+)\s*;/;
 const AUTHOR_REGEX = /Metadata\.Author\s*=\s*"([^"]+)"\s*;/;
-const DISPLAY_NAME_REGEX = /Metadata\.DisplayName\s*=\s*METASOUND_LOCTEXT\s*\(\s*"[^"]+"\s*,\s*"([^"]+)"\);/;
-const DESCRIPTION_REGEX = /Metadata\.Description\s*=\s*METASOUND_LOCTEXT\s*\(\s*"[^"]+"\s*,\s*"([^"]+)"\);/;
+const DISPLAY_NAME_REGEX = /Metadata\.DisplayName\s*=\s*(?:\w*LOCTEXT\w*)\s*\(\s*"[^"]+"\s*,\s*"([^"]+)"\);/;
+const DESCRIPTION_REGEX = /Metadata\.Description\s*=\s*(?:\w*LOCTEXT\w*)\s*\(\s*"[^"]+"\s*,\s*"([^"]+)"\);/;
 const CATEGORY_REGEX = /Metadata\.CategoryHierarchy\s*=\s*\{\s*([^\}]+)\};/;
 
 function getAllMatches(regex, content) {
