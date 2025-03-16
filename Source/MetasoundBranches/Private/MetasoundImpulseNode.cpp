@@ -107,7 +107,7 @@ namespace Metasound
             return OutputDataReferences;
         }
 
-          static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
+        static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
             using namespace ImpulseNodeVertexNames;
 
