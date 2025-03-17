@@ -109,8 +109,8 @@ namespace Metasound
                 [](int32 StartFrame, int32 EndFrame) {},
                 [&](int32 TriggerFrame, int32 TriggerFrameEnd)
                 {
-                    LastGlobalFrameIndex = -1;
-                    *OutputDelta = FTime(0.0);
+                    int32 GlobalResetIndex = CurrentBlockStartFrame + TriggerFrame;
+                    LastGlobalFrameIndex = GlobalResetIndex;
                     OutputOnReset->TriggerFrame(TriggerFrame);
                 }
             );
@@ -137,9 +137,11 @@ namespace Metasound
     private:
         FTriggerReadRef InputTrigger;
         FTriggerReadRef InputReset;
+        
         FTriggerWriteRef OutputOnTrigger;
         FTriggerWriteRef OutputOnReset;
         FTimeWriteRef OutputDelta;
+        
         int32 LastGlobalFrameIndex;
         int32 CurrentBlockStartFrame;
         int32 BlockSize;
