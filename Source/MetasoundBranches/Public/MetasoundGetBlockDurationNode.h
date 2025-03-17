@@ -7,9 +7,9 @@
 
 namespace MetasoundBranches
 {
-    class FMetasoundGetBlockLengthNode : public Metasound::FNode
+    class FMetasoundGetBlockDurationNode : public Metasound::FNode
     {
     public:
-        FMetasoundGetBlockLengthNode();
+        FMetasoundGetBlockDurationNode();
     };
 }
