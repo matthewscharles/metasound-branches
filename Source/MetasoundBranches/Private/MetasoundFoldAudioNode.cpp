@@ -1,16 +1,55 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
 #include "MetasoundBranches/Public/MetasoundFoldAudioNode.h"
+#include "MetasoundBranches/Public/MetasoundFoldAudioNode.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundPrimitives.h"
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
+#include "Math/UnrealMathUtility.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundFoldNode"
 
 namespace Metasound
 {
+    inline float PerformFold(float InSample, float Low, float High)
+    {
+        // Swap Low and High without branching (if required)
+        float NewLow  = FMath::Min(Low, High);
+        float NewHigh = FMath::Max(Low, High);
+
+        float Range = NewHigh - NewLow;
+        if (Range <= 0.0f)
+        {
+            return InSample; // Invalid range, return input as-is
+        }
+
+        float Folded = InSample;
+
+        if (Folded > NewHigh || Folded < NewLow)
+        {
+            float Diff = (Folded > NewHigh) ? (Folded - NewHigh) : (NewLow - Folded);
+            int Mag = static_cast<int>(Diff / Range);
+
+            float Modded = fmodf(Diff, Range);
+            if (Modded < 0.0f)
+            {
+                Modded += Range;
+            }
+
+            if (Mag % 2 == 0)
+            {
+                Folded = (Folded > NewHigh) ? (NewHigh - Modded) : (NewLow + Modded);
+            }
+            else
+            {
+                Folded = (Folded > NewHigh) ? (NewLow + Modded) : (NewHigh - Modded);
+            }
+        }
+
+        return Folded;
+    }
     namespace FoldNodeVertexNames
     {
         METASOUND_PARAM(InputSignal, "In", "Audio signal to fold.");
@@ -127,7 +166,7 @@ namespace Metasound
 
             return MakeUnique<FFoldOperator>(InParams.OperatorSettings, InputSignal, InputHigh, InputLow, InputHighMod, InputLowMod);
         }
-
+        
         virtual void Execute()
         {
             int32 NumFrames = InputSignal->Num();
@@ -139,15 +178,10 @@ namespace Metasound
             for (int32 i = 0; i < NumFrames; ++i)
             {
                 float HighValue = *InputHigh + HighModData[i];
-                float LowValue = *InputLow + LowModData[i];
-                float Sample = SignalData[i];
-                
-                while (Sample > HighValue)
-                    Sample = 2.0f * HighValue - Sample;
-                while (Sample < LowValue)
-                    Sample = 2.0f * LowValue - Sample;
+                float LowValue  = *InputLow  + LowModData[i];
 
-                OutputDataPtr[i] = Sample;
+                float FoldedSample = PerformFold(SignalData[i], LowValue, HighValue);
+                OutputDataPtr[i] = FoldedSample;
             }
         }
 
@@ -157,7 +191,6 @@ namespace Metasound
         FFloatReadRef InputLow;
         FAudioBufferReadRef InputHighMod;
         FAudioBufferReadRef InputLowMod;
-        
         FAudioBufferWriteRef OutputSignal;
     };
 
