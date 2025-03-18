@@ -1,7 +1,6 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
 #include "MetasoundBranches/Public/MetasoundFoldAudioNode.h"
-#include "MetasoundBranches/Public/MetasoundFoldAudioNode.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundPrimitives.h"
 #include "MetasoundNodeRegistrationMacro.h"
