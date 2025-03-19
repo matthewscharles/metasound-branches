@@ -8,7 +8,7 @@
 #include "MetasoundParamHelper.h"
 #include "Math/UnrealMathUtility.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundFoldNode"
+#define LOCTEXT_NAMESPACE "MetasoundFoldAudioNode"
 
 namespace Metasound
 {
@@ -49,7 +49,7 @@ namespace Metasound
 
         return Folded;
     }
-    namespace FoldNodeVertexNames
+    namespace FoldAudioNodeVertexNames
     {
         METASOUND_PARAM(InputSignal, "In", "Audio signal to fold.");
         METASOUND_PARAM(InputHigh, "High", "Upper threshold for folding.");
@@ -80,7 +80,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace FoldNodeVertexNames;
+            using namespace FoldAudioNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -121,7 +121,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace FoldNodeVertexNames;
+            using namespace FoldAudioNodeVertexNames;
 
             FDataReferenceCollection InputDataReferences;
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
@@ -135,7 +135,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace FoldNodeVertexNames;
+            using namespace FoldAudioNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
             OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal), OutputSignal);
@@ -144,7 +144,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace FoldNodeVertexNames;
+            using namespace FoldAudioNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
 
@@ -193,16 +193,16 @@ namespace Metasound
         FAudioBufferWriteRef OutputSignal;
     };
 
-    class FFoldNode : public FNodeFacade
+    class FFoldAudioNode : public FNodeFacade
     {
     public:
-        FFoldNode(const FNodeInitData& InitData)
+        FFoldAudioNode(const FNodeInitData& InitData)
             : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FFoldOperator>())
         {
         }
     };
 
-    METASOUND_REGISTER_NODE(FFoldNode);
+    METASOUND_REGISTER_NODE(FFoldAudioNode);
 }
 
 #undef LOCTEXT_NAMESPACE
