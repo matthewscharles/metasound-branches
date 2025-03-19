@@ -54,3 +54,4 @@
 | 03/15 | - Docs: sketch a script for metadata extraction from source. |
 | 03/16 | - Create Get Wave Cue Points prototype. |
 | 03/17 | - Prototype Get Block Duration and Get Current Frame nodes for troubleshooting.<br> - Prototype Delta Time node. |
+| 03/18 | - Create Wrap and Fold nodes. |
