@@ -8,7 +8,7 @@
 #include "MetasoundParamHelper.h"
 #include "Math/UnrealMathUtility.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundWrapNode"
+#define LOCTEXT_NAMESPACE "MetasoundWrapAudioNode"
 
 namespace Metasound
 {
@@ -42,7 +42,7 @@ namespace Metasound
         return Wrapped + NewLow;
     }
 
-    namespace WrapNodeVertexNames
+    namespace WrapAudioNodeVertexNames
     {
         METASOUND_PARAM(InputSignal,    "In",       "Audio signal to wrap.");
         METASOUND_PARAM(InputHigh,      "High",     "Upper threshold for wrapping.");
@@ -73,7 +73,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace WrapNodeVertexNames;
+            using namespace WrapAudioNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -114,7 +114,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace WrapNodeVertexNames;
+            using namespace WrapAudioNodeVertexNames;
 
             FDataReferenceCollection InputDataReferences;
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
@@ -128,7 +128,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace WrapNodeVertexNames;
+            using namespace WrapAudioNodeVertexNames;
 
             FDataReferenceCollection OutputDataReferences;
             OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal), OutputSignal);
@@ -137,7 +137,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace WrapNodeVertexNames;
+            using namespace WrapAudioNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
 
@@ -190,16 +190,16 @@ namespace Metasound
         FAudioBufferWriteRef OutputSignal;
     };
 
-    class FWrapNode : public FNodeFacade
+    class FWrapAudioNode : public FNodeFacade
     {
     public:
-        FWrapNode(const FNodeInitData& InitData)
+        FWrapAudioNode(const FNodeInitData& InitData)
             : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FWrapOperator>())
         {
         }
     };
 
-    METASOUND_REGISTER_NODE(FWrapNode);
+    METASOUND_REGISTER_NODE(FWrapAudioNode);
 }
 
 #undef LOCTEXT_NAMESPACE
