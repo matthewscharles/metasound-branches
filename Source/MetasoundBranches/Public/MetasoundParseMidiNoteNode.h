@@ -4,6 +4,7 @@
 
 #include "MetasoundBranches/Public/ParseMidiNote.h"
 #include "Interfaces/MetasoundFrontendSourceInterface.h"
+#include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundStandardNodesNames.h"
 #include "Internationalization/Text.h"
 #include "MetasoundBuilderInterface.h"
