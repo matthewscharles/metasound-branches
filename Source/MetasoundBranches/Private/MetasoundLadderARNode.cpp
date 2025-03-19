@@ -1,78 +1,21 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundLowPassARNode.h"
+#include "MetasoundBranches/Public/MetasoundLadderARNode.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundPrimitives.h"
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
 #include "Math/UnrealMathUtility.h"
+#include "DSP/Filter.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundLowPassARNode"
+#define LOCTEXT_NAMESPACE "MetasoundLadderARNode"
 
 namespace Metasound
 {
-    class FLowPassArFilter
+    namespace LadderArVertexNames
     {
-    public:
-        void Init(float InSampleRate)
-        {
-            SampleRate = InSampleRate;
-            Reset();
-        }
-    
-        void Reset()
-        {
-            FMemory::Memzero(Stage, sizeof(Stage));
-            Frequency = 1000.0f;
-            Resonance = 1.0f;
-            UpdateCoefficients();
-        }
-    
-        void SetFrequency(float InFrequency)
-        {
-            Frequency = FMath::Clamp(InFrequency, 20.0f, 0.45f * SampleRate);
-            UpdateCoefficients();
-        }
-    
-        void SetResonance(float InResonance)
-        {
-            Resonance = FMath::Clamp(InResonance, 0.0f, 10.0f);
-            ScaledResonance = 4.0f * (Resonance / 10.0f);
-        }
-    
-        float Process(float InSample)
-        {
-            float Feedback = ScaledResonance * (Stage[3]); 
-            float Input = InSample - Feedback;
-    
-            for (int i = 0; i < 4; ++i)
-            {
-                Stage[i] += Alpha * (Input - Stage[i]);
-                Input = Stage[i];
-            }
-    
-            return Stage[3];
-        }
-    
-    private:
-        void UpdateCoefficients()
-        {
-            float x = Frequency / SampleRate;
-            Alpha = (3.14159265359f * x) / (1.0f + (3.14159265359f * x));
-        }
-    
-        float SampleRate;
-        float Frequency;
-        float Resonance;
-        float ScaledResonance;
-        float Alpha;
-        float Stage[4];
-    };
-
-    namespace LowPassArVertexNames
-    {
-        METASOUND_PARAM(InputSignal,        "In",         "Audio input to the filter.");
+        METASOUND_PARAM(InputSignal,        "In",         "Audio input to the ladder filter.");
         METASOUND_PARAM(InputCutoff,        "Cutoff",     "Base cutoff frequency.");
         METASOUND_PARAM(InputResonance,     "Resonance",  "Base resonance.");
         METASOUND_PARAM(InputCutoffMod,     "Cutoff Modulation", "Audio-rate modulation signal for cutoff frequency.");
@@ -80,10 +23,10 @@ namespace Metasound
         METASOUND_PARAM(OutputSignal,       "Out",        "Filtered audio output.");
     }
 
-    class FLowPassArOperator : public TExecutableOperator<FLowPassArOperator>
+    class FLadderArOperator : public TExecutableOperator<FLadderArOperator>
     {
     public:
-        FLowPassArOperator(
+        FLadderArOperator(
             const FOperatorSettings& InSettings,
             const FAudioBufferReadRef& InAudioInput,
             const FFloatReadRef& InCutoff,
@@ -99,14 +42,15 @@ namespace Metasound
             , AudioOutput(FAudioBufferWriteRef::CreateNew(InSettings))
             , BlockSize(InSettings.GetNumFramesPerBlock())
             , SampleRate(InSettings.GetSampleRate())
-            // , MaxCutoffFrequency(0.5f * SampleRate)
+            , MaxCutoffFrequency(0.5f * SampleRate)
         {
-            LowPassFilter.Init(SampleRate);
+            LadderFilter.Init(SampleRate, 1);
+            check(AudioOutput->Num() == BlockSize);
         }
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace LowPassArVertexNames;
+            using namespace LadderArVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -129,11 +73,11 @@ namespace Metasound
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
             {
                 FNodeClassMetadata Metadata;
-                Metadata.ClassName = { TEXT("UE"), TEXT("Low Pass Filter (AR)"), TEXT("Audio") };
+                Metadata.ClassName = { TEXT("UE"), TEXT("Ladder (AR)"), TEXT("Audio") };
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 0;
-                Metadata.DisplayName = LOCTEXT("LowPassArDisplayName", "Low Pass Filter (AR)");
-                Metadata.Description = LOCTEXT("LowPassArDesc", "Low pass (ladder) filter with audio-rate modulation for cutoff and resonance.");
+                Metadata.DisplayName = LOCTEXT("LadderArDisplayName", "Ladder (AR)");
+                Metadata.Description = LOCTEXT("LadderArDesc", "Ladder filter with audio-rate modulation for cutoff and resonance.");
                 Metadata.Author = TEXT("Charles Matthews");
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = DeclareVertexInterface();
@@ -147,7 +91,7 @@ namespace Metasound
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace LowPassArVertexNames;
+            using namespace LadderArVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
 
@@ -166,7 +110,7 @@ namespace Metasound
             TDataReadReference<FAudioBuffer> ResMod = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(
                 METASOUND_GET_PARAM_NAME(InputResonanceMod), InParams.OperatorSettings);
 
-            return MakeUnique<FLowPassArOperator>(
+            return MakeUnique<FLadderArOperator>(
                 InParams.OperatorSettings,
                 InputSignal,
                 BaseCutoff,
@@ -184,7 +128,7 @@ namespace Metasound
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace LowPassArVertexNames;
+            using namespace LadderArVertexNames;
 
             FDataReferenceCollection OutputData;
             OutputData.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal), AudioOutput);
@@ -193,20 +137,31 @@ namespace Metasound
 
         virtual void Execute()
         {
-            const float* InAudio = AudioInput->GetData();
-            const float* CutoffModData = CutoffMod->GetData();
-            const float* ResModData = ResonanceMod->GetData();
-            float* OutAudio = AudioOutput->GetData();
+            const float* InAudio        = AudioInput->GetData();
+            const float* CutoffModData  = CutoffMod->GetData();
+            const float* ResModData     = ResonanceMod->GetData();
+            float* OutAudio             = AudioOutput->GetData();
 
-            for (int32 i = 0; i < BlockSize; ++i)
+            const int32 NumFrames = AudioInput->Num();
+
+            for (int32 i = 0; i < NumFrames; ++i)
             {
                 float CutoffVal = (*BaseCutoff) + CutoffModData[i];
+                CutoffVal = FMath::Clamp(CutoffVal, 0.0f, MaxCutoffFrequency);
+
                 float ResonanceVal = (*BaseResonance) + ResModData[i];
+                ResonanceVal = FMath::Clamp(ResonanceVal, 1.0f, 10.0f);
 
-                LowPassFilter.SetFrequency(CutoffVal);
-                LowPassFilter.SetResonance(ResonanceVal);
+                LadderFilter.SetFrequency(CutoffVal);
+                LadderFilter.SetQ(ResonanceVal);
+                LadderFilter.Update();
 
-                OutAudio[i] = LowPassFilter.Process(InAudio[i]);
+                float SingleInSample = InAudio[i];
+                float SingleOutSample = 0.0f;
+
+                LadderFilter.ProcessAudio(&SingleInSample, 1 /* NumSamples */, &SingleOutSample);
+
+                OutAudio[i] = SingleOutSample;
             }
         }
 
@@ -217,30 +172,30 @@ namespace Metasound
         FFloatReadRef        BaseResonance;
         FAudioBufferReadRef  CutoffMod;
         FAudioBufferReadRef  ResonanceMod;
-        
+
         // Output
         FAudioBufferWriteRef AudioOutput;
-        
-        FLowPassArFilter LowPassFilter;
+
         const int32 BlockSize;
         const float SampleRate;
-        // const float MaxCutoffFrequency;
+        const float MaxCutoffFrequency;
+        Audio::FLadderFilter LadderFilter;
     };
 
-    class FLowPassArNode : public FNodeFacade
+    class FLadderArNode : public FNodeFacade
     {
     public:
-        FLowPassArNode(const FNodeInitData& InitData)
+        FLadderArNode(const FNodeInitData& InitData)
             : FNodeFacade(
                 InitData.InstanceName,
                 InitData.InstanceID,
-                TFacadeOperatorClass<FLowPassArOperator>()
+                TFacadeOperatorClass<FLadderArOperator>()
               )
         {
         }
     };
 
-    METASOUND_REGISTER_NODE(FLowPassArNode);
+    METASOUND_REGISTER_NODE(FLadderArNode);
 }
 
 #undef LOCTEXT_NAMESPACE
