@@ -53,19 +53,15 @@ namespace Metasound
         {
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
             {
-                FNodeClassMetadata Metadata = MetasoundArrayNodesPrivate::CreateArrayNodeClassMetadata(
-                    GetMetasoundDataTypeName<ElementType>(),
-                    TEXT("Parse MIDI Note"),
-                    METASOUND_LOCTEXT_FORMAT("ParseMidiNoteName", "Parse MIDI Note ({0})", GetMetasoundDataTypeDisplayText<ElementType>()),
-                    LOCTEXT("ParseMidiNoteDesc", "Parses a note string to MIDI."),
-                    GetDefaultInterface(),
-                    1,  // Major version
-                    0,  // Minor version
-                    false
-                );
-
+                FNodeClassMetadata Metadata;
+                Metadata.ClassName = { StandardNodes::Namespace, TEXT("ParseMidiNote"), StandardNodes::AudioVariant };
+                Metadata.MajorVersion = 1;
+                Metadata.MinorVersion = 0;
+                Metadata.DisplayName = METASOUND_LOCTEXT_FORMAT("ParseMidiNoteName", "Parse MIDI Note ({0})", GetMetasoundDataTypeDisplayText<ElementType>());
+                Metadata.Description = LOCTEXT("ParseMidiNoteDesc", "Parses a note string to MIDI.");
                 Metadata.Author = TEXT("Charles Matthews");
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
+                Metadata.DefaultInterface = GetDefaultInterface();
                 Metadata.CategoryHierarchy = { LOCTEXT("Custom", "Branches") };
                 Metadata.Keywords = TArray<FText>();
 
