@@ -20,7 +20,7 @@ namespace Metasound
             case 'b': return 6;
             default:  return 0;
         }
-    }
+    };
 
     constexpr float kPitchOffsets[7] = {
         0.f, 2.f, 4.f, 5.f, 7.f, 9.f, 11.f
