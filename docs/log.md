@@ -55,4 +55,5 @@
 | 03/16 | - Create Get Wave Cue Points prototype. |
 | 03/17 | - Prototype Get Block Duration and Get Current Frame nodes for troubleshooting.<br> - Prototype Delta Time node. |
 | 03/18 | - Create Wrap and Fold nodes (Audio). |
-| 03/18 | - Move Wrap and Fold processes into shared headers.<br>- Create Float versions of Wrap and Fold. |
+| 03/19 | - Move Wrap and Fold processes into shared headers.<br>- Create Float versions of Wrap and Fold.<br>- Create prototype of filter with AR control |
+| 03/20 | - Create Kink node prototype. |
