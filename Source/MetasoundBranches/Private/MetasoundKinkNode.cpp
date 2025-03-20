@@ -1,6 +1,7 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
 #include "MetasoundBranches/Public/MetasoundKinkNode.h"
+#include "MetasoundBranches/Public/Kink.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundPrimitives.h"
 #include "MetasoundNodeRegistrationMacro.h"
@@ -20,14 +21,6 @@ namespace Metasound
         METASOUND_PARAM(OutputSignal, "Out",       "Kinked output.");
     }
 
-    inline float KinkProcess(float x, float s)
-    {
-        float y = x * s;
-        if (y < 0.5f) return y;
-        float slope2 = 0.5f / (1.f - (0.5f / s));
-        float b = 0.5f - slope2 * (0.5f / s);
-        return slope2 * x + b;
-    }
 
     class FKinkOperator : public TExecutableOperator<FKinkOperator>
     {
