@@ -51,4 +51,9 @@
 | 03/09 | - Draft note parser with quarter tones, integrate into a Make Note variant (quarter tones not yet integrated into voice management).<br>- Move VoiceState struct into header.|
 | 03/10 | - Add Event trigger out to Make Note.<br>- Add multi-length array functionality to voice manager|
 | 03/11 | - Add Event trigger out to Make Note From String.|
-
+| 03/15 | - Docs: sketch a script for metadata extraction from source. |
+| 03/16 | - Create Get Wave Cue Points prototype. |
+| 03/17 | - Prototype Get Block Duration and Get Current Frame nodes for troubleshooting.<br> - Prototype Delta Time node. |
+| 03/18 | - Create Wrap and Fold nodes (Audio). |
+| 03/19 | - Move Wrap and Fold processes into shared headers.<br>- Create Float versions of Wrap and Fold.<br>- Create prototype of filter with AR control |
+| 03/20 | - Create Kink node prototype (audio and float, though the latter is more for experimental purposes).<br>- Create Tuning From Array and Frequency Array From Tuning (not the best approach but a step in the right direction).|
