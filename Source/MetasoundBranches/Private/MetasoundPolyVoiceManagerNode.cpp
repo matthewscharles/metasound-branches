@@ -149,8 +149,8 @@ namespace Metasound
                 Metadata.ClassName = {TEXT("UE"), TEXT("Voice Manager"), TEXT("Float")};
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 1;
-                Metadata.DisplayName = LOCTEXT("PolyVoiceManagerNodeDisplayName", "Voice Manager");
-                Metadata.Description = LOCTEXT("PolyVoiceManagerNodeDesc", "Manages up to 8 voices with round-robin or LIFO allocation.");
+                Metadata.DisplayName = METASOUND_LOCTEXT("PolyVoiceManagerNodeDisplayName", "Voice Manager");
+                Metadata.Description = METASOUND_LOCTEXT("PolyVoiceManagerNodeDesc", "Manages up to 8 voices with round-robin or LIFO allocation.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = DeclareVertexInterface();

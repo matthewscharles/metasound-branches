@@ -22,18 +22,23 @@ namespace Metasound
         }
     }
 
-    constexpr float kPitchOffsets[7] = {
+    inline constexpr float kPitchOffsets[7] = {
         0.f, 2.f, 4.f, 5.f, 7.f, 9.f, 11.f
     };
 
-    constexpr float kAccidentalOffsets[256] = {
-        ['#'] =  1.0f,
-        ['b'] = -1.0f,
-        ['^'] =  0.5f,
-        ['_'] = -0.5f
-    };
+    inline float GetAccidentalOffset(char accidental)
+    {
+        switch (accidental)
+        {
+            case '#': return  1.0f;
+            case 'b': return -1.0f;
+            case '^': return  0.5f;
+            case '_': return -0.5f;
+            default:  return  0.0f;
+        }
+    }
 
-    constexpr float ParseMidiNote(const char* Note)
+    inline float ParseMidiNote(const char* Note)
     {
         int pIndex = PitchIndex(Note[0]);
 
@@ -41,17 +46,10 @@ namespace Metasound
         int i = 1;
 
         // Unrolled reading of up to 4 accidentals.
-        float a0 = kAccidentalOffsets[(unsigned char)Note[i]];
-        i += (a0 != 0.f) ? 1 : 0;
-
-        float a1 = kAccidentalOffsets[(unsigned char)Note[i]];
-        i += (a1 != 0.f) ? 1 : 0;
-
-        float a2 = kAccidentalOffsets[(unsigned char)Note[i]];
-        i += (a2 != 0.f) ? 1 : 0;
-
-        float a3 = kAccidentalOffsets[(unsigned char)Note[i]];
-        i += (a3 != 0.f) ? 1 : 0;
+        float a0 = GetAccidentalOffset(Note[i]); i += (a0 != 0.f) ? 1 : 0;
+        float a1 = GetAccidentalOffset(Note[i]); i += (a1 != 0.f) ? 1 : 0;
+        float a2 = GetAccidentalOffset(Note[i]); i += (a2 != 0.f) ? 1 : 0;
+        float a3 = GetAccidentalOffset(Note[i]); i += (a3 != 0.f) ? 1 : 0;
 
         float accidentalSum = a0 + a1 + a2 + a3;
 

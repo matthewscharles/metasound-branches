@@ -1,3 +1,5 @@
+// Copyright 2025 Charles Matthews. All Rights Reserved.
+
 #pragma once
 
 #include "CoreMinimal.h"
