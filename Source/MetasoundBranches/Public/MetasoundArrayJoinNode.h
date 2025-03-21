@@ -83,7 +83,7 @@ namespace Metasound
 			const_cast<FNodeClassMetadata&>(Metadata).PromptIfMissing = PluginNodeMissingPrompt;
 			const_cast<FNodeClassMetadata&>(Metadata).CategoryHierarchy = {
 				METASOUND_LOCTEXT("Custom", "Branches"),
-				METASOUND_LOCTEXT("CustomSub", "Arrays")
+				METASOUND_LOCTEXT("CustomSub", "Array")
 			};
 			const_cast<FNodeClassMetadata&>(Metadata).Keywords = TArray<FText>();
 			return Metadata;
