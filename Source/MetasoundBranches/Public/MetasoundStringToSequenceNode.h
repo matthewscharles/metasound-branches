@@ -125,7 +125,10 @@ namespace Metasound
 				Metadata.Description = NodeDescription;
 				Metadata.Author = TEXT("Charles Matthews");
 				Metadata.DefaultInterface = NodeInterface;
-				Metadata.CategoryHierarchy = { LOCTEXT("Custom", "Branches") };
+				Metadata.CategoryHierarchy = {
+                    METASOUND_LOCTEXT("Custom", "Branches"),
+                    METASOUND_LOCTEXT("CustomSub", "Patterns")
+                };
 				Metadata.Keywords = TArray<FText>();
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
 				return Metadata;
