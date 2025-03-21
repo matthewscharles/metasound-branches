@@ -17,18 +17,18 @@ namespace Metasound
         METASOUND_PARAM(InputMIDINoteNumber, "MIDI Note Number", "Input MIDI note number (integer).");
         METASOUND_PARAM(InputReferenceFrequency, "Reference Frequency", "Reference frequency in Hz.");
         METASOUND_PARAM(InputReferenceMIDINote, "Reference Note", "Reference MIDI note number.");
-        METASOUND_PARAM(InputTuningCents0, "0", "C adjustment in cents");
-        METASOUND_PARAM(InputTuningCents1, "1", "C♯ / D♭ adjustment in cents");
-        METASOUND_PARAM(InputTuningCents2, "2", "D adjustment in cents");
-        METASOUND_PARAM(InputTuningCents3, "3", "D♯ / E♭ adjustment in cents");
-        METASOUND_PARAM(InputTuningCents4, "4", "E adjustment in cents");
-        METASOUND_PARAM(InputTuningCents5, "5", "F adjustment in cents");
-        METASOUND_PARAM(InputTuningCents6, "6", "F♯ / G♭ adjustment in cents");
-        METASOUND_PARAM(InputTuningCents7, "7", "G adjustment in cents");
-        METASOUND_PARAM(InputTuningCents8, "8", "G♯ / A♭ adjustment in cents");
-        METASOUND_PARAM(InputTuningCents9, "9", "A adjustment in cents");
-        METASOUND_PARAM(InputTuningCents10, "10", "A♯ / B♭ adjustment in cents");
-        METASOUND_PARAM(InputTuningCents11, "11", "B adjustment in cents");
+        METASOUND_PARAM(InputTuningCents0, "Cents 0", "C adjustment in cents");
+        METASOUND_PARAM(InputTuningCents1, "Cents 1", "C♯ / D♭ adjustment in cents");
+        METASOUND_PARAM(InputTuningCents2, "Cents 2", "D adjustment in cents");
+        METASOUND_PARAM(InputTuningCents3, "Cents 3", "D♯ / E♭ adjustment in cents");
+        METASOUND_PARAM(InputTuningCents4, "Cents 4", "E adjustment in cents");
+        METASOUND_PARAM(InputTuningCents5, "Cents 5", "F adjustment in cents");
+        METASOUND_PARAM(InputTuningCents6, "Cents 6", "F♯ / G♭ adjustment in cents");
+        METASOUND_PARAM(InputTuningCents7, "Cents 7", "G adjustment in cents");
+        METASOUND_PARAM(InputTuningCents8, "Cents 8", "G♯ / A♭ adjustment in cents");
+        METASOUND_PARAM(InputTuningCents9, "Cents 9", "A adjustment in cents");
+        METASOUND_PARAM(InputTuningCents10, "Cents 10", "A♯ / B♭ adjustment in cents");
+        METASOUND_PARAM(InputTuningCents11, "Cents 11", "B adjustment in cents");
         METASOUND_PARAM(OutputFrequency, "Frequency", "Output frequency.");
     }
 
