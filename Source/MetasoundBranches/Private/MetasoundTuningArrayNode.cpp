@@ -118,7 +118,7 @@ namespace Metasound
                 Metadata.ClassName = { TEXT("UE"), TEXT("Frequency Array From Tuning"), TEXT("Float") };
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 1;
-                Metadata.DisplayName = METASOUND_LOCTEXT("TuningArrayNodeDisplayName", "Frequency Array From Array");
+                Metadata.DisplayName = METASOUND_LOCTEXT("TuningArrayNodeDisplayName", "Frequency Array From Tuning");
                 Metadata.Description = METASOUND_LOCTEXT("TuningArrayNodeDesc", "Generates an array of frequencies based on custom tuning with cent values per-note.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
