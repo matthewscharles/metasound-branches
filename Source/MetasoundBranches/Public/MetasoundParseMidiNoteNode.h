@@ -63,8 +63,10 @@ namespace Metasound
                 Metadata.Description = LOCTEXT("ParseMidiNoteDesc", "Parses a note string to MIDI.");
                 Metadata.Author = TEXT("Charles Matthews");
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
-                Metadata.DefaultInterface = GetDefaultInterface();
-                Metadata.CategoryHierarchy = { LOCTEXT("Custom", "Branches") };
+                Metadata.CategoryHierarchy = {
+                    METASOUND_LOCTEXT("Custom", "Branches"),
+                    METASOUND_LOCTEXT("CustomSub", "MIDI")
+                };
                 Metadata.Keywords = TArray<FText>();
 
                 return Metadata;

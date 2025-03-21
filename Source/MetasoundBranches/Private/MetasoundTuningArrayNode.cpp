@@ -1,20 +1,24 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundTuningNode.h"
+#include "MetasoundBranches/Public/MetasoundTuningArrayNode.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundPrimitives.h"
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundStandardNodes_TuningNode"
+#define LOCTEXT_NAMESPACE "MetasoundStandardNodes_TuningArrayNode"
 
 namespace Metasound
 {
-    namespace TuningNodeVertexNames
+    using FArrayType = TArray<float>;
+    using FArrayDataWriteReference = TDataWriteReference<FArrayType>;
+
+    namespace TuningArrayNodeVertexNames
     {
         METASOUND_PARAM(InputUpdateTrigger, "Trigger", "Triggers tuning update.");
-        METASOUND_PARAM(InputMIDINoteNumber, "MIDI Note Number", "Input MIDI note number (integer).");
+        METASOUND_PARAM(InputStart, "Start", "Start note (integer).");
+        METASOUND_PARAM(InputEnd, "End", "End note (integer).");
         METASOUND_PARAM(InputReferenceFrequency, "Reference Frequency", "Reference frequency in Hz.");
         METASOUND_PARAM(InputReferenceMIDINote, "Reference Note", "Reference MIDI note number.");
         METASOUND_PARAM(InputTuningCents0, "Cents 0", "C adjustment in cents");
@@ -29,18 +33,19 @@ namespace Metasound
         METASOUND_PARAM(InputTuningCents9, "Cents 9", "A adjustment in cents");
         METASOUND_PARAM(InputTuningCents10, "Cents 10", "A♯ / B♭ adjustment in cents");
         METASOUND_PARAM(InputTuningCents11, "Cents 11", "B adjustment in cents");
-        METASOUND_PARAM(OutputFrequency, "Frequency", "Output frequency.");
+        METASOUND_PARAM(OutputFrequencyArray, "Array", "Float array of frequencies.");
     }
 
-    class FTuningNodeOperator : public TExecutableOperator<FTuningNodeOperator>
+    class FTuningArrayNodeOperator : public TExecutableOperator<FTuningArrayNodeOperator>
     {
     public:
-        FTuningNodeOperator(
+        FTuningArrayNodeOperator(
             const FOperatorSettings& InSettings,
-            const FTriggerReadRef& InUpdateTrigger,
-            const FInt32ReadRef& InMIDINoteNumber,
+            const TDataReadReference<FTrigger>& InUpdateTrigger,
+            const TDataReadReference<int32>& InStart,
+            const TDataReadReference<int32>& InEnd,
             const FFloatReadRef& InReferenceFrequency,
-            const FInt32ReadRef& InReferenceMIDINote,
+            const TDataReadReference<int32>& InReferenceMIDINote,
             const FFloatReadRef& InTuningCents0,
             const FFloatReadRef& InTuningCents1,
             const FFloatReadRef& InTuningCents2,
@@ -54,7 +59,8 @@ namespace Metasound
             const FFloatReadRef& InTuningCents10,
             const FFloatReadRef& InTuningCents11)
             : UpdateTrigger(InUpdateTrigger)
-            , MIDINoteNumber(InMIDINoteNumber)
+            , Start(InStart)
+            , End(InEnd)
             , ReferenceFrequency(InReferenceFrequency)
             , ReferenceMIDINote(InReferenceMIDINote)
             , TuningCents0(InTuningCents0)
@@ -69,18 +75,18 @@ namespace Metasound
             , TuningCents9(InTuningCents9)
             , TuningCents10(InTuningCents10)
             , TuningCents11(InTuningCents11)
-            , OutputFrequency(FFloatWriteRef::CreateNew(0.0f))
+            , OutputFrequencyArray(TDataWriteReference<TArray<float>>::CreateNew())
         {
         }
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace TuningNodeVertexNames;
-
+            using namespace TuningArrayNodeVertexNames;
             static const FVertexInterface Interface(
                 FInputVertexInterface(
                     TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputUpdateTrigger)),
-                    TInputDataVertex<int32>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputMIDINoteNumber)),
+                    TInputDataVertex<int32>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputStart), 0),
+                    TInputDataVertex<int32>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputEnd), 127),
                     TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputReferenceFrequency), 440.0f),
                     TInputDataVertex<int32>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputReferenceMIDINote), 69),
                     TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputTuningCents0)),
@@ -97,10 +103,9 @@ namespace Metasound
                     TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputTuningCents11))
                 ),
                 FOutputVertexInterface(
-                    TOutputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputFrequency))
+                    TOutputDataVertex<TArray<float>>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputFrequencyArray))
                 )
             );
-
             return Interface;
         }
         
@@ -109,14 +114,12 @@ namespace Metasound
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
             {
                 FVertexInterface NodeInterface = DeclareVertexInterface();
-
                 FNodeClassMetadata Metadata;
-
-                Metadata.ClassName = { TEXT("UE"), TEXT("Tuning"), TEXT("Float") };
+                Metadata.ClassName = { TEXT("UE"), TEXT("Frequency Array From Tuning"), TEXT("Float") };
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 1;
-                Metadata.DisplayName = METASOUND_LOCTEXT("TuningNodeDisplayName", "Tuning");
-                Metadata.Description = METASOUND_LOCTEXT("TuningNodeDesc", "Generates a frequency based on custom tuning per-note.");
+                Metadata.DisplayName = METASOUND_LOCTEXT("TuningArrayNodeDisplayName", "Frequency Array From Tuning");
+                Metadata.Description = METASOUND_LOCTEXT("TuningArrayNodeDesc", "Generates an array of frequencies based on custom tuning with cent values per-note.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = NodeInterface;
@@ -125,22 +128,19 @@ namespace Metasound
                     METASOUND_LOCTEXT("CustomSub", "Tuning")
                 };
                 Metadata.Keywords = TArray<FText>();
-
                 return Metadata;
             };
-
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             return Metadata;
         }
         
         virtual FDataReferenceCollection GetInputs() const override
         {
-            using namespace TuningNodeVertexNames;
-
+            using namespace TuningArrayNodeVertexNames;
             FDataReferenceCollection InputDataReferences;
-
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputUpdateTrigger), UpdateTrigger);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputMIDINoteNumber), MIDINoteNumber);
+            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputStart), Start);
+            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputEnd), End);
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputReferenceFrequency), ReferenceFrequency);
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputReferenceMIDINote), ReferenceMIDINote);
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents0), TuningCents0);
@@ -155,37 +155,31 @@ namespace Metasound
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents9), TuningCents9);
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents10), TuningCents10);
             InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents11), TuningCents11);
-
             return InputDataReferences;
         }
 
         virtual FDataReferenceCollection GetOutputs() const override
         {
-            using namespace TuningNodeVertexNames;
-
+            using namespace TuningArrayNodeVertexNames;
             FDataReferenceCollection OutputDataReferences;
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputFrequency), OutputFrequency);
+            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputFrequencyArray), OutputFrequencyArray);
             return OutputDataReferences;
         }
-
+        
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace TuningNodeVertexNames;
-
+            using namespace TuningArrayNodeVertexNames;
             const FInputVertexInterfaceData& InputData = InParams.InputData;
-
             TDataReadReference<FTrigger> UpdateTrigger = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(
                 METASOUND_GET_PARAM_NAME(InputUpdateTrigger), InParams.OperatorSettings);
-
-            TDataReadReference<int32> MIDINoteNumber = InputData.GetOrCreateDefaultDataReadReference<int32>(
-                METASOUND_GET_PARAM_NAME(InputMIDINoteNumber), InParams.OperatorSettings);
-
+            TDataReadReference<int32> Start = InputData.GetOrCreateDefaultDataReadReference<int32>(
+                METASOUND_GET_PARAM_NAME(InputStart), InParams.OperatorSettings);
+            TDataReadReference<int32> End = InputData.GetOrCreateDefaultDataReadReference<int32>(
+                METASOUND_GET_PARAM_NAME(InputEnd), InParams.OperatorSettings);
             TDataReadReference<float> ReferenceFrequency = InputData.GetOrCreateDefaultDataReadReference<float>(
                 METASOUND_GET_PARAM_NAME(InputReferenceFrequency), InParams.OperatorSettings);
-
             TDataReadReference<int32> ReferenceMIDINote = InputData.GetOrCreateDefaultDataReadReference<int32>(
                 METASOUND_GET_PARAM_NAME(InputReferenceMIDINote), InParams.OperatorSettings);
-
             TDataReadReference<float> TuningCents0 = InputData.GetOrCreateDefaultDataReadReference<float>(
                 METASOUND_GET_PARAM_NAME(InputTuningCents0), InParams.OperatorSettings);
             TDataReadReference<float> TuningCents1 = InputData.GetOrCreateDefaultDataReadReference<float>(
@@ -211,10 +205,11 @@ namespace Metasound
             TDataReadReference<float> TuningCents11 = InputData.GetOrCreateDefaultDataReadReference<float>(
                 METASOUND_GET_PARAM_NAME(InputTuningCents11), InParams.OperatorSettings);
 
-            return MakeUnique<FTuningNodeOperator>(
+            return MakeUnique<FTuningArrayNodeOperator>(
                 InParams.OperatorSettings,
                 UpdateTrigger,
-                MIDINoteNumber,
+                Start,
+                End,
                 ReferenceFrequency,
                 ReferenceMIDINote,
                 TuningCents0,
@@ -231,16 +226,18 @@ namespace Metasound
                 TuningCents11
             );
         }
-
+        
         void Execute()
         {
             UpdateTrigger->ExecuteBlock(
                 [](int32, int32) {},
-                [this](int32 StartFrame, int32)
+                [this](int32, int32)
                 {
-                    int32 midiNote = *MIDINoteNumber;
-                    int32 noteInOctave = midiNote % 12;
-
+                    int32 startNote = *Start;
+                    int32 endNote = *End;
+                    int32 count = endNote - startNote + 1;
+                    FArrayType FrequencyArray;
+                    FrequencyArray.SetNum(count);
                     float tuningCentsArray[12] = {
                         *TuningCents0,
                         *TuningCents1,
@@ -255,46 +252,39 @@ namespace Metasound
                         *TuningCents10,
                         *TuningCents11
                     };
-
-                    float tuningAdjustmentCents = tuningCentsArray[noteInOctave];
-                    float tuningAdjustmentSemitones = tuningAdjustmentCents / 100.0f;
-                    float adjustedNote = midiNote + tuningAdjustmentSemitones;
-                    float frequency = *ReferenceFrequency * powf(2.0f, (adjustedNote - *ReferenceMIDINote) / 12.0f);
-                    *OutputFrequency = frequency;
+                    for (int32 midiNote = startNote; midiNote <= endNote; ++midiNote)
+                    {
+                        int32 noteInOctave = midiNote % 12;
+                        float tuningAdjustmentSemitones = tuningCentsArray[noteInOctave] / 100.0f;
+                        float adjustedNote = midiNote + tuningAdjustmentSemitones;
+                        float frequency = *ReferenceFrequency * powf(2.0f, (adjustedNote - *ReferenceMIDINote) / 12.0f);
+                        FrequencyArray[midiNote - startNote] = frequency;
+                    }
+                    *OutputFrequencyArray = FrequencyArray;
                 }
             );
         }
 
     private:
-        FTriggerReadRef UpdateTrigger;
-        FInt32ReadRef MIDINoteNumber;
-        FFloatReadRef ReferenceFrequency;
-        FInt32ReadRef ReferenceMIDINote;
-        FFloatReadRef TuningCents0;
-        FFloatReadRef TuningCents1;
-        FFloatReadRef TuningCents2;
-        FFloatReadRef TuningCents3;
-        FFloatReadRef TuningCents4;
-        FFloatReadRef TuningCents5;
-        FFloatReadRef TuningCents6;
-        FFloatReadRef TuningCents7;
-        FFloatReadRef TuningCents8;
-        FFloatReadRef TuningCents9;
-        FFloatReadRef TuningCents10;
-        FFloatReadRef TuningCents11;
-        FFloatWriteRef OutputFrequency;
+        TDataReadReference<FTrigger> UpdateTrigger;
+        TDataReadReference<int32> Start;
+        TDataReadReference<int32> End;
+        TDataReadReference<float> ReferenceFrequency;
+        TDataReadReference<int32> ReferenceMIDINote;
+        FFloatReadRef TuningCents0, TuningCents1, TuningCents2, TuningCents3, TuningCents4, TuningCents5, TuningCents6, TuningCents7, TuningCents8, TuningCents9, TuningCents10, TuningCents11;
+        TDataWriteReference<TArray<float>> OutputFrequencyArray;
     };
 
-    class FTuningNode : public FNodeFacade
+    class FTuningArrayNode : public FNodeFacade
     {
     public:
-        FTuningNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FTuningNodeOperator>())
+        FTuningArrayNode(const FNodeInitData& InitData)
+            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FTuningArrayNodeOperator>())
         {
         }
     };
-    
-    METASOUND_REGISTER_NODE(FTuningNode);
+
+    METASOUND_REGISTER_NODE(FTuningArrayNode);
 }
 
 #undef LOCTEXT_NAMESPACE

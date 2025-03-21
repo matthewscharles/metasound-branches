@@ -88,7 +88,10 @@ namespace Metasound
 			static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
 			const_cast<FNodeClassMetadata&>(Metadata).Author = TEXT("Charles Matthews");
 			const_cast<FNodeClassMetadata&>(Metadata).PromptIfMissing = PluginNodeMissingPrompt;
-			const_cast<FNodeClassMetadata&>(Metadata).CategoryHierarchy = { LOCTEXT("Custom", "Branches") };
+			const_cast<FNodeClassMetadata&>(Metadata).CategoryHierarchy = {
+				METASOUND_LOCTEXT("Custom", "Branches"),
+				METASOUND_LOCTEXT("CustomSub", "Array")
+			};
 			const_cast<FNodeClassMetadata&>(Metadata).Keywords = TArray<FText>();
 			return Metadata;
 		}
