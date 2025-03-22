@@ -22,6 +22,7 @@ namespace Metasound
         METASOUND_PARAM(InputReferenceNote, "Reference Note", "MIDI note used as tuning reference.");
         METASOUND_PARAM(InputReferenceFrequency, "Reference Frequency", "Reference frequency in Hz.");
         METASOUND_PARAM(InputOctaveDegree, "Octave Degree", "Number of notes per octave.");
+        METASOUND_PARAM(InputPeriodRatio, "Period Ratio", "Ratio of octave.");
         METASOUND_PARAM(InputScaleDegrees, "Scale Degrees", "Array of scale degrees (-1 = unassigned).");
         METASOUND_PARAM(InputCentValues, "Cent Values", "Array of cent values per MIDI note.");
 
@@ -42,6 +43,7 @@ namespace Metasound
             const FInt32ReadRef& InReferenceNote,
             const FFloatReadRef& InReferenceFrequency,
             const FInt32ReadRef& InOctaveDegree,
+            const FFloatReadRef& InPeriodRatio,
             const TDataReadReference<TArray<int32>>& InScaleDegrees,
             const TDataReadReference<TArray<float>>& InCentValues)
             : Trigger(InTrigger)
@@ -52,6 +54,7 @@ namespace Metasound
             , ReferenceNote(InReferenceNote)
             , ReferenceFrequency(InReferenceFrequency)
             , OctaveDegree(InOctaveDegree)
+            , PeriodRatio(FFloatReadRef::CreateNew(2.0f))
             , ScaleDegrees(InScaleDegrees)
             , CentValues(InCentValues)
             , OnMakeTrigger(FTriggerWriteRef::CreateNew(InSettings))
@@ -73,6 +76,7 @@ namespace Metasound
                     TInputDataVertex<int32>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputReferenceNote)),
                     TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputReferenceFrequency)),
                     TInputDataVertex<int32>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputOctaveDegree)),
+                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputPeriodRatio), 2.0f),
                     TInputDataVertex<TArray<int32>>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputScaleDegrees)),
                     TInputDataVertex<TArray<float>>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputCentValues))
                 ),
@@ -123,6 +127,7 @@ namespace Metasound
             Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputReferenceNote), ReferenceNote);
             Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputReferenceFrequency), ReferenceFrequency);
             Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputOctaveDegree), OctaveDegree);
+            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputPeriodRatio), PeriodRatio);
             Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputScaleDegrees), ScaleDegrees);
             Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputCentValues), CentValues);
             return Inputs;
@@ -153,6 +158,7 @@ namespace Metasound
                 InputData.GetOrCreateDefaultDataReadReference<int32>(METASOUND_GET_PARAM_NAME(InputReferenceNote), InParams.OperatorSettings),
                 InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputReferenceFrequency), InParams.OperatorSettings),
                 InputData.GetOrCreateDefaultDataReadReference<int32>(METASOUND_GET_PARAM_NAME(InputOctaveDegree), InParams.OperatorSettings),
+                InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputPeriodRatio), InParams.OperatorSettings),
                 InputData.GetOrCreateDefaultDataReadReference<TArray<int32>>(METASOUND_GET_PARAM_NAME(InputScaleDegrees), InParams.OperatorSettings),
                 InputData.GetOrCreateDefaultDataReadReference<TArray<float>>(METASOUND_GET_PARAM_NAME(InputCentValues), InParams.OperatorSettings)
             );
@@ -173,6 +179,7 @@ namespace Metasound
                     NewKbm.ReferenceNote = *ReferenceNote;
                     NewKbm.ReferenceFrequency = *ReferenceFrequency;
                     NewKbm.OctaveDegree = *OctaveDegree;
+                    NewKbm.PeriodRatio = *PeriodRatio;
                     NewKbm.ScaleDegrees = *ScaleDegrees;
                     NewKbm.CentValues = *CentValues;
                     *KbmData = NewKbm;
@@ -191,6 +198,7 @@ namespace Metasound
         FInt32ReadRef ReferenceNote;
         FFloatReadRef ReferenceFrequency;
         FInt32ReadRef OctaveDegree;
+        FFloatReadRef PeriodRatio;
         TDataReadReference<TArray<int32>> ScaleDegrees;
         TDataReadReference<TArray<float>> CentValues;
 

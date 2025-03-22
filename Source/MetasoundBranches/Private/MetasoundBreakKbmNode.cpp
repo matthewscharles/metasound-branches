@@ -25,6 +25,7 @@ namespace Metasound
         METASOUND_PARAM(OutputReferenceNote, "Reference Note", "MIDI note used as tuning reference.");
         METASOUND_PARAM(OutputReferenceFrequency, "Reference Frequency", "Reference frequency in Hz.");
         METASOUND_PARAM(OutputOctaveDegree, "Octave Degree", "Number of notes per octave.");
+        METASOUND_PARAM(OutputPeriodRatio, "Period Ratio", "Ratio of octave.");
         METASOUND_PARAM(OutputScaleDegrees, "Scale Degrees", "Array of scale degrees.");
         METASOUND_PARAM(OutputCentValues, "Cent Values", "Array of cent values.");
     }
@@ -46,6 +47,7 @@ namespace Metasound
             , ReferenceNote(FInt32WriteRef::CreateNew(69))
             , ReferenceFrequency(FFloatWriteRef::CreateNew(440.0f))
             , OctaveDegree(FInt32WriteRef::CreateNew(12))
+            , PeriodRatio(FFloatWriteRef::CreateNew(2.0f))
             , ScaleDegrees(TDataWriteReference<TArray<int32>>::CreateNew())
             , CentValues(TDataWriteReference<TArray<float>>::CreateNew())
         {
@@ -69,6 +71,7 @@ namespace Metasound
                     TOutputDataVertex<int32>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputReferenceNote)),
                     TOutputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputReferenceFrequency)),
                     TOutputDataVertex<int32>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputOctaveDegree)),
+                    TOutputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputPeriodRatio)),
                     TOutputDataVertex<TArray<int32>>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputScaleDegrees)),
                     TOutputDataVertex<TArray<float>>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputCentValues))
                 )
@@ -125,6 +128,7 @@ namespace Metasound
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputReferenceNote), ReferenceNote);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputReferenceFrequency), ReferenceFrequency);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputOctaveDegree), OctaveDegree);
+            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputPeriodRatio), PeriodRatio);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputScaleDegrees), ScaleDegrees);
             Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputCentValues), CentValues);
             return Outputs;
@@ -156,6 +160,7 @@ namespace Metasound
                     *ReferenceNote = KbmData->ReferenceNote;
                     *ReferenceFrequency = KbmData->ReferenceFrequency;
                     *OctaveDegree = KbmData->OctaveDegree;
+                    *PeriodRatio = KbmData->PeriodRatio;
                     *ScaleDegrees = KbmData->ScaleDegrees;
                     *CentValues = KbmData->CentValues;
 
@@ -175,6 +180,7 @@ namespace Metasound
         FInt32WriteRef ReferenceNote;
         FFloatWriteRef ReferenceFrequency;
         FInt32WriteRef OctaveDegree;
+        FFloatWriteRef PeriodRatio;
         TDataWriteReference<TArray<int32>> ScaleDegrees;
         TDataWriteReference<TArray<float>> CentValues;
     };
