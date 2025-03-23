@@ -71,11 +71,11 @@ namespace Metasound
 
                 FNodeClassMetadata Metadata;
 
-                Metadata.ClassName = { TEXT("UE"), TEXT("FM Oscillator"), TEXT("Cosine") };
+                Metadata.ClassName = { TEXT("UE"), TEXT("Function"), TEXT("Cosine") };
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 0;
-                Metadata.DisplayName = METASOUND_LOCTEXT("SineFMOscillatorNodeDisplayName", "FM Oscillator (Cosine)");
-                Metadata.Description = METASOUND_LOCTEXT("SineFMOscillatorNodeDesc", "Generate a cosine wave oscillator with phase-based FM and feedback.");
+                Metadata.DisplayName = METASOUND_LOCTEXT("SineFMOscillatorNodeDisplayName", "Function (Cosine)");
+                Metadata.Description = METASOUND_LOCTEXT("SineFMOscillatorNodeDesc", "Generate a consine wave with audio rate phase control and feedback.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = DeclareVertexInterface();

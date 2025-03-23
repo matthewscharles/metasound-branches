@@ -71,11 +71,11 @@ namespace Metasound
 
                 FNodeClassMetadata Metadata;
 
-                Metadata.ClassName = { TEXT("UE"), TEXT("FM Oscillator"), TEXT("Sawtooth") };
+                Metadata.ClassName = { TEXT("UE"), TEXT("Function"), TEXT("Sawtooth") };
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 0;
-                Metadata.DisplayName = METASOUND_LOCTEXT("SawFMOscillatorNodeDisplayName", "FM Oscillator (Sawtooth)");
-                Metadata.Description = METASOUND_LOCTEXT("SawFMOscillatorNodeDesc", "Generate a sawtooth wave oscillator with phase-based FM and feedback.");
+                Metadata.DisplayName = METASOUND_LOCTEXT("SawFMOscillatorNodeDisplayName", "Function (Sawtooth)");
+                Metadata.Description = METASOUND_LOCTEXT("SawFMOscillatorNodeDesc", "Generate a sawtooth wave with audio rate phase control and feedback.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = DeclareVertexInterface();
