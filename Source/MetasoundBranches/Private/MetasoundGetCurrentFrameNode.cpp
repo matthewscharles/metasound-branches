@@ -60,19 +60,17 @@ namespace Metasound
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             return Metadata;
         }
-
-        virtual FDataReferenceCollection GetInputs() const override
+        
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
-            FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(GetCurrentFrameNodeVertexNames::InputTrigger), InputTrigger);
-            return Inputs;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(GetCurrentFrameNodeVertexNames::InputTrigger), InputTrigger);
         }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
-            FDataReferenceCollection Outputs;
-            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(GetCurrentFrameNodeVertexNames::OutputFrame), OutputFrame);
-            return Outputs;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(GetCurrentFrameNodeVertexNames::OutputFrame), OutputFrame);
         }
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)

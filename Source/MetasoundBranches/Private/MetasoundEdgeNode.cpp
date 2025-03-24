@@ -88,30 +88,24 @@ namespace Metasound
             return Metadata;
         }
 
-        virtual FDataReferenceCollection GetInputs() const override
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace EdgeNames;
 
-            FDataReferenceCollection InputDataReferences;
-
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputDebounce), InputDebounce);
-
-            return InputDataReferences;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDebounce), InputDebounce);
         }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace EdgeNames;
 
-            FDataReferenceCollection OutputDataReferences;
-
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTriggerRise), OutputTriggerRise);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTriggerFall), OutputTriggerFall);
-
-            return OutputDataReferences;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputTriggerRise), OutputTriggerRise);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputTriggerFall), OutputTriggerFall);
         }
-
+        
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
             using namespace EdgeNames;

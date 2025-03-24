@@ -91,29 +91,26 @@ namespace Metasound
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             return Metadata;
         }
-
-        virtual FDataReferenceCollection GetInputs() const override
+        
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace StereoInverterNodeVertexNames;
 
-            FDataReferenceCollection InputDataReferences;
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputLeftSignal), InputLeftSignal);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputRightSignal), InputRightSignal);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputInvertLeft), InputInvertLeft);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputInvertRight), InputInvertRight);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputSwapChannels), InputSwapChannels);
-
-            return InputDataReferences;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputLeftSignal), InputLeftSignal);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputRightSignal), InputRightSignal);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputInvertLeft), InputInvertLeft);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputInvertRight), InputInvertRight);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSwapChannels), InputSwapChannels);
         }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace StereoInverterNodeVertexNames;
 
-            FDataReferenceCollection OutputDataReferences;
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputLeftSignal), OutputLeftSignal);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputRightSignal), OutputRightSignal);
-            return OutputDataReferences;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputLeftSignal), OutputLeftSignal);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputRightSignal), OutputRightSignal);
         }
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)

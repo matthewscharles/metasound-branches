@@ -84,18 +84,20 @@ namespace Metasound
 
             return MakeUnique<FKinkFloatOperator>(InParams.OperatorSettings, InValue, InSlope);
         }
-
-        virtual FDataReferenceCollection GetInputs() const override
-        {
-            return {};
-        }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace KinkFloatNodeVertexNames;
-            FDataReferenceCollection Outputs;
-            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputValue), OutputValue);
-            return Outputs;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputValue), InputValue);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSlope), BaseSlope);
+        }
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
+        {
+            using namespace KinkFloatNodeVertexNames;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputValue), OutputValue);
         }
 
         virtual void Execute()

@@ -91,25 +91,23 @@ namespace Metasound
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             return Metadata;
         }
-
-        virtual FDataReferenceCollection GetInputs() const override
+        
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace SawFMOscillatorNodeVertexNames;
-            FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputEnabled), InputEnabled);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputBipolar), InputBipolar);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputPhase), InputPhase);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputFeedbackFloat), InputFeedbackFloat);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputFeedbackAudio), InputFeedbackAudio);
-            return Inputs;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputEnabled), InputEnabled);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputBipolar), InputBipolar);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputPhase), InputPhase);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputFeedbackFloat), InputFeedbackFloat);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputFeedbackAudio), InputFeedbackAudio);
         }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace SawFMOscillatorNodeVertexNames;
-            FDataReferenceCollection Outputs;
-            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputAudio), OutputAudio);
-            return Outputs;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputAudio), OutputAudio);
         }
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)

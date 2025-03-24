@@ -77,8 +77,7 @@ namespace Metasound
 			return Metadata;
 		}
 
-		METASOUND_DISABLE_LEGACY_IO()
-
+		
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutResults)
 		{
 			using namespace WaveCuePointsNodeVertexNames;
@@ -87,7 +86,9 @@ namespace Metasound
 			FTriggerReadRef InTriggerGetCuePoints = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(ParamTriggerGetCuePoints), InParams.OperatorSettings);
 			return MakeUnique<FGetWaveCuePointsOperator>(InParams.OperatorSettings, InWaveAsset, InTriggerGetCuePoints);
 		}
-
+		
+		METASOUND_DISABLE_LEGACY_IO()
+		
 		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
 		{
 			using namespace WaveCuePointsNodeVertexNames;

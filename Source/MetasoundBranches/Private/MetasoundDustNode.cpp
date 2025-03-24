@@ -94,30 +94,25 @@ namespace Metasound
             return Metadata;
         }
 
-        // Allows MetaSound graph to interact with the node's inputs
-        virtual FDataReferenceCollection GetInputs() const override
-        {
-            using namespace DustNodeVertexNames;
-            FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputDensity), InputDensity);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputDensityOffset), InputDensityOffset);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputEnabled), InputEnabled);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputBiPolar), InputBiPolar);
-            return Inputs;
-        }
-
-        // Allows MetaSound graph to interact with the node's outputs
-        virtual FDataReferenceCollection GetOutputs() const override
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace DustNodeVertexNames;
 
-            FDataReferenceCollection OutputDataReferences;
-
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputImpulse), OutputImpulse);
-
-            return OutputDataReferences;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDensity), InputDensity);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDensityOffset), InputDensityOffset);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputEnabled), InputEnabled);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputBiPolar), InputBiPolar);
         }
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
+        {
+            using namespace DustNodeVertexNames;
 
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputImpulse), OutputImpulse);
+        }
+        
         // Used to instantiate a new runtime instance of the node
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {

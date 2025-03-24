@@ -85,31 +85,25 @@ namespace Metasound
             return Metadata;
         }
 
-        virtual FDataReferenceCollection GetInputs() const override
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace EdoNodeVertexNames;
 
-            FDataReferenceCollection InputDataReferences;
-
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputNoteNumber), NoteNumber);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputReferenceFrequency), ReferenceFrequency);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputReferenceMIDINote), ReferenceMIDINote);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputDivisions), Divisions);
-
-            return InputDataReferences;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputNoteNumber), NoteNumber);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputReferenceFrequency), ReferenceFrequency);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputReferenceMIDINote), ReferenceMIDINote);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDivisions), Divisions);
         }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace EdoNodeVertexNames;
 
-            FDataReferenceCollection OutputDataReferences;
-
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputFrequency), OutputFrequency);
-
-            return OutputDataReferences;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputFrequency), OutputFrequency);
         }
-
+        
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
             using namespace EdoNodeVertexNames;

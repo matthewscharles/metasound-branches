@@ -91,27 +91,22 @@ namespace Metasound
             return Metadata;
         }
 
-        // Allows MetaSound graph to interact with the node's inputs
-        virtual FDataReferenceCollection GetInputs() const override
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace DustTriggerNodeVertexNames;
-            FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputDensity), InputDensity);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputDensityOffset), InputDensityOffset);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputEnabled), InputEnabled);
-            return Inputs;
+
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDensity), InputDensity);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDensityOffset), InputDensityOffset);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputEnabled), InputEnabled);
         }
-
-        // Allows MetaSound graph to interact with the node's outputs
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace DustTriggerNodeVertexNames;
 
-            FDataReferenceCollection OutputDataReferences;
-
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTrigger), OutputTrigger);
-
-            return OutputDataReferences;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputTrigger), OutputTrigger);
         }
 
         // Used to instantiate a new runtime instance of the node
