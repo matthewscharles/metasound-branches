@@ -9,6 +9,7 @@
 #include "MetasoundParamHelper.h"
 #include "Math/UnrealMathUtility.h"
 #include "Misc/DateTime.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_SawFMOperatorNode"
 

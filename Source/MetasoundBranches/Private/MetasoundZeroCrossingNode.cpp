@@ -7,6 +7,7 @@
 #include "MetasoundFacade.h"                 // FNodeFacade class
 #include "MetasoundParamHelper.h"            // METASOUND_PARAM and METASOUND_GET_PARAM family of macros
 #include "MetasoundTrigger.h"                // For FTriggerWriteRef and FTrigger
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_ZeroCrossing"
 

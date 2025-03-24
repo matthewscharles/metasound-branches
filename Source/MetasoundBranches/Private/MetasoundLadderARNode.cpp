@@ -8,6 +8,7 @@
 #include "MetasoundParamHelper.h"
 #include "Math/UnrealMathUtility.h"
 #include "DSP/Filter.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundLadderARNode"
 
