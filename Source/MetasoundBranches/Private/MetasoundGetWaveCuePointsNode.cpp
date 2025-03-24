@@ -69,15 +69,17 @@ namespace Metasound
 				Metadata.Author = "Charles Matthews";
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
 				Metadata.DefaultInterface = DeclareVertexInterface();
-				Metadata.CategoryHierarchy = { METASOUND_LOCTEXT("Custom", "Branches") };
+				Metadata.CategoryHierarchy = {
+                    METASOUND_LOCTEXT("Custom", "Branches"),
+                    METASOUND_LOCTEXT("CustomSub", "Cue Points")
+                };
 				return Metadata;
 			};
 
 			static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
 			return Metadata;
 		}
-
-		
+    
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutResults)
 		{
 			using namespace WaveCuePointsNodeVertexNames;
