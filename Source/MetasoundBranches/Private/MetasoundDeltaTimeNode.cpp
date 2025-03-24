@@ -6,6 +6,7 @@
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundDeltaTimeNode"
 
@@ -66,30 +67,31 @@ namespace Metasound
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = DeclareVertexInterface();
-                Metadata.CategoryHierarchy = { METASOUND_LOCTEXT("Custom", "Branches") };
+                Metadata.CategoryHierarchy = {
+                    METASOUND_LOCTEXT("Custom", "Branches"),
+                    METASOUND_LOCTEXT("CustomSub", "Time")
+                };
                 return Metadata;
             };
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             return Metadata;
         }
-
-        virtual FDataReferenceCollection GetInputs() const override
+        
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
-            FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(DeltaTimeNodeVertexNames::InputTrigger), InputTrigger);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(DeltaTimeNodeVertexNames::InputReset), InputReset);
-            return Inputs;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(DeltaTimeNodeVertexNames::InputTrigger), InputTrigger);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(DeltaTimeNodeVertexNames::InputReset), InputReset);
         }
 
-        virtual FDataReferenceCollection GetOutputs() const override
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
-            FDataReferenceCollection Outputs;
-            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(DeltaTimeNodeVertexNames::OutputOnTrigger), OutputOnTrigger);
-            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(DeltaTimeNodeVertexNames::OutputOnReset), OutputOnReset);
-            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(DeltaTimeNodeVertexNames::OutputDelta), OutputDelta);
-            return Outputs;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(DeltaTimeNodeVertexNames::OutputOnTrigger), OutputOnTrigger);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(DeltaTimeNodeVertexNames::OutputOnReset), OutputOnReset);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(DeltaTimeNodeVertexNames::OutputDelta), OutputDelta);
         }
-
+        
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
             const FInputVertexInterfaceData& InputData = InParams.InputData;

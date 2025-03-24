@@ -16,6 +16,7 @@
 #include "MetasoundTrigger.h"
 #include "MetasoundVertex.h"
 #include <sstream>
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_ParseMidiNote"
 
@@ -126,17 +127,7 @@ namespace Metasound
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputValue), OutValue);
         }
 
-        virtual FDataReferenceCollection GetInputs() const override
-        {
-            checkNoEntry();
-            return {};
-        }
-
-        virtual FDataReferenceCollection GetOutputs() const override
-        {
-            checkNoEntry();
-            return {};
-        }
+        METASOUND_DISABLE_LEGACY_IO()
 
         void Execute()
         {

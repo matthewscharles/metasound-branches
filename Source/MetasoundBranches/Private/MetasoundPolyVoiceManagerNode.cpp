@@ -13,6 +13,7 @@
 #include "MetasoundPrimitives.h"
 #include "MetasoundParamHelper.h"
 #include "MetasoundTime.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MPolyVoiceManagerNode"
 
@@ -167,49 +168,48 @@ namespace Metasound
             return Metadata;
         }
 
-        virtual FDataReferenceCollection GetInputs() const override
+        
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData &InOutVertexData) override
         {
             using namespace PolyVoiceManagerNames;
-            FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTriggerNote), NoteTrigger);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputNoteData), NoteData);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputNumVoices), NumVoices);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTriggerFlush), FlushTrigger);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputRoundRobin), bRoundRobin);
-            return Inputs;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTriggerNote), NoteTrigger);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputNoteData), NoteData);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputNumVoices), NumVoices);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTriggerFlush), FlushTrigger);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputRoundRobin), bRoundRobin);
         }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData &InOutVertexData) override
         {
             using namespace PolyVoiceManagerNames;
-            FDataReferenceCollection Outputs;
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice0Trig), VoiceTriggers[0]);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice0Array), VoiceArrays[0]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice0Trig), VoiceTriggers[0]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice0Array), VoiceArrays[0]);
             
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice1Trig), VoiceTriggers[1]);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice1Array), VoiceArrays[1]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice1Trig), VoiceTriggers[1]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice1Array), VoiceArrays[1]);
             
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice2Trig), VoiceTriggers[2]);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice2Array), VoiceArrays[2]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice2Trig), VoiceTriggers[2]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice2Array), VoiceArrays[2]);
             
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice3Trig), VoiceTriggers[3]);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice3Array), VoiceArrays[3]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice3Trig), VoiceTriggers[3]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice3Array), VoiceArrays[3]);
             
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice4Trig), VoiceTriggers[4]);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice4Array), VoiceArrays[4]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice4Trig), VoiceTriggers[4]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice4Array), VoiceArrays[4]);
             
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice5Trig), VoiceTriggers[5]);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice5Array), VoiceArrays[5]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice5Trig), VoiceTriggers[5]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice5Array), VoiceArrays[5]);
             
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice6Trig), VoiceTriggers[6]);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice6Array), VoiceArrays[6]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice6Trig), VoiceTriggers[6]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice6Array), VoiceArrays[6]);
             
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice7Trig), VoiceTriggers[7]);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVoice7Array), VoiceArrays[7]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice7Trig), VoiceTriggers[7]);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVoice7Array), VoiceArrays[7]);
 
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputActiveVoices), OutputActiveVoices);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputOnFlush), OutputOnFlush);
-            return Outputs;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputActiveVoices), OutputActiveVoices);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputOnFlush), OutputOnFlush);
         }
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams &InParams, FBuildResults &OutErrors)

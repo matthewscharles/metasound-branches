@@ -9,13 +9,12 @@
 #include "Math/UnrealMathUtility.h"          // For FMath functions
 #include "Misc/DateTime.h"                   // For FDateTime::UtcNow()
 #include "MetasoundTrigger.h"                // For FTrigger classes
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
-// Required for ensuring the node is supported by all languages in engine. Must be unique per MetaSound.
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_DustTriggerNode"
 
 namespace Metasound
 {
-    // Vertex Names - define the node's inputs and outputs here
     namespace DustTriggerNodeVertexNames
     {
         METASOUND_PARAM(InputDensity, "Modulation", "Input density control signal.");
@@ -24,11 +23,9 @@ namespace Metasound
         METASOUND_PARAM(OutputTrigger, "Trigger Out", "Generated trigger output.");
     }
 
-    // Operator Class - defines the way the node is described, created and executed
     class FDustTriggerOperator : public TExecutableOperator<FDustTriggerOperator>
     {
     public:
-        // Constructor
         FDustTriggerOperator(
             const FOperatorSettings& InSettings,
             const FAudioBufferReadRef& InDensity,
@@ -42,7 +39,6 @@ namespace Metasound
         {
         }
 
-        // Helper function for constructing vertex interface
         static const FVertexInterface& DeclareVertexInterface()
         {
             using namespace DustTriggerNodeVertexNames;
@@ -61,7 +57,6 @@ namespace Metasound
             return Interface;
         }
 
-        // Retrieves necessary metadata about the node
         static const FNodeClassMetadata& GetNodeInfo()
         {
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
@@ -91,27 +86,22 @@ namespace Metasound
             return Metadata;
         }
 
-        // Allows MetaSound graph to interact with the node's inputs
-        virtual FDataReferenceCollection GetInputs() const override
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace DustTriggerNodeVertexNames;
-            FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputDensity), InputDensity);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputDensityOffset), InputDensityOffset);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputEnabled), InputEnabled);
-            return Inputs;
+
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDensity), InputDensity);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDensityOffset), InputDensityOffset);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputEnabled), InputEnabled);
         }
-
-        // Allows MetaSound graph to interact with the node's outputs
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace DustTriggerNodeVertexNames;
 
-            FDataReferenceCollection OutputDataReferences;
-
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTrigger), OutputTrigger);
-
-            return OutputDataReferences;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputTrigger), OutputTrigger);
         }
 
         // Used to instantiate a new runtime instance of the node
@@ -129,7 +119,6 @@ namespace Metasound
             return MakeUnique<FDustTriggerOperator>(InParams.OperatorSettings, InputDensity, InputDensityOffset, InputEnabled);
         }
 
-        // Primary node functionality
         void Execute()
         {
             OutputTrigger->AdvanceBlock();
@@ -176,7 +165,7 @@ namespace Metasound
         }
     };
 
-    // Node Class - Inheriting from FNodeFacade is recommended for nodes that have a static FVertexInterface
+    
     class FDustTriggerNode : public FNodeFacade
     {
     public:
@@ -186,7 +175,6 @@ namespace Metasound
         }
     };
 
-    // Register node
     METASOUND_REGISTER_NODE(FDustTriggerNode);
 }
 

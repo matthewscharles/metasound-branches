@@ -9,6 +9,7 @@
 #include "MetasoundParamHelper.h"
 #include "Math/UnrealMathUtility.h"
 #include "Misc/DateTime.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_SawFMOscillatorNode"
 
@@ -71,11 +72,11 @@ namespace Metasound
 
                 FNodeClassMetadata Metadata;
 
-                Metadata.ClassName = { TEXT("UE"), TEXT("FM Oscillator"), TEXT("Sawtooth") };
+                Metadata.ClassName = { TEXT("UE"), TEXT("Function"), TEXT("Sawtooth") };
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 0;
-                Metadata.DisplayName = METASOUND_LOCTEXT("SawFMOscillatorNodeDisplayName", "FM Oscillator (Sawtooth)");
-                Metadata.Description = METASOUND_LOCTEXT("SawFMOscillatorNodeDesc", "Generate a sawtooth wave oscillator with phase-based FM and feedback.");
+                Metadata.DisplayName = METASOUND_LOCTEXT("SawFMOscillatorNodeDisplayName", "Function (Sawtooth)");
+                Metadata.Description = METASOUND_LOCTEXT("SawFMOscillatorNodeDesc", "Generate a sawtooth wave with audio rate phase control and feedback.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = DeclareVertexInterface();
@@ -91,25 +92,23 @@ namespace Metasound
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             return Metadata;
         }
-
-        virtual FDataReferenceCollection GetInputs() const override
+        
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace SawFMOscillatorNodeVertexNames;
-            FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputEnabled), InputEnabled);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputBipolar), InputBipolar);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputPhase), InputPhase);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputFeedbackFloat), InputFeedbackFloat);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputFeedbackAudio), InputFeedbackAudio);
-            return Inputs;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputEnabled), InputEnabled);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputBipolar), InputBipolar);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputPhase), InputPhase);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputFeedbackFloat), InputFeedbackFloat);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputFeedbackAudio), InputFeedbackAudio);
         }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace SawFMOscillatorNodeVertexNames;
-            FDataReferenceCollection Outputs;
-            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputAudio), OutputAudio);
-            return Outputs;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputAudio), OutputAudio);
         }
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)

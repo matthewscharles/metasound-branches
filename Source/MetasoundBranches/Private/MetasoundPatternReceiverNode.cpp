@@ -6,6 +6,7 @@
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_PatternReceiverNode"
 
@@ -74,24 +75,24 @@ namespace Metasound
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             return Metadata;
         }
-
-        virtual FDataReferenceCollection GetInputs() const override
+        
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace PatternReceiverNodeVertexNames;
-            FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputPatternStream), PatternStream);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputActive), bActive);
-            return Inputs;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputPatternStream), PatternStream);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputActive), bActive);
         }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace PatternReceiverNodeVertexNames;
-            FDataReferenceCollection Outputs;
-            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTrigger), OnReceiveTrigger);
-            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputRandomFloat), OutRandomFloat);
-            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputPatternStream), OutPatternStream);
-            return Outputs;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputTrigger), OnReceiveTrigger);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputRandomFloat), OutRandomFloat);
+            
+            // Pass-through uses BindReadVertex
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputPatternStream), OutPatternStream);
         }
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)

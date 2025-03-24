@@ -6,6 +6,7 @@
 #include "MetasoundNodeRegistrationMacro.h"  // METASOUND_LOCTEXT and METASOUND_REGISTER_NODE macros
 #include "MetasoundFacade.h"                 // FNodeFacade class, eliminates the need for a fair amount of boilerplate code
 #include "MetasoundParamHelper.h"            // METASOUND_PARAM and METASOUND_GET_PARAM family of macros
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_StereoWidthNode"
 
@@ -84,30 +85,24 @@ namespace Metasound
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             return Metadata;
         }
-
-        virtual FDataReferenceCollection GetInputs() const override
+        
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace WidthNodeVertexNames;
 
-            FDataReferenceCollection InputDataReferences;
-
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputLeftSignal), InputLeftSignal);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputRightSignal), InputRightSignal);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputWidth), InputWidth);
-
-            return InputDataReferences;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputLeftSignal), InputLeftSignal);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputRightSignal), InputRightSignal);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputWidth), InputWidth);
         }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace WidthNodeVertexNames;
 
-            FDataReferenceCollection OutputDataReferences;
-
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputLeftSignal), OutputLeftSignal);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputRightSignal), OutputRightSignal);
-
-            return OutputDataReferences;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputLeftSignal), OutputLeftSignal);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputRightSignal), OutputRightSignal);
         }
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)

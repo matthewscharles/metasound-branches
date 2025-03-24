@@ -6,6 +6,7 @@
 #include "MetasoundNodeRegistrationMacro.h"  // METASOUND_LOCTEXT and METASOUND_REGISTER_NODE macros
 #include "MetasoundFacade.h"                 // FNodeFacade class, eliminates the need for a fair amount of boilerplate code
 #include "MetasoundParamHelper.h"            // METASOUND_PARAM and METASOUND_GET_PARAM family of macros
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_ClockDividerNode"
 
@@ -99,35 +100,29 @@ namespace Metasound
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             return Metadata;
         }
-
-        virtual FDataReferenceCollection GetInputs() const override
+        
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace ClockDividerNodeVertexNames;
 
-            FDataReferenceCollection InputDataReferences;
-
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTrigger), InputTrigger);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputReset), InputReset);
-
-            return InputDataReferences;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTrigger), InputTrigger);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputReset), InputReset);
         }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace ClockDividerNodeVertexNames;
 
-            FDataReferenceCollection OutputDataReferences;
-
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTrigger1), OutputTrigger1);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTrigger2), OutputTrigger2);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTrigger3), OutputTrigger3);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTrigger4), OutputTrigger4);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTrigger5), OutputTrigger5);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTrigger6), OutputTrigger6);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTrigger7), OutputTrigger7);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputTrigger8), OutputTrigger8);
-
-            return OutputDataReferences;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger1), OutputTrigger1);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger2), OutputTrigger2);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger3), OutputTrigger3);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger4), OutputTrigger4);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger5), OutputTrigger5);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger6), OutputTrigger6);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger7), OutputTrigger7);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger8), OutputTrigger8);
         }
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)

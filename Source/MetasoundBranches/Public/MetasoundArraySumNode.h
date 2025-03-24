@@ -19,6 +19,7 @@
 #include "Misc/ScopeLock.h"
 #include "MetasoundArrayTypeTraits.h"
 #include <numeric>
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundFrontend"
 
@@ -130,17 +131,7 @@ namespace Metasound
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSum), OutSum);
         }
 
-        virtual FDataReferenceCollection GetInputs() const override
-        {
-            checkNoEntry();
-            return {};
-        }
-
-        virtual FDataReferenceCollection GetOutputs() const override
-        {
-            checkNoEntry();
-            return {};
-        }
+        METASOUND_DISABLE_LEGACY_IO()
 
         void Execute()
         {

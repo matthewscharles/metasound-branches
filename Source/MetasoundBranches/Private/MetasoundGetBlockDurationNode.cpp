@@ -6,6 +6,7 @@
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundGetBlockDurationNode"
 
@@ -50,7 +51,10 @@ namespace Metasound
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = DeclareVertexInterface();
-                Metadata.CategoryHierarchy = { METASOUND_LOCTEXT("Custom", "Branches") };
+                Metadata.CategoryHierarchy = {
+                    METASOUND_LOCTEXT("Custom", "Branches"),
+                    METASOUND_LOCTEXT("CustomSub", "Time")
+                };
                 Metadata.Keywords = TArray<FText>();
                 return Metadata;
             };
@@ -58,19 +62,17 @@ namespace Metasound
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             return Metadata;
         }
-
-        virtual FDataReferenceCollection GetInputs() const override
+        
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
-            FDataReferenceCollection InputDataReferences;
-            return InputDataReferences;
         }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace GetBlockDurationNodeVertexNames;
-            FDataReferenceCollection OutputDataReferences;
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputBlockDuration), OutputBlockDuration);
-            return OutputDataReferences;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputBlockDuration), OutputBlockDuration);
         }
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)

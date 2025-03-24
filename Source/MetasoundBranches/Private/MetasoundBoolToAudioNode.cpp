@@ -7,6 +7,7 @@
 #include "MetasoundStandardNodesNames.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundBoolToAudioNode"
 
@@ -81,28 +82,24 @@ namespace Metasound
             return Metadata;
         }
 
-        virtual FDataReferenceCollection GetInputs() const override
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace BoolToAudioNodeVertexNames;
 
-            FDataReferenceCollection InputDataReferences;
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputBool), InputBool);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputRiseTime), InputRiseTime);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputFallTime), InputFallTime);
-
-            return InputDataReferences;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputBool), InputBool);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputRiseTime), InputRiseTime);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputFallTime), InputFallTime);
         }
 
-        virtual FDataReferenceCollection GetOutputs() const override
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace BoolToAudioNodeVertexNames;
 
-            FDataReferenceCollection OutputDataReferences;
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal), OutputSignal);
-
-            return OutputDataReferences;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal), OutputSignal);
         }
-
+        
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
             using namespace BoolToAudioNodeVertexNames;

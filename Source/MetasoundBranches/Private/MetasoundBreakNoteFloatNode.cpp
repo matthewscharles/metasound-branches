@@ -8,6 +8,7 @@
 #include "MetasoundParamHelper.h"
 #include "MetasoundTime.h"
 #include "MetasoundSampleCounter.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundBreakNoteFloatNode"
 
@@ -85,24 +86,22 @@ namespace Metasound
             return Metadata;
         }
 
-        virtual FDataReferenceCollection GetInputs() const override
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace BreakNoteFloatNodeVertexNames;
-            FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTrigger), InputTrigger);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputNoteData), InputNoteData);
-            return Inputs;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTrigger), InputTrigger);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputNoteData), InputNoteData);
         }
         
-        virtual FDataReferenceCollection GetOutputs() const override
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace BreakNoteFloatNodeVertexNames;
-            FDataReferenceCollection Outputs;
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputPitch), OutputPitch);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputVelocity), OutputVelocity);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputNoteOn), OutputNoteOn);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputNoteOff), OutputNoteOff);
-            return Outputs;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputPitch), OutputPitch);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputVelocity), OutputVelocity);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputNoteOn), OutputNoteOn);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputNoteOff), OutputNoteOff);
         }
         
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutResults)

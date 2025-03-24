@@ -6,6 +6,7 @@
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_TuningArrayNode"
 
@@ -134,36 +135,34 @@ namespace Metasound
             return Metadata;
         }
         
-        virtual FDataReferenceCollection GetInputs() const override
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace TuningArrayNodeVertexNames;
-            FDataReferenceCollection InputDataReferences;
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputUpdateTrigger), UpdateTrigger);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputStart), Start);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputEnd), End);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputReferenceFrequency), ReferenceFrequency);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputReferenceMIDINote), ReferenceMIDINote);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents0), TuningCents0);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents1), TuningCents1);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents2), TuningCents2);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents3), TuningCents3);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents4), TuningCents4);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents5), TuningCents5);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents6), TuningCents6);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents7), TuningCents7);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents8), TuningCents8);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents9), TuningCents9);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents10), TuningCents10);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTuningCents11), TuningCents11);
-            return InputDataReferences;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputUpdateTrigger), UpdateTrigger);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputStart), Start);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputEnd), End);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputReferenceFrequency), ReferenceFrequency);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputReferenceMIDINote), ReferenceMIDINote);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTuningCents0), TuningCents0);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTuningCents1), TuningCents1);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTuningCents2), TuningCents2);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTuningCents3), TuningCents3);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTuningCents4), TuningCents4);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTuningCents5), TuningCents5);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTuningCents6), TuningCents6);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTuningCents7), TuningCents7);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTuningCents8), TuningCents8);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTuningCents9), TuningCents9);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTuningCents10), TuningCents10);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTuningCents11), TuningCents11);
         }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace TuningArrayNodeVertexNames;
-            FDataReferenceCollection OutputDataReferences;
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputFrequencyArray), OutputFrequencyArray);
-            return OutputDataReferences;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputFrequencyArray), OutputFrequencyArray);
         }
         
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)

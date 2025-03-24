@@ -58,3 +58,4 @@
 | 03/19 | - Move Wrap and Fold processes into shared headers.<br>- Create Float versions of Wrap and Fold.<br>- Create prototype of filter with AR control |
 | 03/20 | - Create Kink node prototype (audio and float, though the latter is more for experimental purposes).<br>- Create Tuning From Array and Frequency Array From Tuning (not the best approach but a step in the right direction).|
 | 03/21 | - Add categories to all existing nodes.  Following the categories currently listed, which are in turn based on the standard nodes. |
+| 03/24 | - Create METASOUND_DISABLE_LEGACY_IO macro to cut down boilerplate, switch all nodes to BindInputs/BindOutputs |

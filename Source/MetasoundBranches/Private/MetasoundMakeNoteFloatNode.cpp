@@ -9,6 +9,7 @@
 #include "MetasoundParamHelper.h"
 #include "MetasoundTime.h"
 #include "MetasoundSampleCounter.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundMakeNoteFloatNode"
 
@@ -110,28 +111,26 @@ namespace Metasound
             return Metadata;
         }
 
-        virtual FDataReferenceCollection GetInputs() const override
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace MakeNoteFloatNodeVertexNames;
-            FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputNoteOn), InputNoteOn);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputNoteOff), InputNoteOff);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputPitch), InputPitch);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputVelocity), InputVelocity);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputDuration), InputDuration);
-            return Inputs;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputNoteOn), InputNoteOn);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputNoteOff), InputNoteOff);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputPitch), InputPitch);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputVelocity), InputVelocity);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDuration), InputDuration);
         }
         
-        virtual FDataReferenceCollection GetOutputs() const override
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace MakeNoteFloatNodeVertexNames;
-            FDataReferenceCollection Outputs;
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputNoteOn), OutputNoteOn);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputNoteOff), OutputNoteOff);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputArray), OutputArray);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputEvent), OutputEvent);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputOverride), OutputOverride);
-            return Outputs;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputNoteOn), OutputNoteOn);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputNoteOff), OutputNoteOff);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputArray), OutputArray);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputEvent), OutputEvent);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputOverride), OutputOverride);
         }
         
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
