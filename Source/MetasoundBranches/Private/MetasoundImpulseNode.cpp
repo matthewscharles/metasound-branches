@@ -123,8 +123,6 @@ namespace Metasound
             int32 NumFrames = OutputImpulse->Num();
             float* OutputDataPtr = OutputImpulse->GetData();
             FMemory::Memzero(OutputDataPtr, sizeof(float) * NumFrames);
-
-            // Process trigger events
             InputTrigger->ExecuteBlock(
                 // Pre-trigger lambda (called before any triggers in the block)
                 [](int32 StartFrame, int32 EndFrame)
@@ -176,7 +174,6 @@ namespace Metasound
         }
     };
 
-    // Register node
     METASOUND_REGISTER_NODE(FImpulseNode);
 }
 

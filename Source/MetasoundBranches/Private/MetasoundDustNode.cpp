@@ -201,7 +201,6 @@ namespace Metasound
         }
     };
 
-    // Register node
     METASOUND_REGISTER_NODE(FDustNode);
 }
 
