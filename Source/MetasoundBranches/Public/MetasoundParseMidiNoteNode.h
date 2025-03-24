@@ -112,8 +112,6 @@ namespace Metasound
         }
 
         virtual ~TParseMidiNoteOperator() = default;
-        
-        METASOUND_DISABLE_LEGACY_IO()
 
         virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
@@ -127,6 +125,18 @@ namespace Metasound
             using namespace ParseMidiNoteVertexNames;
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTriggerOnParse), TriggerOnParse);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputValue), OutValue);
+        }
+
+        virtual FDataReferenceCollection GetInputs() const override
+        {
+            checkNoEntry();
+            return {};
+        }
+
+        virtual FDataReferenceCollection GetOutputs() const override
+        {
+            checkNoEntry();
+            return {};
         }
 
         void Execute()

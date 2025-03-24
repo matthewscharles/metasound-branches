@@ -141,8 +141,6 @@ namespace Metasound
 
 		virtual ~TArraySplitOperator() = default;
 
-		METASOUND_DISABLE_LEGACY_IO()
-		
 		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
 		{
 			using namespace StringToArrayNodeVertexNames;
@@ -156,6 +154,18 @@ namespace Metasound
 			using namespace StringToArrayNodeVertexNames;
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTriggerOnSplit), TriggerOnSplit);
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputArray), OutputArray);
+		}
+
+		virtual FDataReferenceCollection GetInputs() const override
+		{
+			checkNoEntry();
+			return {};
+		}
+
+		virtual FDataReferenceCollection GetOutputs() const override
+		{
+			checkNoEntry();
+			return {};
 		}
 
 		void Execute()
