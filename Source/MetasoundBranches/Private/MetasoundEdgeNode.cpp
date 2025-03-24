@@ -24,7 +24,6 @@ namespace Metasound
     class FEdgeOperator : public TExecutableOperator<FEdgeOperator>
     {
     public:
-        // Constructor
         FEdgeOperator(
             const FAudioBufferReadRef& InSignal,
             const FTimeReadRef& InDebounce,

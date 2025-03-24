@@ -25,7 +25,6 @@ namespace Metasound
     class FDustOperator : public TExecutableOperator<FDustOperator>
     {
     public:
-        // Constructor
         FDustOperator(
             const FOperatorSettings& InSettings,
             const FAudioBufferReadRef& InDensity,

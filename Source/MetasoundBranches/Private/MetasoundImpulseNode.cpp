@@ -22,7 +22,6 @@ namespace Metasound
     class FImpulseOperator : public TExecutableOperator<FImpulseOperator>
     {
     public:
-        // Constructor
         FImpulseOperator(
             const FOperatorSettings& InSettings,
             const FTriggerReadRef& InTrigger,

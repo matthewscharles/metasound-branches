@@ -25,7 +25,6 @@ namespace Metasound
     class FDustTriggerOperator : public TExecutableOperator<FDustTriggerOperator>
     {
     public:
-        // Constructor
         FDustTriggerOperator(
             const FOperatorSettings& InSettings,
             const FAudioBufferReadRef& InDensity,
