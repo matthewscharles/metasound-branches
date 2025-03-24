@@ -78,21 +78,14 @@ namespace Metasound
 
 		virtual FDataReferenceCollection GetInputs() const override
 		{
-			using namespace WaveCuePointsNodeVertexNames;
-			FDataReferenceCollection Inputs;
-			Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(ParamWaveAsset), WaveAsset);
-			Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(ParamTriggerGetCuePoints), TriggerGetCuePoints);
-			return Inputs;
+			checkNoEntry();
+			return {};
 		}
 
 		virtual FDataReferenceCollection GetOutputs() const override
 		{
-			using namespace WaveCuePointsNodeVertexNames;
-			FDataReferenceCollection Outputs;
-			Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutCuePointIDs), CuePointIDs);
-			Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutCuePointTimes), CuePointTimes);
-			Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutCuePointLabels), CuePointLabels);
-			return Outputs;
+			checkNoEntry();
+			return {};
 		}
 
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutResults)
