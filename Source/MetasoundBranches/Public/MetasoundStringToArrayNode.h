@@ -156,7 +156,8 @@ namespace Metasound
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputArray), OutputArray);
 		}
 
-METASOUND_DISABLE_LEGACY_IO()
+		METASOUND_DISABLE_LEGACY_IO()
+		
 		void Execute()
 		{
 			TriggerOnSplit->AdvanceBlock();
