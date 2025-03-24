@@ -156,18 +156,7 @@ namespace Metasound
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputArray), OutputArray);
 		}
 
-		virtual FDataReferenceCollection GetInputs() const override
-		{
-			checkNoEntry();
-			return {};
-		}
-
-		virtual FDataReferenceCollection GetOutputs() const override
-		{
-			checkNoEntry();
-			return {};
-		}
-
+METASOUND_DISABLE_LEGACY_IO()
 		void Execute()
 		{
 			TriggerOnSplit->AdvanceBlock();
