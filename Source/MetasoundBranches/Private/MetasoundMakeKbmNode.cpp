@@ -7,6 +7,7 @@
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_MakeKbmNode"
 
@@ -114,35 +115,31 @@ namespace Metasound
             return Metadata;
         }
 
-        FDataReferenceCollection GetInputs() const override
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace MakeKbmNodeVertexNames;
-
-            FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTrigger), Trigger);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputMapSize), MapSize);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputFirstNote), FirstNote);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputLastNote), LastNote);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputMiddleNote), MiddleNote);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputReferenceNote), ReferenceNote);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputReferenceFrequency), ReferenceFrequency);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputOctaveDegree), OctaveDegree);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputPeriodRatio), PeriodRatio);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputScaleDegrees), ScaleDegrees);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputCentValues), CentValues);
-            return Inputs;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTrigger), Trigger);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputMapSize), MapSize);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputFirstNote), FirstNote);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputLastNote), LastNote);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputMiddleNote), MiddleNote);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputReferenceNote), ReferenceNote);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputReferenceFrequency), ReferenceFrequency);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputOctaveDegree), OctaveDegree);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputPeriodRatio), PeriodRatio);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputScaleDegrees), ScaleDegrees);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputCentValues), CentValues);
         }
-
-        FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace MakeKbmNodeVertexNames;
-
-            FDataReferenceCollection Outputs;
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputTrigger), OnMakeTrigger);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputKbmData), KbmData);
-            return Outputs;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputTrigger), OnMakeTrigger);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputKbmData), KbmData);
         }
-
+        
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
             using namespace MakeKbmNodeVertexNames;

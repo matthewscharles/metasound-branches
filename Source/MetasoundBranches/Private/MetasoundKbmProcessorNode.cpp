@@ -7,6 +7,7 @@
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_KbmProcessorNode"
 
@@ -85,26 +86,24 @@ namespace Metasound
             return Metadata;
         }
         
-        FDataReferenceCollection GetInputs() const override
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace KbmProcessorNodeVertexNames;
-            FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTrigger), Trigger);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputNote), Note);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputKbmData), KbmData);
-            return Inputs;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTrigger), Trigger);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputNote), Note);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputKbmData), KbmData);
         }
-
-        FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace KbmProcessorNodeVertexNames;
-            FDataReferenceCollection Outputs;
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputTrigger), OnMappedTrigger);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputUnmappedTrigger), OnUnmappedTrigger);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputFrequency), Frequency);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputScaleDegree), ScaleDegree);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputOctave), Octave);
-            return Outputs;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputTrigger), OnMappedTrigger);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputUnmappedTrigger), OnUnmappedTrigger);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputFrequency), Frequency);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputScaleDegree), ScaleDegree);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputOctave), Octave);
         }
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)

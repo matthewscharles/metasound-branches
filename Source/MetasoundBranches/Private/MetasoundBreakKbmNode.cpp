@@ -7,6 +7,7 @@
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_BreakKbmNode"
 
@@ -105,33 +106,29 @@ namespace Metasound
             return Metadata;
         }
         
-        FDataReferenceCollection GetInputs() const override
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace BreakKbmNodeVertexNames;
-
-            FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTrigger), Trigger);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputKbmData), KbmData);
-            return Inputs;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTrigger), Trigger);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputKbmData), KbmData);
         }
-
-        FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace BreakKbmNodeVertexNames;
-
-            FDataReferenceCollection Outputs;
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputTrigger), OnBreakTrigger);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputMapSize), MapSize);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputFirstNote), FirstNote);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputLastNote), LastNote);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputMiddleNote), MiddleNote);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputReferenceNote), ReferenceNote);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputReferenceFrequency), ReferenceFrequency);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputOctaveDegree), OctaveDegree);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputPeriodRatio), PeriodRatio);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputScaleDegrees), ScaleDegrees);
-            Outputs.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputCentValues), CentValues);
-            return Outputs;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputTrigger), OnBreakTrigger);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputMapSize), MapSize);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputFirstNote), FirstNote);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputLastNote), LastNote);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputMiddleNote), MiddleNote);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputReferenceNote), ReferenceNote);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputReferenceFrequency), ReferenceFrequency);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputOctaveDegree), OctaveDegree);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputPeriodRatio), PeriodRatio);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputScaleDegrees), ScaleDegrees);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputCentValues), CentValues);
         }
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
