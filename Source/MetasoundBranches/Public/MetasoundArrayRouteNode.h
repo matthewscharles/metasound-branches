@@ -18,6 +18,7 @@
 #include "MetasoundVertex.h"
 #include "MetasoundArrayTypeTraits.h"
 #include "MetasoundTime.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundFrontend"
 

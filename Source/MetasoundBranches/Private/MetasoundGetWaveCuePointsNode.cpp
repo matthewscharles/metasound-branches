@@ -8,6 +8,7 @@
 #include "MetasoundParamHelper.h"
 #include "Algo/Sort.h"
 #include "MetasoundWave.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundGetWaveCuePoints"
 

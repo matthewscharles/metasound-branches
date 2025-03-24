@@ -15,6 +15,7 @@
 #include "MetasoundVertex.h"
 #include "MetasoundArrayTypeTraits.h"
 #include <sstream>
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_StringToSequence"
 

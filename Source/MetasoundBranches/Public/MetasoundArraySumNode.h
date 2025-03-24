@@ -19,6 +19,7 @@
 #include "Misc/ScopeLock.h"
 #include "MetasoundArrayTypeTraits.h"
 #include <numeric>
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundFrontend"
 
