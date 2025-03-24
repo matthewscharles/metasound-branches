@@ -79,8 +79,7 @@ namespace Metasound
 			static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
 			return Metadata;
 		}
-
-		
+    
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutResults)
 		{
 			using namespace WaveCuePointsNodeVertexNames;
