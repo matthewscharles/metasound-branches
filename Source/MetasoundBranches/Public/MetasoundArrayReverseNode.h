@@ -19,6 +19,7 @@
 #include "MetasoundArrayTypeTraits.h"
 #include "MetasoundTime.h"
 #include "Algo/Reverse.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundFrontend"
 
@@ -106,6 +107,8 @@ namespace Metasound
 
         virtual ~TArrayReverseOperator() = default;
 
+        METASOUND_DISABLE_LEGACY_IO()
+        
         virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace ArrayReverseNodeVertexNames;
@@ -117,18 +120,6 @@ namespace Metasound
         {
             using namespace ArrayReverseNodeVertexNames;
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputArray), OutArray);
-        }
-
-        virtual FDataReferenceCollection GetInputs() const override
-        {
-            checkNoEntry();
-            return {};
-        }
-
-        virtual FDataReferenceCollection GetOutputs() const override
-        {
-            checkNoEntry();
-            return {};
         }
 
         template <typename T>

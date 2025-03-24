@@ -95,20 +95,23 @@ namespace Metasound
 
             return MakeUnique<FKinkOperator>(InParams.OperatorSettings, InAudio, InSlope, InSlopeMod);
         }
+        
+        METASOUND_DISABLE_LEGACY_IO()
 
-        virtual FDataReferenceCollection GetInputs() const override
-        {
-            return {};
-        }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace KinkNodeVertexNames;
-            FDataReferenceCollection Outputs;
-            Outputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal), AudioOut);
-            return Outputs;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), AudioIn);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSlope), BaseSlope);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSlopeMod), SlopeMod);
         }
-
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
+        {
+            using namespace KinkNodeVertexNames;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputSignal), AudioOut);
+        }
+        
         virtual void Execute()
         {
             const float* InData = AudioIn->GetData();

@@ -122,20 +122,25 @@ namespace Metasound
                 ResMod
             );
         }
-
-        virtual FDataReferenceCollection GetInputs() const override
-        {
-            FDataReferenceCollection InputData;
-            return InputData;
-        }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace LadderArVertexNames;
 
-            FDataReferenceCollection OutputData;
-            OutputData.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal), AudioOutput);
-            return OutputData;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), AudioInput);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputCutoff), BaseCutoff);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputResonance), BaseResonance);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputCutoffMod), CutoffMod);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputResonanceMod), ResonanceMod);
+        }
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
+        {
+            using namespace LadderArVertexNames;
+
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputSignal), AudioOutput);
         }
 
         virtual void Execute()

@@ -7,12 +7,10 @@
 #include "MetasoundFacade.h"                 // FNodeFacade class, eliminates the need for a fair amount of boilerplate code
 #include "MetasoundParamHelper.h"            // METASOUND_PARAM and METASOUND_GET_PARAM family of macros
 
-// Required for ensuring the node is supported by all languages in engine. Must be unique per MetaSound.
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_ImpulseNode"
 
 namespace Metasound
 {
-    // Vertex Names - define the node's inputs and outputs here
     namespace ImpulseNodeVertexNames
     {
         METASOUND_PARAM(InputTrigger, "Trigger", "Trigger input to generate an impulse.");
@@ -21,11 +19,9 @@ namespace Metasound
         METASOUND_PARAM(OutputImpulse, "Impulse Out", "Generated impulse output.");
     }
 
-    // Operator Class - defines the way the node is described, created and executed
     class FImpulseOperator : public TExecutableOperator<FImpulseOperator>
     {
     public:
-        // Constructor
         FImpulseOperator(
             const FOperatorSettings& InSettings,
             const FTriggerReadRef& InTrigger,
@@ -38,7 +34,6 @@ namespace Metasound
         {
         }
 
-        // Helper function for constructing vertex interface
         static const FVertexInterface& DeclareVertexInterface()
         {
             using namespace ImpulseNodeVertexNames;
@@ -57,7 +52,6 @@ namespace Metasound
             return Interface;
         }
 
-        // Retrieves necessary metadata about the node
         static const FNodeClassMetadata& GetNodeInfo()
         {
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
@@ -87,29 +81,22 @@ namespace Metasound
             return Metadata;
         }
 
-        // Allows MetaSound graph to interact with the node's inputs
-        virtual FDataReferenceCollection GetInputs() const override
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace ImpulseNodeVertexNames;
-            FDataReferenceCollection Inputs;
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTrigger), InputTrigger);
-            Inputs.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputBiPolar), InputBiPolar);
-            return Inputs;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTrigger), InputTrigger);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputBiPolar), InputBiPolar);
         }
-
-        // Allows MetaSound graph to interact with the node's outputs
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace ImpulseNodeVertexNames;
-
-            FDataReferenceCollection OutputDataReferences;
-            
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputOnTrigger), OnTrigger);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputImpulse), OutputImpulse);
-
-            return OutputDataReferences;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputOnTrigger), OnTrigger);
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputImpulse), OutputImpulse);
         }
-
+        
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
             using namespace ImpulseNodeVertexNames;
@@ -127,7 +114,6 @@ namespace Metasound
             );
         }
 
-        // Primary node functionality
         void Execute()
         {
             OnTrigger->AdvanceBlock();
@@ -137,8 +123,6 @@ namespace Metasound
             int32 NumFrames = OutputImpulse->Num();
             float* OutputDataPtr = OutputImpulse->GetData();
             FMemory::Memzero(OutputDataPtr, sizeof(float) * NumFrames);
-
-            // Process trigger events
             InputTrigger->ExecuteBlock(
                 // Pre-trigger lambda (called before any triggers in the block)
                 [](int32 StartFrame, int32 EndFrame)
@@ -180,7 +164,7 @@ namespace Metasound
 
     };
 
-    // Node Class - Inheriting from FNodeFacade is recommended for nodes that have a static FVertexInterface
+    
     class FImpulseNode : public FNodeFacade
     {
     public:
@@ -190,7 +174,6 @@ namespace Metasound
         }
     };
 
-    // Register node
     METASOUND_REGISTER_NODE(FImpulseNode);
 }
 

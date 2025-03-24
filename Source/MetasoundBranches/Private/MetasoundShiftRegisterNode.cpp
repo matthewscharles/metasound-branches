@@ -108,36 +108,30 @@ namespace Metasound
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             return Metadata;
         }
-
-        virtual FDataReferenceCollection GetInputs() const override
+        
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace ShiftRegisterNodeVertexNames;
 
-            FDataReferenceCollection InputDataReferences;
-
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputTrigger), InputTrigger);
-
-            return InputDataReferences;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTrigger), InputTrigger);
         }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace ShiftRegisterNodeVertexNames;
 
-            FDataReferenceCollection OutputDataReferences;
-            
-            OutputDataReferences.AddDataWriteReference(METASOUND_GET_PARAM_NAME(OutputTrigger), OutputTrigger);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal1), OutputSignal1);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal2), OutputSignal2);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal3), OutputSignal3);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal4), OutputSignal4);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal5), OutputSignal5);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal6), OutputSignal6);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal7), OutputSignal7);
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal8), OutputSignal8);
-
-            return OutputDataReferences;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputTrigger), OutputTrigger);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal1), OutputSignal1);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal2), OutputSignal2);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal3), OutputSignal3);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal4), OutputSignal4);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal5), OutputSignal5);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal6), OutputSignal6);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal7), OutputSignal7);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal8), OutputSignal8);
         }
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)

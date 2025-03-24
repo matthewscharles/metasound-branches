@@ -85,28 +85,23 @@ namespace Metasound
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             return Metadata;
         }
-
-        virtual FDataReferenceCollection GetInputs() const override
+        
+        METASOUND_DISABLE_LEGACY_IO()
+        
+        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace WrapAudioNodeVertexNames;
-
-            FDataReferenceCollection InputDataReferences;
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputHigh), InputHigh);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputLow), InputLow);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputHighMod), InputHighMod);
-            InputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(InputLowMod), InputLowMod);
-
-            return InputDataReferences;
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputHigh), InputHigh);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputLow), InputLow);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputHighMod), InputHighMod);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputLowMod), InputLowMod);
         }
-
-        virtual FDataReferenceCollection GetOutputs() const override
+        
+        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace WrapAudioNodeVertexNames;
-
-            FDataReferenceCollection OutputDataReferences;
-            OutputDataReferences.AddDataReadReference(METASOUND_GET_PARAM_NAME(OutputSignal), OutputSignal);
-            return OutputDataReferences;
+            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputSignal), OutputSignal);
         }
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
