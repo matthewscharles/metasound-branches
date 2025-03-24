@@ -1,3 +1,7 @@
+// Copyright 2025 Charles Matthews. All Rights Reserved.
+
+#pragma once
+
 #define METASOUND_DISABLE_LEGACY_IO()                                     \
     /* Disable legacy GetInputs/GetOutputs — BindInputs used instead */   \
     virtual FDataReferenceCollection GetInputs() const override           \
