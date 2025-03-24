@@ -243,6 +243,8 @@ namespace Metasound
 		}
 
 		virtual ~TStringToSequenceOperator() = default;
+		
+		METASOUND_DISABLE_LEGACY_IO()
 
 		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
 		{
@@ -269,18 +271,6 @@ namespace Metasound
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputRepeatCount),     OutRepeatCount);
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputLength),          OutLength);
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTriggerOnEnd),    OnEnd);
-		}
-
-		virtual FDataReferenceCollection GetInputs() const override
-		{
-			checkNoEntry();
-			return {};
-		}
-
-		virtual FDataReferenceCollection GetOutputs() const override
-		{
-			checkNoEntry();
-			return {};
 		}
 
 		void Execute()

@@ -187,6 +187,8 @@ namespace Metasound
 		}
 
 		virtual ~TArrayMakeOperator() = default;
+		
+		METASOUND_DISABLE_LEGACY_IO()
 
 		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
 		{
@@ -207,18 +209,6 @@ namespace Metasound
 			using namespace ArrayMakeNodeVertexNames;
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTriggerOnMake), TriggerOnMake);
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputArray), OutArray);
-		}
-
-		virtual FDataReferenceCollection GetInputs() const override
-		{
-			checkNoEntry();
-			return {};
-		}
-
-		virtual FDataReferenceCollection GetOutputs() const override
-		{
-			checkNoEntry();
-			return {};
 		}
 
 		void Execute()

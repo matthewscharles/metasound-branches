@@ -126,6 +126,8 @@ namespace Metasound
 		}
 
 		virtual ~TArrayJoinOperator() = default;
+		
+		METASOUND_DISABLE_LEGACY_IO()
 
 		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
 		{
@@ -142,17 +144,6 @@ namespace Metasound
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputJoinedString), OutJoinedString);
 		}
 
-		virtual FDataReferenceCollection GetInputs() const override
-		{
-			checkNoEntry();
-			return {};
-		}
-
-		virtual FDataReferenceCollection GetOutputs() const override
-		{
-			checkNoEntry();
-			return {};
-		}
 
 		void Execute()
         {

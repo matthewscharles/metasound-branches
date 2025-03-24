@@ -116,6 +116,8 @@ namespace Metasound
         }
 
         virtual ~TArraySumOperator() = default;
+        
+        METASOUND_DISABLE_LEGACY_IO()
 
         virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
@@ -129,18 +131,6 @@ namespace Metasound
             using namespace ArraySumNodeVertexNames;
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTriggerOnSum), TriggerOnSum);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSum), OutSum);
-        }
-
-        virtual FDataReferenceCollection GetInputs() const override
-        {
-            checkNoEntry();
-            return {};
-        }
-
-        virtual FDataReferenceCollection GetOutputs() const override
-        {
-            checkNoEntry();
-            return {};
         }
 
         void Execute()
