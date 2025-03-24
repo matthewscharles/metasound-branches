@@ -7,12 +7,10 @@
 #include "MetasoundFacade.h"                 // FNodeFacade class, eliminates the need for a fair amount of boilerplate code
 #include "MetasoundParamHelper.h"            // METASOUND_PARAM and METASOUND_GET_PARAM family of macros
 
-// Required for ensuring the node is supported by all languages in engine. Must be unique per MetaSound.
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_ImpulseNode"
 
 namespace Metasound
 {
-    // Vertex Names - define the node's inputs and outputs here
     namespace ImpulseNodeVertexNames
     {
         METASOUND_PARAM(InputTrigger, "Trigger", "Trigger input to generate an impulse.");
@@ -21,7 +19,6 @@ namespace Metasound
         METASOUND_PARAM(OutputImpulse, "Impulse Out", "Generated impulse output.");
     }
 
-    // Operator Class - defines the way the node is described, created and executed
     class FImpulseOperator : public TExecutableOperator<FImpulseOperator>
     {
     public:
@@ -38,7 +35,6 @@ namespace Metasound
         {
         }
 
-        // Helper function for constructing vertex interface
         static const FVertexInterface& DeclareVertexInterface()
         {
             using namespace ImpulseNodeVertexNames;
@@ -57,7 +53,6 @@ namespace Metasound
             return Interface;
         }
 
-        // Retrieves necessary metadata about the node
         static const FNodeClassMetadata& GetNodeInfo()
         {
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
@@ -120,7 +115,6 @@ namespace Metasound
             );
         }
 
-        // Primary node functionality
         void Execute()
         {
             OnTrigger->AdvanceBlock();
@@ -173,7 +167,7 @@ namespace Metasound
 
     };
 
-    // Node Class - Inheriting from FNodeFacade is recommended for nodes that have a static FVertexInterface
+    
     class FImpulseNode : public FNodeFacade
     {
     public:

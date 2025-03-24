@@ -10,12 +10,10 @@
 #include "Misc/DateTime.h"                   // For FDateTime::UtcNow()
 #include "MetasoundTrigger.h"                // For FTrigger classes
 
-// Required for ensuring the node is supported by all languages in engine. Must be unique per MetaSound.
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_DustTriggerNode"
 
 namespace Metasound
 {
-    // Vertex Names - define the node's inputs and outputs here
     namespace DustTriggerNodeVertexNames
     {
         METASOUND_PARAM(InputDensity, "Modulation", "Input density control signal.");
@@ -24,7 +22,6 @@ namespace Metasound
         METASOUND_PARAM(OutputTrigger, "Trigger Out", "Generated trigger output.");
     }
 
-    // Operator Class - defines the way the node is described, created and executed
     class FDustTriggerOperator : public TExecutableOperator<FDustTriggerOperator>
     {
     public:
@@ -42,7 +39,6 @@ namespace Metasound
         {
         }
 
-        // Helper function for constructing vertex interface
         static const FVertexInterface& DeclareVertexInterface()
         {
             using namespace DustTriggerNodeVertexNames;
@@ -61,7 +57,6 @@ namespace Metasound
             return Interface;
         }
 
-        // Retrieves necessary metadata about the node
         static const FNodeClassMetadata& GetNodeInfo()
         {
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
@@ -124,7 +119,6 @@ namespace Metasound
             return MakeUnique<FDustTriggerOperator>(InParams.OperatorSettings, InputDensity, InputDensityOffset, InputEnabled);
         }
 
-        // Primary node functionality
         void Execute()
         {
             OutputTrigger->AdvanceBlock();
@@ -171,7 +165,7 @@ namespace Metasound
         }
     };
 
-    // Node Class - Inheriting from FNodeFacade is recommended for nodes that have a static FVertexInterface
+    
     class FDustTriggerNode : public FNodeFacade
     {
     public:

@@ -13,7 +13,6 @@
 
 namespace Metasound
 {
-    // Vertex Names - define the node's inputs and outputs here
     namespace DustNodeVertexNames
     {
         METASOUND_PARAM(InputDensity, "Modulation", "Density control signal.");
@@ -23,7 +22,6 @@ namespace Metasound
         METASOUND_PARAM(OutputImpulse, "Impulse Out", "Generated impulse output.");
     }
 
-    // Operator Class - defines the way the node is described, created and executed
     class FDustOperator : public TExecutableOperator<FDustOperator>
     {
     public:
@@ -44,7 +42,6 @@ namespace Metasound
         {
         }
 
-        // Helper function for constructing vertex interface
         static const FVertexInterface& DeclareVertexInterface()
         {
             using namespace DustNodeVertexNames;
@@ -64,7 +61,6 @@ namespace Metasound
             return Interface;
         }
 
-        // Retrieves necessary metadata about the node
         static const FNodeClassMetadata& GetNodeInfo()
         {
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
@@ -129,7 +125,6 @@ namespace Metasound
             return MakeUnique<FDustOperator>(InParams.OperatorSettings, InputDensity, InputDensityOffset, InputEnabled, InputBiPolar);
         }
 
-        // Primary node functionality
         void Execute()
         {
         const float* DensityData = InputDensity->GetData();
@@ -197,7 +192,7 @@ namespace Metasound
         }
     };
 
-    // Node Class - Inheriting from FNodeFacade is recommended for nodes that have a static FVertexInterface
+    
     class FDustNode : public FNodeFacade
     {
     public:
