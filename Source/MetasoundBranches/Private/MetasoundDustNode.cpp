@@ -8,6 +8,7 @@
 #include "MetasoundParamHelper.h"            // METASOUND_PARAM and METASOUND_GET_PARAM family of macros
 #include "Math/UnrealMathUtility.h"          // For FMath functions
 #include "Misc/DateTime.h"                   // For FDateTime::UtcNow()
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_DustNode"
 

@@ -7,6 +7,7 @@
 #include "MetasoundStandardNodesNames.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundBoolToAudioNode"
 

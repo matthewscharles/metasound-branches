@@ -10,6 +10,7 @@
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
 #include "Math/UnrealMathUtility.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundWrapFloatNode"
 

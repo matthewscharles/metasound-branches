@@ -9,6 +9,7 @@
 #include "Math/UnrealMathUtility.h"          // For FMath functions
 #include "Misc/DateTime.h"                   // For FDateTime::UtcNow()
 #include "MetasoundTrigger.h"                // For FTrigger classes
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_DustTriggerNode"
 
