@@ -1,3 +1,5 @@
+// Copyright 2025 Charles Matthews. All Rights Reserved.
+
 #include "MetasoundBranches/Public/MetasoundDustNode.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundPrimitives.h"
@@ -83,7 +85,7 @@ namespace Metasound
 				FNodeClassMetadata Metadata;
 				Metadata.ClassName = { TEXT("UE"), TEXT("Dust (Audio)"), TEXT("Audio") };
 				Metadata.MajorVersion = 1;
-				Metadata.MinorVersion = 0;
+				Metadata.MinorVersion = 1;
 				Metadata.DisplayName = LOCTEXT("DustNodeDisplayName", "Dust (Audio)");
 				Metadata.Description = LOCTEXT("DustNodeDesc", "Generates randomly timed impulses (uni or bi-polar) alongside triggers, with optional audio rate modulation.");
 				Metadata.Author = TEXT("Charles Matthews");
