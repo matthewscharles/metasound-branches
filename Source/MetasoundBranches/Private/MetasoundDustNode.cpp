@@ -1,208 +1,231 @@
-// Copyright 2025 Charles Matthews. All Rights Reserved.
-
 #include "MetasoundBranches/Public/MetasoundDustNode.h"
-#include "MetasoundExecutableOperator.h"     // TExecutableOperator class
-#include "MetasoundPrimitives.h"             // ReadRef and WriteRef descriptions for bool, int32, float, and string
-#include "MetasoundNodeRegistrationMacro.h"  // METASOUND_LOCTEXT and METASOUND_REGISTER_NODE macros
-#include "MetasoundFacade.h"                 // FNodeFacade class, eliminates the need for a fair amount of boilerplate code
-#include "MetasoundParamHelper.h"            // METASOUND_PARAM and METASOUND_GET_PARAM family of macros
-#include "Math/UnrealMathUtility.h"          // For FMath functions
-#include "Misc/DateTime.h"                   // For FDateTime::UtcNow()
+#include "MetasoundExecutableOperator.h"
+#include "MetasoundPrimitives.h"
+#include "MetasoundNodeRegistrationMacro.h"
+#include "MetasoundFacade.h"
+#include "MetasoundParamHelper.h"
+#include "Math/UnrealMathUtility.h"
+#include "Misc/DateTime.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
+#include "MetasoundTrigger.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_DustNode"
 
 namespace Metasound
 {
-    namespace DustNodeVertexNames
-    {
-        METASOUND_PARAM(InputDensity, "Modulation", "Density control signal.");
-        METASOUND_PARAM(InputDensityOffset, "Density", "Probability of impulse generation.");
-        METASOUND_PARAM(InputEnabled, "Enabled", "Enable or disable generation.");
-        METASOUND_PARAM(InputBiPolar, "Bi-Polar", "Toggle between bipolar and unipolar impulse output.");
-        METASOUND_PARAM(OutputImpulse, "Impulse Out", "Generated impulse output.");
-    }
+	namespace DustNodeVertexNames
+	{
+		METASOUND_PARAM(InputEnabled,             "Enabled",             "Enable or disable output")
+		METASOUND_PARAM(InputBiPolar,             "Bi-Polar",            "Toggle between bipolar and unipolar impulse output.")
+		METASOUND_PARAM(InputSeed,                "Seed",                "Seed for seeding the Random Number Generator, -1 (default) will use current time.")
+		METASOUND_PARAM(InputDensityOffset,       "Density",             "Density of impulses (roughly equivalent to Hz).")
+		METASOUND_PARAM(InputDensityAudio,        "Density Modulation",  "Audio modulation for density.")
+		METASOUND_PARAM(InputAmpVarOffset,        "Amp Variation",       "Base amplitude variation (0=fixed at maximum amplitude, 1=fully random).")
+		METASOUND_PARAM(InputAmpVarAudio,         "Amp Variation Modulation", "Audio modulation for amplitude variation.")
+		METASOUND_PARAM(OutputImpulse,            "Impulse Out",         "Generated impulse.")
+		METASOUND_PARAM(OutputTrigger,            "Trigger Out",         "Generated trigger.")
+	}
 
-    class FDustOperator : public TExecutableOperator<FDustOperator>
-    {
-    public:
-        FDustOperator(
-            const FOperatorSettings& InSettings,
-            const FAudioBufferReadRef& InDensity,
-            const FFloatReadRef& InDensityOffset,
-            const FBoolReadRef& InEnabled,
-            const FBoolReadRef& InBiPolar)
-            : InputDensity(InDensity)
-            , InputDensityOffset(InDensityOffset)
-            , InputEnabled(InEnabled)
-            , InputBiPolar(InBiPolar)
-            , OutputImpulse(FAudioBufferWriteRef::CreateNew(InSettings))
-            , RNGStream(InitialSeed())
-            , SignalIsPositive(true)
-        {
-        }
+	class FDustOperator : public TExecutableOperator<FDustOperator>
+	{
+	public:
+		FDustOperator(
+			const FOperatorSettings& InSettings,
+			const FBoolReadRef& InEnabled,
+			const FBoolReadRef& InBiPolar,
+			const FInt32ReadRef& InSeed,
+			const FFloatReadRef& InDensityOffset,
+			const FAudioBufferReadRef& InDensityAudio,
+			const FFloatReadRef& InAmpVarOffset,
+			const FAudioBufferReadRef& InAmpVarAudio
+		)
+			: Enabled(InEnabled)
+			, BiPolar(InBiPolar)
+			, Seed(InSeed)
+			, DensityOffset(InDensityOffset)
+			, DensityAudio(InDensityAudio)
+			, AmpVarOffset(InAmpVarOffset)
+			, AmpVarAudio(InAmpVarAudio)
+			, OutputImpulse(FAudioBufferWriteRef::CreateNew(InSettings))
+			, OutputTrigger(FTriggerWriteRef::CreateNew(InSettings))
+			, RNGStream((*InSeed == -1) ? FDateTime::UtcNow().GetTicks() : *InSeed)
+			, SampleRate((float)InSettings.GetSampleRate())
+			, SignalIsPositive(true)
+			, LastSeed((*InSeed == -1) ? FDateTime::UtcNow().GetTicks() : *InSeed)
+		{
+		}
 
-        static const FVertexInterface& DeclareVertexInterface()
-        {
-            using namespace DustNodeVertexNames;
-
-            static const FVertexInterface Interface(
-                FInputVertexInterface(
-                    TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputEnabled), true),
-                    TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputBiPolar), true),
-                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputDensityOffset), 0.1f),
-                    TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputDensity))
-                ),
-                FOutputVertexInterface(
-                    TOutputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputImpulse))
-                )
-            );
-
-            return Interface;
-        }
+		static const FVertexInterface& DeclareVertexInterface()
+		{
+			using namespace DustNodeVertexNames;
+			static const FVertexInterface Interface(
+				FInputVertexInterface(
+					TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputEnabled), true),
+					TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputBiPolar), true),
+					TInputDataVertex<int32>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputSeed), -1),
+					TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputDensityOffset), 0.f),
+					TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputDensityAudio)),
+					TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputAmpVarOffset), 1.f),
+					TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputAmpVarAudio))
+				),
+				FOutputVertexInterface(
+					TOutputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputImpulse)),
+					TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTrigger))
+				)
+			);
+			return Interface;
+		}
 
         static const FNodeClassMetadata& GetNodeInfo()
-        {
-            auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
-                {
-                    FVertexInterface NodeInterface = DeclareVertexInterface();
-
-                    FNodeClassMetadata Metadata;
-
-                    Metadata.ClassName = { TEXT("UE"), TEXT("Dust (Audio)"), TEXT("Audio") };
-                    Metadata.MajorVersion = 1;
-                    Metadata.MinorVersion = 1;
-                    Metadata.DisplayName = METASOUND_LOCTEXT("DustNodeDisplayName", "Dust (Audio)");
-                    Metadata.Description = METASOUND_LOCTEXT("DustNodeDesc", "Generate randomly timed impulses with audio-rate modulation.");
-                    Metadata.Author = "Charles Matthews";
-                    Metadata.PromptIfMissing = PluginNodeMissingPrompt;
-                    Metadata.DefaultInterface = DeclareVertexInterface();
-                    Metadata.CategoryHierarchy = {
-                        METASOUND_LOCTEXT("Custom", "Branches"),
-                        METASOUND_LOCTEXT("CustomSub", "Generators")
-                    };
-                    Metadata.Keywords = TArray<FText>(); // Add relevant keywords if necessary
-
-                    return Metadata;
+		{
+			auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
+			{
+				FNodeClassMetadata Metadata;
+				Metadata.ClassName = { TEXT("UE"), TEXT("Dust (Audio)"), TEXT("Audio") };
+				Metadata.MajorVersion = 1;
+				Metadata.MinorVersion = 0;
+				Metadata.DisplayName = LOCTEXT("DustNodeDisplayName", "Dust (Audio)");
+				Metadata.Description = LOCTEXT("DustNodeDesc", "Generates randomly timed impulses (uni or bi-polar) alongside triggers, with optional audio rate modulation.");
+				Metadata.Author = TEXT("Charles Matthews");
+				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
+                Metadata.CategoryHierarchy = {
+                    METASOUND_LOCTEXT("Custom", "Branches"),
+                    METASOUND_LOCTEXT("CustomSub", "Triggers")
                 };
+				Metadata.DefaultInterface = DeclareVertexInterface();
+				return Metadata;
+			};
+			static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
+			return Metadata;
+		}
 
-            static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
-            return Metadata;
-        }
+		METASOUND_DISABLE_LEGACY_IO()
 
-        METASOUND_DISABLE_LEGACY_IO()
-        
-        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
-        {
-            using namespace DustNodeVertexNames;
+		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
+		{
+			using namespace DustNodeVertexNames;
+			const FInputVertexInterfaceData& InputData = InParams.InputData;
+			TDataReadReference<bool> InEnabled =
+				InputData.GetOrCreateDefaultDataReadReference<bool>(METASOUND_GET_PARAM_NAME(InputEnabled), InParams.OperatorSettings);
+			TDataReadReference<bool> InBiPolar =
+				InputData.GetOrCreateDefaultDataReadReference<bool>(METASOUND_GET_PARAM_NAME(InputBiPolar), InParams.OperatorSettings);
+			TDataReadReference<int32> InSeed =
+				InputData.GetOrCreateDefaultDataReadReference<int32>(METASOUND_GET_PARAM_NAME(InputSeed), InParams.OperatorSettings);
+			TDataReadReference<float> InDensityOffset =
+				InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputDensityOffset), InParams.OperatorSettings);
+			TDataReadReference<FAudioBuffer> InDensityAudio =
+				InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputDensityAudio), InParams.OperatorSettings);
+			TDataReadReference<float> InAmpVarOffset =
+				InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputAmpVarOffset), InParams.OperatorSettings);
+			TDataReadReference<FAudioBuffer> InAmpVarAudio =
+				InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputAmpVarAudio), InParams.OperatorSettings);
+			return MakeUnique<FDustOperator>(
+				InParams.OperatorSettings,
+				InEnabled,
+				InBiPolar,
+				InSeed,
+				InDensityOffset,
+				InDensityAudio,
+				InAmpVarOffset,
+				InAmpVarAudio
+			);
+		}
 
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDensity), InputDensity);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDensityOffset), InputDensityOffset);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputEnabled), InputEnabled);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputBiPolar), InputBiPolar);
-        }
-        
-        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
-        {
-            using namespace DustNodeVertexNames;
+		void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
+		{
+			using namespace DustNodeVertexNames;
+			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputEnabled), Enabled);
+			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputBiPolar), BiPolar);
+			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSeed), Seed);
+			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDensityOffset), DensityOffset);
+			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDensityAudio), DensityAudio);
+			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputAmpVarOffset), AmpVarOffset);
+			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputAmpVarAudio), AmpVarAudio);
+		}
 
-            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputImpulse), OutputImpulse);
-        }
-        
-        // Used to instantiate a new runtime instance of the node
-        static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
-        {
-            using namespace DustNodeVertexNames;
-
-            const FInputVertexInterfaceData& InputData = InParams.InputData;
-            const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();
-
-            TDataReadReference<FAudioBuffer> InputDensity = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputDensity), InParams.OperatorSettings);
-            TDataReadReference<float> InputDensityOffset = InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputDensityOffset), InParams.OperatorSettings);
-            TDataReadReference<bool> InputEnabled = InputData.GetOrCreateDefaultDataReadReference<bool>(METASOUND_GET_PARAM_NAME(InputEnabled), InParams.OperatorSettings);
-            TDataReadReference<bool> InputBiPolar = InputData.GetOrCreateDefaultDataReadReference<bool>(METASOUND_GET_PARAM_NAME(InputBiPolar), InParams.OperatorSettings);
-
-            return MakeUnique<FDustOperator>(InParams.OperatorSettings, InputDensity, InputDensityOffset, InputEnabled, InputBiPolar);
-        }
+		void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
+		{
+			using namespace DustNodeVertexNames;
+			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputTrigger), OutputTrigger);
+			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputImpulse), OutputImpulse);
+		}
 
         void Execute()
         {
-        const float* DensityData = InputDensity->GetData();
-        float* OutputDataPtr = OutputImpulse->GetData();
-        int32 NumFrames = InputDensity->Num();
-        float InputDensityOffsetValue = *InputDensityOffset;
-        bool bEnabled = *InputEnabled;
-        bool bBiPolar = *InputBiPolar;
-
-        for (int32 i = 0; i < NumFrames; ++i)
-        {
-            if (bEnabled)
+            OutputTrigger->AdvanceBlock();
+            float* AudioOut = OutputImpulse->GetData();
+            const float* DensityIn = DensityAudio->GetData();
+            const float* AmpVarIn = AmpVarAudio->GetData();
+            int32 NumFrames = DensityAudio->Num();
+        
+            int32 CurrentSeed = *Seed;
+            int32 NewSeed = (CurrentSeed == -1) ? FDateTime::UtcNow().GetTicks() : CurrentSeed;
+            if (NewSeed != LastSeed)
             {
-                float Density = DensityData[i];
-                float AbsDensity = FMath::Abs(Density) + InputDensityOffsetValue;
-                float Threshold = 1.0f - AbsDensity * 0.0009f;
-
-                float RandomValue = RNGStream.GetFraction();
-
-                if (RandomValue > Threshold)
+                RNGStream.Initialize(NewSeed);
+                LastSeed = NewSeed;
+            }
+        
+            if (!*Enabled)
+            {
+                FMemory::Memset(AudioOut, 0, sizeof(float) * NumFrames);
+                return;
+            }
+        
+            for (int32 i = 0; i < NumFrames; ++i)
+            {
+                float d = (*DensityOffset) + DensityIn[i];
+                float p = FMath::Clamp(FMath::Max(0.f, d) / SampleRate, 0.f, 1.f);
+                float r = RNGStream.GetFraction();
+        
+                if (r < p)
                 {
-                    if (bBiPolar)
+                    float mod = FMath::Clamp((*AmpVarOffset) + AmpVarIn[i], 0.f, 1.f);
+                    float randAmp = RNGStream.GetFraction();
+                    float a = FMath::Lerp(1.f, randAmp, mod);
+        
+                    if (*BiPolar)
                     {
-                        OutputDataPtr[i] = SignalIsPositive ? 1.0f : -1.0f;
-                        SignalIsPositive = !SignalIsPositive; 
+                        a = SignalIsPositive ? a : -a;
+                        SignalIsPositive = !SignalIsPositive;
                     }
-                    else
-                    {
-                        OutputDataPtr[i] = 1.0f;
-                    }
+        
+                    AudioOut[i] = a;
+                    OutputTrigger->TriggerFrame(i);
                 }
                 else
                 {
-                    OutputDataPtr[i] = 0.0f;
+                    AudioOut[i] = 0.f;
                 }
             }
-            else
-            {
-                OutputDataPtr[i] = 0.0f; // Output zero when disabled
-            }
         }
-    }
 
-    private:
+	private:
+		FBoolReadRef Enabled;
+		FBoolReadRef BiPolar;
+		FInt32ReadRef Seed;
+		FFloatReadRef DensityOffset;
+		FAudioBufferReadRef DensityAudio;
+		FFloatReadRef AmpVarOffset;
+		FAudioBufferReadRef AmpVarAudio;
+		FAudioBufferWriteRef OutputImpulse;
+		FTriggerWriteRef OutputTrigger;
+		FRandomStream RNGStream;
+		float SampleRate;
+		bool SignalIsPositive;
+		int32 LastSeed;
+	};
 
-        // Inputs
-        FAudioBufferReadRef InputDensity;
-		FFloatReadRef InputDensityOffset;
-        FBoolReadRef InputEnabled;
-        FBoolReadRef InputBiPolar;
+	class FDustNode : public FNodeFacade
+	{
+	public:
+		FDustNode(const FNodeInitData& InitData)
+			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FDustOperator>())
+		{
+		}
+	};
 
-        // Outputs
-        FAudioBufferWriteRef OutputImpulse;
-
-        // Random number generator
-        FRandomStream RNGStream;
-        
-        // Toggle flag for polarity
-        bool SignalIsPositive;
-
-        // Generate an initial seed for FRandomStream
-        static int32 InitialSeed()
-        {
-            return FDateTime::UtcNow().GetTicks();
-        }
-    };
-
-    
-    class FDustNode : public FNodeFacade
-    {
-    public:
-        FDustNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FDustOperator>())
-        {
-        }
-    };
-
-    METASOUND_REGISTER_NODE(FDustNode);
+	METASOUND_REGISTER_NODE(FDustNode);
 }
 
 #undef LOCTEXT_NAMESPACE
