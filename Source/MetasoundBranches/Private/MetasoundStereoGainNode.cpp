@@ -17,6 +17,7 @@ namespace Metasound
         METASOUND_PARAM(InputLeftSignal, "In L", "Left channel audio input.");
         METASOUND_PARAM(InputRightSignal, "In R", "Right channel audio input.");
         METASOUND_PARAM(InputGain, "Gain (Lin)", "Gain control (0.0 to 1.0).");
+        METASOUND_PARAM(InputGainModulation, "Modulation", "Audio rate gain modulation.");
 
         METASOUND_PARAM(OutputLeftSignal, "Out L", "Left output channel.");
         METASOUND_PARAM(OutputRightSignal, "Out R", "Right output channel.");
@@ -29,10 +30,12 @@ namespace Metasound
             const FOperatorSettings& InSettings,
             const FAudioBufferReadRef& InLeftSignal,
             const FAudioBufferReadRef& InRightSignal,
-            const FFloatReadRef& InGain)
+            const FFloatReadRef& InGain,
+            const FAudioBufferReadRef& InGainModulation)
             : InputLeftSignal(InLeftSignal)
             , InputRightSignal(InRightSignal)
             , InputGain(InGain)
+            , InputGainModulation(InGainModulation)
             , OutputLeftSignal(FAudioBufferWriteRef::CreateNew(InSettings))
             , OutputRightSignal(FAudioBufferWriteRef::CreateNew(InSettings))
         {
@@ -46,7 +49,8 @@ namespace Metasound
                 FInputVertexInterface(
                     TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputLeftSignal)),
                     TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputRightSignal)),
-                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputGain), 1.0f)
+                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputGain), 1.0f),
+                    TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputGainModulation))
                 ),
                 FOutputVertexInterface(
                     TOutputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputLeftSignal)),
@@ -94,6 +98,7 @@ namespace Metasound
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputLeftSignal), InputLeftSignal);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputRightSignal), InputRightSignal);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputGain), InputGain);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputGainModulation), InputGainModulation);
         }
         
         virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
@@ -114,6 +119,7 @@ namespace Metasound
             TDataReadReference<FAudioBuffer> InputLeftSignal = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputLeftSignal), InParams.OperatorSettings);
             TDataReadReference<FAudioBuffer> InputRightSignal = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputRightSignal), InParams.OperatorSettings);
             TDataReadReference<float> Gain = InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputGain), InParams.OperatorSettings);
+            TDataReadReference<FAudioBuffer> GainModulation = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputGainModulation), InParams.OperatorSettings);
 
             return MakeUnique<FStereoGainOperator>(InParams.OperatorSettings, InputLeftSignal, InputRightSignal, Gain);
         }
@@ -121,18 +127,19 @@ namespace Metasound
         void Execute()
         {
             const int32 NumFrames = InputLeftSignal->Num();
-
             const float* LeftData = InputLeftSignal->GetData();
             const float* RightData = InputRightSignal->GetData();
+            const float* ModData = InputGainModulation->GetData();
             float* OutputLeftData = OutputLeftSignal->GetData();
             float* OutputRightData = OutputRightSignal->GetData();
 
-            const float GainVal = *InputGain;
+            const float ScalarGain = *InputGain;
 
             for (int32 i = 0; i < NumFrames; ++i)
             {
-                OutputLeftData[i] = LeftData[i] * GainVal;
-                OutputRightData[i] = RightData[i] * GainVal;
+                const float TotalGain = ScalarGain + ModData[i]; // ModData[i] is 0 if not connected
+                OutputLeftData[i] = LeftData[i] * TotalGain;
+                OutputRightData[i] = RightData[i] * TotalGain;
             }
         }
 
@@ -141,6 +148,7 @@ namespace Metasound
         FAudioBufferReadRef InputLeftSignal;
         FAudioBufferReadRef InputRightSignal;
         FFloatReadRef InputGain;
+        FAudioBufferReadRef InputGainModulation;
 
         // Outputs
         FAudioBufferWriteRef OutputLeftSignal;
