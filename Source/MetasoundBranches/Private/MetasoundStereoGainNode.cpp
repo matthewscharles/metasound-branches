@@ -121,7 +121,7 @@ namespace Metasound
             TDataReadReference<float> Gain = InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputGain), InParams.OperatorSettings);
             TDataReadReference<FAudioBuffer> GainModulation = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputGainModulation), InParams.OperatorSettings);
 
-            return MakeUnique<FStereoGainOperator>(InParams.OperatorSettings, InputLeftSignal, InputRightSignal, Gain);
+            return MakeUnique<FStereoGainOperator>(InParams.OperatorSettings, InputLeftSignal, InputRightSignal, Gain, GainModulation);
         }
 
         void Execute()
@@ -137,7 +137,7 @@ namespace Metasound
 
             for (int32 i = 0; i < NumFrames; ++i)
             {
-                const float TotalGain = ScalarGain + ModData[i]; // ModData[i] is 0 if not connected
+                const float TotalGain = ScalarGain + ModData[i];
                 OutputLeftData[i] = LeftData[i] * TotalGain;
                 OutputRightData[i] = RightData[i] * TotalGain;
             }
