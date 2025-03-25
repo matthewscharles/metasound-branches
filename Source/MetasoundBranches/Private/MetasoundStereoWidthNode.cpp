@@ -1,11 +1,11 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
 #include "MetasoundBranches/Public/MetasoundStereoWidthNode.h"
-#include "MetasoundExecutableOperator.h"     // TExecutableOperator class
-#include "MetasoundPrimitives.h"             // ReadRef and WriteRef descriptions for bool, int32, float, and string
-#include "MetasoundNodeRegistrationMacro.h"  // METASOUND_LOCTEXT and METASOUND_REGISTER_NODE macros
-#include "MetasoundFacade.h"                 // FNodeFacade class, eliminates the need for a fair amount of boilerplate code
-#include "MetasoundParamHelper.h"            // METASOUND_PARAM and METASOUND_GET_PARAM family of macros
+#include "MetasoundExecutableOperator.h"
+#include "MetasoundPrimitives.h"
+#include "MetasoundNodeRegistrationMacro.h"
+#include "MetasoundFacade.h"
+#include "MetasoundParamHelper.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_StereoWidthNode"
@@ -17,6 +17,7 @@ namespace Metasound
         METASOUND_PARAM(InputLeftSignal, "In L", "Left channel.");
         METASOUND_PARAM(InputRightSignal, "In R", "Right channel.");
         METASOUND_PARAM(InputWidth, "Width", "Stereo width factor ranging from 0 to 200% (0 - 2).");
+        METASOUND_PARAM(InputGainModulation, "Modulation", "Audio rate gain modulation.");
 
         METASOUND_PARAM(OutputLeftSignal, "Out L", "Left channel of the adjusted stereo output signal.");
         METASOUND_PARAM(OutputRightSignal, "Out R", "Right channel of the adjusted stereo output signal.");
@@ -29,10 +30,12 @@ namespace Metasound
             const FOperatorSettings& InSettings,
             const FAudioBufferReadRef& InLeftSignal,
             const FAudioBufferReadRef& InRightSignal,
-            const FFloatReadRef& InWidth)
+            const FFloatReadRef& InWidth,
+            const FAudioBufferReadRef& InModulation)
             : InputLeftSignal(InLeftSignal)
             , InputRightSignal(InRightSignal)
             , InputWidth(InWidth)
+            , InputGainModulation(InModulation)
             , OutputLeftSignal(FAudioBufferWriteRef::CreateNew(InSettings))
             , OutputRightSignal(FAudioBufferWriteRef::CreateNew(InSettings))
         {
@@ -46,7 +49,8 @@ namespace Metasound
                 FInputVertexInterface(
                     TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputLeftSignal)),
                     TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputRightSignal)),
-                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputWidth), 1.0f)
+                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputWidth), 1.0f),
+                    TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputGainModulation))
                 ),
                 FOutputVertexInterface(
                     TOutputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputLeftSignal)),
@@ -60,34 +64,33 @@ namespace Metasound
         static const FNodeClassMetadata& GetNodeInfo()
         {
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
-                {
-                    FVertexInterface NodeInterface = DeclareVertexInterface();
+            {
+                FVertexInterface NodeInterface = DeclareVertexInterface();
 
-                    FNodeClassMetadata Metadata;
-
-                    Metadata.ClassName = { TEXT("UE"), TEXT("Stereo Width"), TEXT("Audio") };
-                    Metadata.MajorVersion = 1;
-                    Metadata.MinorVersion = 1;
-                    Metadata.DisplayName = METASOUND_LOCTEXT("WidthNodeDisplayName", "Stereo Width");
-                    Metadata.Description = METASOUND_LOCTEXT("WidthNodeDesc", "Adjusts the stereo width of a signal.");
-                    Metadata.Author = "Charles Matthews";
-                    Metadata.PromptIfMissing = PluginNodeMissingPrompt;
-                    Metadata.DefaultInterface = DeclareVertexInterface();
-                    Metadata.CategoryHierarchy = {
-                        METASOUND_LOCTEXT("Custom", "Branches"),
-                        METASOUND_LOCTEXT("CustomSub", "Spatialization")
-                    };
-                    Metadata.Keywords = TArray<FText>(); // Keywords for searching
-
-                    return Metadata;
+                FNodeClassMetadata Metadata;
+                Metadata.ClassName = { TEXT("UE"), TEXT("Stereo Width"), TEXT("Audio") };
+                Metadata.MajorVersion = 1;
+                Metadata.MinorVersion = 2;
+                Metadata.DisplayName = METASOUND_LOCTEXT("WidthNodeDisplayName", "Stereo Width");
+                Metadata.Description = METASOUND_LOCTEXT("WidthNodeDesc", "Adjusts the stereo width of a signal with optional AR modulation.");
+                Metadata.Author = "Charles Matthews";
+                Metadata.PromptIfMissing = PluginNodeMissingPrompt;
+                Metadata.DefaultInterface = NodeInterface;
+                Metadata.CategoryHierarchy = {
+                    METASOUND_LOCTEXT("Custom", "Branches"),
+                    METASOUND_LOCTEXT("CustomSub", "Spatialization")
                 };
+                Metadata.Keywords = TArray<FText>();
+
+                return Metadata;
+            };
 
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             return Metadata;
         }
-        
+
         METASOUND_DISABLE_LEGACY_IO()
-        
+
         virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace WidthNodeVertexNames;
@@ -95,8 +98,9 @@ namespace Metasound
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputLeftSignal), InputLeftSignal);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputRightSignal), InputRightSignal);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputWidth), InputWidth);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputGainModulation), InputGainModulation);
         }
-        
+
         virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace WidthNodeVertexNames;
@@ -110,13 +114,13 @@ namespace Metasound
             using namespace WidthNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
-            const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();
 
             TDataReadReference<FAudioBuffer> InputLeftSignal = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputLeftSignal), InParams.OperatorSettings);
             TDataReadReference<FAudioBuffer> InputRightSignal = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputRightSignal), InParams.OperatorSettings);
             TDataReadReference<float> InputWidth = InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputWidth), InParams.OperatorSettings);
+            TDataReadReference<FAudioBuffer> InputGainModulation = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputGainModulation), InParams.OperatorSettings);
 
-            return MakeUnique<FWidthOperator>(InParams.OperatorSettings, InputLeftSignal, InputRightSignal, InputWidth);
+            return MakeUnique<FWidthOperator>(InParams.OperatorSettings, InputLeftSignal, InputRightSignal, InputWidth, InputGainModulation);
         }
 
         void Execute()
@@ -125,13 +129,17 @@ namespace Metasound
 
             const float* LeftData = InputLeftSignal->GetData();
             const float* RightData = InputRightSignal->GetData();
+            const float* ModulationData = InputGainModulation->GetData();
+
             float* OutputLeftData = OutputLeftSignal->GetData();
             float* OutputRightData = OutputRightSignal->GetData();
 
-            float WidthFactor = FMath::Clamp(*InputWidth, 0.0f, 2.0f);
+            const float ScalarWidth = *InputWidth;
 
             for (int32 i = 0; i < NumFrames; ++i)
             {
+                float WidthFactor = FMath::Clamp(ScalarWidth + ModulationData[i], 0.0f, 2.0f);
+
                 float Left = LeftData[i];
                 float Right = RightData[i];
 
@@ -146,11 +154,11 @@ namespace Metasound
         }
 
     private:
-
         // Inputs
         FAudioBufferReadRef InputLeftSignal;
         FAudioBufferReadRef InputRightSignal;
         FFloatReadRef InputWidth;
+        FAudioBufferReadRef InputGainModulation;
 
         // Outputs
         FAudioBufferWriteRef OutputLeftSignal;

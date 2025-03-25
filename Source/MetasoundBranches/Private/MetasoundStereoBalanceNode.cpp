@@ -1,12 +1,12 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
 #include "MetasoundBranches/Public/MetasoundStereoBalanceNode.h"
-#include "MetasoundExecutableOperator.h"     // TExecutableOperator class
-#include "MetasoundPrimitives.h"             // ReadRef and WriteRef descriptions for bool, int32, float, and string
-#include "MetasoundNodeRegistrationMacro.h"  // METASOUND_LOCTEXT and METASOUND_REGISTER_NODE macros
-#include "MetasoundFacade.h"                 // FNodeFacade class, eliminates the need for a fair amount of boilerplate code
-#include "MetasoundParamHelper.h"            // METASOUND_PARAM and METASOUND_GET_PARAM family of macros
-#include "Math/UnrealMathUtility.h"          // For FMath functions
+#include "MetasoundExecutableOperator.h"
+#include "MetasoundPrimitives.h"
+#include "MetasoundNodeRegistrationMacro.h"
+#include "MetasoundFacade.h"
+#include "MetasoundParamHelper.h"
+#include "Math/UnrealMathUtility.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_BalanceNode"
@@ -18,6 +18,7 @@ namespace Metasound
         METASOUND_PARAM(InputLeftSignal, "In L", "Left channel audio input.");
         METASOUND_PARAM(InputRightSignal, "In R", "Right channel audio input.");
         METASOUND_PARAM(InputBalance, "Balance", "Balance control ranging from -1.0 (full left) to 1.0 (full right).");
+        METASOUND_PARAM(InputBalanceModulation, "Modulation", "Audio-rate balance modulation signal.");
 
         METASOUND_PARAM(OutputLeftSignal, "Out L", "Left output channel.");
         METASOUND_PARAM(OutputRightSignal, "Out R", "Right output channel.");
@@ -30,10 +31,12 @@ namespace Metasound
             const FOperatorSettings& InSettings,
             const FAudioBufferReadRef& InLeftSignal,
             const FAudioBufferReadRef& InRightSignal,
-            const FFloatReadRef& InBalance)
+            const FFloatReadRef& InBalance,
+            const FAudioBufferReadRef& InBalanceModulation)
             : InputLeftSignal(InLeftSignal)
             , InputRightSignal(InRightSignal)
             , InputBalance(InBalance)
+            , InputBalanceModulation(InBalanceModulation)
             , OutputLeftSignal(FAudioBufferWriteRef::CreateNew(InSettings))
             , OutputRightSignal(FAudioBufferWriteRef::CreateNew(InSettings))
         {
@@ -47,7 +50,8 @@ namespace Metasound
                 FInputVertexInterface(
                     TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputLeftSignal)),
                     TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputRightSignal)),
-                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputBalance), 0.0f) // Default balance is centered
+                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputBalance), 0.0f),
+                    TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputBalanceModulation))
                 ),
                 FOutputVertexInterface(
                     TOutputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputLeftSignal)),
@@ -61,34 +65,34 @@ namespace Metasound
         static const FNodeClassMetadata& GetNodeInfo()
         {
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
-                {
-                    FVertexInterface NodeInterface = DeclareVertexInterface();
+            {
+                FVertexInterface NodeInterface = DeclareVertexInterface();
 
-                    FNodeClassMetadata Metadata;
-    
-                    Metadata.ClassName = { TEXT("UE"), TEXT("Stereo Balance"), TEXT("Audio") };
-                    Metadata.MajorVersion = 1;
-                    Metadata.MinorVersion = 1;
-                    Metadata.DisplayName = METASOUND_LOCTEXT("StereoGainNodeDisplayName", "Stereo Balance");
-                    Metadata.Description = METASOUND_LOCTEXT("StereoGainNodeDesc", "Adjusts the balance of a stereo signal.");
-                    Metadata.Author = "Charles Matthews";
-                    Metadata.PromptIfMissing = PluginNodeMissingPrompt;
-                    Metadata.DefaultInterface = NodeInterface;
-                    Metadata.CategoryHierarchy = {
-                        METASOUND_LOCTEXT("Custom", "Branches"),
-                        METASOUND_LOCTEXT("CustomSub", "Spatialization")
-                    };
-                    Metadata.Keywords = TArray<FText>();
+                FNodeClassMetadata Metadata;
 
-                    return Metadata;
+                Metadata.ClassName = { TEXT("UE"), TEXT("Stereo Balance"), TEXT("Audio") };
+                Metadata.MajorVersion = 1;
+                Metadata.MinorVersion = 2;
+                Metadata.DisplayName = METASOUND_LOCTEXT("StereoBalanceNodeDisplayName", "Stereo Balance");
+                Metadata.Description = METASOUND_LOCTEXT("StereoBalanceNodeDesc", "Adjusts the balance of a stereo signal with optional AR modulation.");
+                Metadata.Author = "Charles Matthews";
+                Metadata.PromptIfMissing = PluginNodeMissingPrompt;
+                Metadata.DefaultInterface = NodeInterface;
+                Metadata.CategoryHierarchy = {
+                    METASOUND_LOCTEXT("Custom", "Branches"),
+                    METASOUND_LOCTEXT("CustomSub", "Spatialization")
                 };
+                Metadata.Keywords = TArray<FText>();
+
+                return Metadata;
+            };
 
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             return Metadata;
         }
-        
+
         METASOUND_DISABLE_LEGACY_IO()
-        
+
         virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace BalanceNodeVertexNames;
@@ -96,8 +100,9 @@ namespace Metasound
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputLeftSignal), InputLeftSignal);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputRightSignal), InputRightSignal);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputBalance), InputBalance);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputBalanceModulation), InputBalanceModulation);
         }
-        
+
         virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace BalanceNodeVertexNames;
@@ -111,44 +116,57 @@ namespace Metasound
             using namespace BalanceNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
-            const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();
 
-            TDataReadReference<FAudioBuffer> InputLeftSignal = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputLeftSignal), InParams.OperatorSettings);
-            TDataReadReference<FAudioBuffer> InputRightSignal = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputRightSignal), InParams.OperatorSettings);
-            TDataReadReference<float> InputBalance = InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputBalance), InParams.OperatorSettings);
+            TDataReadReference<FAudioBuffer> InputLeftSignal = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(
+                METASOUND_GET_PARAM_NAME(InputLeftSignal), InParams.OperatorSettings);
+            TDataReadReference<FAudioBuffer> InputRightSignal = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(
+                METASOUND_GET_PARAM_NAME(InputRightSignal), InParams.OperatorSettings);
+            TDataReadReference<float> InputBalance = InputData.GetOrCreateDefaultDataReadReference<float>(
+                METASOUND_GET_PARAM_NAME(InputBalance), InParams.OperatorSettings);
+            TDataReadReference<FAudioBuffer> InputBalanceModulation = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(
+                METASOUND_GET_PARAM_NAME(InputBalanceModulation), InParams.OperatorSettings);
 
-            return MakeUnique<FBalanceOperator>(InParams.OperatorSettings, InputLeftSignal, InputRightSignal, InputBalance);
+            return MakeUnique<FBalanceOperator>(
+                InParams.OperatorSettings,
+                InputLeftSignal,
+                InputRightSignal,
+                InputBalance,
+                InputBalanceModulation
+            );
         }
 
-    void Execute()
-    {
-        int32 NumFrames = InputLeftSignal->Num();
-
-        const float* LeftData = InputLeftSignal->GetData();
-        const float* RightData = InputRightSignal->GetData();
-        float* OutputLeftData = OutputLeftSignal->GetData();
-        float* OutputRightData = OutputRightSignal->GetData();
-
-        float Balance = FMath::Clamp(*InputBalance, -1.0f, 1.0f);
-
-        float Angle = (Balance + 1.0f) * (PI / 4.0f);
-
-        float LeftGain = FMath::Cos(Angle);
-        float RightGain = FMath::Sin(Angle);
-
-        for (int32 i = 0; i < NumFrames; ++i)
+        void Execute()
         {
-            OutputLeftData[i] = LeftData[i] * LeftGain;
-            OutputRightData[i] = RightData[i] * RightGain;
+            const int32 NumFrames = InputLeftSignal->Num();
+
+            const float* LeftData = InputLeftSignal->GetData();
+            const float* RightData = InputRightSignal->GetData();
+            const float* ModulationData = InputBalanceModulation->GetData();
+
+            float* OutputLeftData = OutputLeftSignal->GetData();
+            float* OutputRightData = OutputRightSignal->GetData();
+
+            const float ScalarBalance = *InputBalance;
+
+            for (int32 i = 0; i < NumFrames; ++i)
+            {
+                float Balance = FMath::Clamp(ScalarBalance + ModulationData[i], -1.0f, 1.0f);
+                float Angle = (Balance + 1.0f) * (PI / 4.0f);
+
+                float LeftGain = FMath::Cos(Angle);
+                float RightGain = FMath::Sin(Angle);
+
+                OutputLeftData[i] = LeftData[i] * LeftGain;
+                OutputRightData[i] = RightData[i] * RightGain;
+            }
         }
-    }
 
     private:
-
         // Inputs
         FAudioBufferReadRef InputLeftSignal;
         FAudioBufferReadRef InputRightSignal;
         FFloatReadRef InputBalance;
+        FAudioBufferReadRef InputBalanceModulation;
 
         // Outputs
         FAudioBufferWriteRef OutputLeftSignal;
