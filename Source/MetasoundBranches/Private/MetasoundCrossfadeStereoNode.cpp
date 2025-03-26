@@ -19,6 +19,7 @@ namespace Metasound
         METASOUND_PARAM(InputLeftSignal2, "In2 L", "Left channel of second input.");
         METASOUND_PARAM(InputRightSignal2, "In2 R", "Right channel of second input.");
         METASOUND_PARAM(InputCrossfade, "Crossfade", "Crossfade between the two inputs (0.0 to 1.0).");
+        METASOUND_PARAM(InputCrossfadeModulation, "Modulation", "Audio rate crossfade modulation.");
 
         METASOUND_PARAM(OutputLeftSignal, "Out L", "Left channel of the output signal.");
         METASOUND_PARAM(OutputRightSignal, "Out R", "Right channel of the output signal.");
@@ -33,15 +34,18 @@ namespace Metasound
             const FAudioBufferReadRef& InRightSignal1,
             const FAudioBufferReadRef& InLeftSignal2,
             const FAudioBufferReadRef& InRightSignal2,
-            const FFloatReadRef& InCrossfade)
+            const FFloatReadRef& InCrossfade,
+            const FAudioBufferReadRef& InCrossfadeModulation)
             : InputLeftSignal1(InLeftSignal1)
             , InputRightSignal1(InRightSignal1)
             , InputLeftSignal2(InLeftSignal2)
             , InputRightSignal2(InRightSignal2)
             , InputCrossfade(InCrossfade)
+            , InputCrossfadeModulation(InCrossfadeModulation)
             , OutputLeftSignal(FAudioBufferWriteRef::CreateNew(InSettings))
             , OutputRightSignal(FAudioBufferWriteRef::CreateNew(InSettings))
         {
+            
         }
 
         static const FVertexInterface& DeclareVertexInterface()
@@ -54,7 +58,8 @@ namespace Metasound
                     TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputRightSignal1)),
                     TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputLeftSignal2)),
                     TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputRightSignal2)),
-                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputCrossfade), 0.5f)
+                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputCrossfade), 0.5f),
+                    TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputCrossfadeModulation))
                 ),
                 FOutputVertexInterface(
                     TOutputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputLeftSignal)),
@@ -127,8 +132,9 @@ namespace Metasound
             TDataReadReference<FAudioBuffer> InputLeftSignal2 = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputLeftSignal2), InParams.OperatorSettings);
             TDataReadReference<FAudioBuffer> InputRightSignal2 = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputRightSignal2), InParams.OperatorSettings);
             TDataReadReference<float> InputCrossfade = InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputCrossfade), InParams.OperatorSettings);
+            TDataReadReference<FAudioBuffer> InputCrossfadeModulation = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputCrossfadeModulation), InParams.OperatorSettings);
 
-            return MakeUnique<FCrossfadeStereoOperator>(InParams.OperatorSettings, InputLeftSignal1, InputRightSignal1, InputLeftSignal2, InputRightSignal2, InputCrossfade);
+            return MakeUnique<FCrossfadeStereoOperator>(InParams.OperatorSettings, InputLeftSignal1, InputRightSignal1, InputLeftSignal2, InputRightSignal2, InputCrossfade, InputCrossfadeModulation);
         }
 
         void Execute()
@@ -139,17 +145,20 @@ namespace Metasound
             const float* RightData1 = InputRightSignal1->GetData();
             const float* LeftData2 = InputLeftSignal2->GetData();
             const float* RightData2 = InputRightSignal2->GetData();
+            const float* ModulationData = InputCrossfadeModulation->GetData();
 
             float* OutputLeftData = OutputLeftSignal->GetData();
             float* OutputRightData = OutputRightSignal->GetData();
 
-            float CrossfadeFactor = FMath::Clamp(*InputCrossfade, 0.0f, 1.0f);
 
-            float Gain1 = FMath::Cos(CrossfadeFactor * HALF_PI); // HALF_PI = PI / 2
-            float Gain2 = FMath::Sin(CrossfadeFactor * HALF_PI);
 
             for (int32 i = 0; i < NumFrames; ++i)
             {
+                float CrossfadeFactor = FMath::Clamp(*InputCrossfade + ModulationData[i], 0.0f, 1.0f);
+
+                float Gain1 = FMath::Cos(CrossfadeFactor * HALF_PI); // HALF_PI = PI / 2
+                float Gain2 = FMath::Sin(CrossfadeFactor * HALF_PI);
+                
                 OutputLeftData[i] = Gain1 * LeftData1[i] + Gain2 * LeftData2[i];
                 OutputRightData[i] = Gain1 * RightData1[i] + Gain2 * RightData2[i];
             }
@@ -163,6 +172,7 @@ namespace Metasound
         FAudioBufferReadRef InputLeftSignal2;
         FAudioBufferReadRef InputRightSignal2;
         FFloatReadRef InputCrossfade;
+        FAudioBufferReadRef InputCrossfadeModulation;
 
         // Outputs
         FAudioBufferWriteRef OutputLeftSignal;

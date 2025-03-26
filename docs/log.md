@@ -60,3 +60,4 @@
 | 03/21 | - Add categories to all existing nodes.  Following the categories currently listed, which are in turn based on the standard nodes. |
 | 03/24 | - Create METASOUND_DISABLE_LEGACY_IO macro to cut down boilerplate, switch all nodes to BindInputs/BindOutputs |
 | 03/25 | - Add AR modulation to all stereo tools.<br>- Create safer version of phase disperser.<br>- Update Dust (potentially merge Audio and Trigger versions). |
+| 03/26 | - Add AR modulation to Stereo Crossfade. |
