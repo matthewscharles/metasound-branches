@@ -92,7 +92,7 @@ namespace Metasound
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.CategoryHierarchy = {
                     METASOUND_LOCTEXT("Custom", "Branches"),
-                    METASOUND_LOCTEXT("CustomSub", "Triggers")
+                    METASOUND_LOCTEXT("CustomSub", "Generators")
                 };
 				Metadata.DefaultInterface = DeclareVertexInterface();
 				return Metadata;
