@@ -35,8 +35,7 @@ Click on each node name below for a summary including inputs and outputs.
 |------|-----------|-------------|
 | [`Bool To Audio`](https://matthewscharles.github.io/metasound-branches/BoolToAudio.html) | Conversions | Convert a boolean value to an audio signal, with optional rise and fall times. |
 | [`Clock Divider`](https://matthewscharles.github.io/metasound-branches/ClockDivider.html) | Triggers | Divide a trigger into eight density levels. |
-| [`Dust (Audio)`](https://matthewscharles.github.io/metasound-branches/Dust(Audio).html) | Generators | Generate randomly timed impulses (unipolar or alternating polarity per impulse) with density control and audio-rate modulation. |
-| [`Dust (Trigger)`](https://matthewscharles.github.io/metasound-branches/Dust(Trigger).html) | Generators | Generate randomly timed impulses (unipolar or alternating polarity per impulse) with density control and audio-rate modulation. |
+| [`Dust`](https://matthewscharles.github.io/metasound-branches/Dust(Audio).html) | Generators | Generate randomly timed triggers and impulses (unipolar or alternating polarity per impulse) with density control, amplitude variation, and audio-rate modulation. |
 | [`Edge`](https://matthewscharles.github.io/metasound-branches/Edge.html) | Envelopes | Detect upward and downward changes in an input audio signal, with optional debounce. |
 | [`EDO`](https://matthewscharles.github.io/metasound-branches/EDO.html) | Tuning | Generate frequencies for tuning systems using equally divided octaves with a MIDI note input. Set a reference frequency and reference MIDI note (defaults to A440). |
 | [`Impulse`](https://matthewscharles.github.io/metasound-branches/Impulse.html) | Generators | Trigger a one-sample impulse (unipolar or alternating polarity per impulse). |
@@ -51,6 +50,19 @@ Click on each node name below for a summary including inputs and outputs.
 | [`Stereo Width`](https://matthewscharles.github.io/metasound-branches/StereoWidth.html) | Spatialization | Stereo width adjustment (0-200%), using mid-side processing. |
 | [`Tuning`](https://matthewscharles.github.io/metasound-branches/Tuning.html) | Tuning | Quantize a float value to a custom 12-note tuning, with adjustment in cents per-note. |
 | [`Zero Crossing`](https://matthewscharles.github.io/metasound-branches/ZeroCrossing.html) | Envelopes | Detect zero crossings in an input audio signal, with optional debounce. |
+
+## v1.1 Notes
+In addition to improvements to the range of nodes, all items are now available via sub-categories within Branches.
+
+### Additions
+- Delta Time
+
+### Changes
+- The audio and trigger versions of Dust have been combined.
+- Phase Disperser has been optimised for the audio thread and now accepts a maximum number of filters on start.
+- Tuning and EDO now require a trigger for output.
+- All stereo tools now accept audio rate modulation for smooth panning effects.
+
 
 ---
 
