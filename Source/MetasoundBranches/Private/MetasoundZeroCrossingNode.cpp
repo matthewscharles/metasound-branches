@@ -1,12 +1,12 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
 #include "MetasoundBranches/Public/MetasoundZeroCrossingNode.h"
-#include "MetasoundExecutableOperator.h"     // TExecutableOperator class
-#include "MetasoundPrimitives.h"             // ReadRef and WriteRef for data types
-#include "MetasoundNodeRegistrationMacro.h"  // METASOUND_LOCTEXT and METASOUND_REGISTER_NODE macros
-#include "MetasoundFacade.h"                 // FNodeFacade class
-#include "MetasoundParamHelper.h"            // METASOUND_PARAM and METASOUND_GET_PARAM family of macros
-#include "MetasoundTrigger.h"                // For FTriggerWriteRef and FTrigger
+#include "MetasoundExecutableOperator.h"
+#include "MetasoundPrimitives.h"
+#include "MetasoundNodeRegistrationMacro.h"
+#include "MetasoundFacade.h"
+#include "MetasoundParamHelper.h"
+#include "MetasoundTrigger.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_ZeroCrossing"
@@ -31,9 +31,6 @@ namespace Metasound
             : InputSignal(InSignal)
             , InputDebounce(InDebounce)
             , OutputTriggerZeroCrossing(FTriggerWriteRef::CreateNew(InSettings))
-            , PreviousSignalValue(0.0f)
-            , DebounceSamples(0)
-            , DebounceCounter(0)
             , SampleRate(InSampleRate)
         {
         }
@@ -75,7 +72,7 @@ namespace Metasound
                     METASOUND_LOCTEXT("Custom", "Branches"),
                     METASOUND_LOCTEXT("CustomSub", "Envelopes")
                 };
-                Metadata.Keywords = TArray<FText>(); // Keywords for searching
+                Metadata.Keywords = TArray<FText>();
 
                 return Metadata;
             };
@@ -83,16 +80,16 @@ namespace Metasound
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             return Metadata;
         }
-        
+
         METASOUND_DISABLE_LEGACY_IO()
-        
+
         virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace ZeroCrossingVertexNames;
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDebounce), InputDebounce);
         }
-        
+
         virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace ZeroCrossingVertexNames;
@@ -121,7 +118,6 @@ namespace Metasound
         {
             OutputTriggerZeroCrossing->Reset();
 
-            // Initialize PreviousSignalValue
             if (InputSignal->Num() > 0)
             {
                 PreviousSignalValue = InputSignal->GetData()[0];
@@ -131,7 +127,8 @@ namespace Metasound
                 PreviousSignalValue = 0.0f;
             }
 
-            DebounceCounter = 0;
+            LastTriggerFrame = -1000000;
+            BlockIndex = 0;
         }
 
         void Execute()
@@ -142,62 +139,43 @@ namespace Metasound
             int32 NumFrames = InputSignal->Num();
             const float DebounceTime = InputDebounce->GetSeconds();
 
-            // Recalculate debounce samples if debounce time or sample rate has changed
-            if (LastDebounceTime != DebounceTime || LastSampleRate != SampleRate)
-            {
-                DebounceSamples = FMath::RoundToInt(FMath::Clamp(DebounceTime, 0.001f, 5.0f) * SampleRate);
-                LastDebounceTime = DebounceTime;
-                LastSampleRate = SampleRate;
-            }
+            int32 DebounceSamples = FMath::Max(1, static_cast<int32>(FMath::Clamp(DebounceTime, 0.001f, 5.0f) * SampleRate));
 
             for (int32 i = 0; i < NumFrames; ++i)
             {
                 float CurrentSignal = SignalData[i];
-
-                if (DebounceCounter > 0)
-                {
-                    DebounceCounter--;
-                }
+                int32 CurrentFrame = BlockIndex + i;
 
                 bool PreviousNonPositive = (PreviousSignalValue <= 0.0f);
                 bool CurrentPositive = (CurrentSignal > 0.0f);
                 bool PreviousNonNegative = (PreviousSignalValue >= 0.0f);
                 bool CurrentNegative = (CurrentSignal < 0.0f);
 
-                // Crossing from negative or zero to positive
-                if (PreviousNonPositive && CurrentPositive && DebounceCounter <= 0)
+                bool Crossing = (PreviousNonPositive && CurrentPositive) || (PreviousNonNegative && CurrentNegative);
+
+                if (Crossing && (CurrentFrame - LastTriggerFrame) >= DebounceSamples)
                 {
                     OutputTriggerZeroCrossing->TriggerFrame(i);
-                    DebounceCounter = DebounceSamples;
-                }
-                // Crossing from positive or zero to negative
-                else if (PreviousNonNegative && CurrentNegative && DebounceCounter <= 0)
-                {
-                    OutputTriggerZeroCrossing->TriggerFrame(i);
-                    DebounceCounter = DebounceSamples;
+                    LastTriggerFrame = CurrentFrame;
                 }
 
                 PreviousSignalValue = CurrentSignal;
             }
+
+            BlockIndex += NumFrames;
         }
 
     private:
-        // Inputs
         FAudioBufferReadRef InputSignal;
         FTimeReadRef InputDebounce;
 
-        // Output
         FTriggerWriteRef OutputTriggerZeroCrossing;
 
-        // Internal variables
-        float PreviousSignalValue;
-        int32 DebounceSamples;
-        int32 DebounceCounter;
         float SampleRate;
+        float PreviousSignalValue = 0.0f;
 
-        // Variables to track changes in debounce time and sample rate
-        float LastDebounceTime = -1.0f;
-        float LastSampleRate = -1.0f;
+        int32 LastTriggerFrame = -1000000;
+        int32 BlockIndex = 0;
     };
 
     class FZeroCrossingNode : public FNodeFacade
