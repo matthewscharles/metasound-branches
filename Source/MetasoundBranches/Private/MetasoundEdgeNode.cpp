@@ -1,12 +1,12 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
 #include "MetasoundBranches/Public/MetasoundEdgeNode.h"
-#include "MetasoundExecutableOperator.h"     // TExecutableOperator class
-#include "MetasoundPrimitives.h"             // ReadRef and WriteRef descriptions for bool, int32, float, and string
-#include "MetasoundNodeRegistrationMacro.h"  // METASOUND_LOCTEXT and METASOUND_REGISTER_NODE macros
-#include "MetasoundFacade.h"                 // FNodeFacade class, eliminates the need for a fair amount of boilerplate code
-#include "MetasoundParamHelper.h"            // METASOUND_PARAM and METASOUND_GET_PARAM family of macros
-#include "MetasoundTrigger.h"                // For FTriggerWriteRef and FTrigger
+#include "MetasoundExecutableOperator.h"
+#include "MetasoundPrimitives.h"
+#include "MetasoundNodeRegistrationMacro.h"
+#include "MetasoundFacade.h"
+#include "MetasoundParamHelper.h"
+#include "MetasoundTrigger.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_Edge"
@@ -34,9 +34,6 @@ namespace Metasound
             , InputDebounce(InDebounce)
             , OutputTriggerRise(FTriggerWriteRef::CreateNew(InSettings))
             , OutputTriggerFall(FTriggerWriteRef::CreateNew(InSettings))
-            , PreviousSignalValue(0.0f)
-            , DebounceSamples(0)
-            , DebounceCounter(0)
             , SampleRate(InSampleRate)
         {
         }
@@ -79,7 +76,7 @@ namespace Metasound
                     METASOUND_LOCTEXT("Custom", "Branches"),
                     METASOUND_LOCTEXT("CustomSub", "Envelopes")
                 };
-                Metadata.Keywords = TArray<FText>(); // Keywords for searching
+                Metadata.Keywords = TArray<FText>();
 
                 return Metadata;
             };
@@ -89,23 +86,21 @@ namespace Metasound
         }
 
         METASOUND_DISABLE_LEGACY_IO()
-        
+
         virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
             using namespace EdgeNames;
-
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDebounce), InputDebounce);
         }
-        
+
         virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
             using namespace EdgeNames;
-
             InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputTriggerRise), OutputTriggerRise);
             InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputTriggerFall), OutputTriggerFall);
         }
-        
+
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
             using namespace EdgeNames;
@@ -123,14 +118,12 @@ namespace Metasound
 
             return MakeUnique<FEdgeOperator>(InputSignal, InputDebounce, SampleRate, InParams.OperatorSettings);
         }
-        
+
         virtual void Reset(const IOperator::FResetParams& InParams)
         {
-            // Reset triggers
             OutputTriggerRise->Reset();
             OutputTriggerFall->Reset();
 
-            // Initialize PreviousSignalValue to the first sample of the incoming signal to prevent false triggers
             if (InputSignal->Num() > 0)
             {
                 PreviousSignalValue = InputSignal->GetData()[0];
@@ -140,8 +133,8 @@ namespace Metasound
                 PreviousSignalValue = 0.0f;
             }
 
-            // Reset debounce counter
-            DebounceCounter = 0;
+            LastTriggerFrame = -1000000;
+            BlockIndex = 0;
         }
 
         void Execute()
@@ -153,65 +146,51 @@ namespace Metasound
             int32 NumFrames = InputSignal->Num();
             const float DebounceTime = InputDebounce->GetSeconds();
 
-            // Recalculate debounce samples if debounce time or sample rate has changed
-            if (LastDebounceTime != DebounceTime || LastSampleRate != SampleRate)
-            {
-                DebounceSamples = FMath::RoundToInt(FMath::Clamp(DebounceTime, 0.001f, 5.0f) * SampleRate);
-                LastDebounceTime = DebounceTime;
-                LastSampleRate = SampleRate;
-            }
+            int32 DebounceSamples = FMath::Max(1, static_cast<int32>(FMath::Clamp(DebounceTime, 0.001f, 5.0f) * SampleRate));
 
             for (int32 i = 0; i < NumFrames; ++i)
             {
                 float CurrentSignal = SignalData[i];
+                int32 CurrentFrame = BlockIndex + i;
 
-                // Decrement debounce counter
-                if (DebounceCounter > 0)
+                if (CurrentSignal > PreviousSignalValue && !PreviousIsRising)
                 {
-                    DebounceCounter--;
+                    if ((CurrentFrame - LastTriggerFrame) >= DebounceSamples)
+                    {
+                        OutputTriggerRise->TriggerFrame(i);
+                        LastTriggerFrame = CurrentFrame;
+                        PreviousIsRising = true;
+                    }
+                }
+                else if (CurrentSignal < PreviousSignalValue && PreviousIsRising)
+                {
+                    if ((CurrentFrame - LastTriggerFrame) >= DebounceSamples)
+                    {
+                        OutputTriggerFall->TriggerFrame(i);
+                        LastTriggerFrame = CurrentFrame;
+                        PreviousIsRising = false;
+                    }
                 }
 
-                // Detect rising edge
-                if (CurrentSignal > PreviousSignalValue && !PreviousIsRising && DebounceCounter <= 0)
-                {
-                    // Rising edge detected
-                    OutputTriggerRise->TriggerFrame(i);
-                    DebounceCounter = DebounceSamples;
-                    PreviousIsRising = true;
-                }
-                // Detect falling edge
-                else if (CurrentSignal < PreviousSignalValue && PreviousIsRising && DebounceCounter <= 0)
-                {
-                    // Falling edge detected
-                    OutputTriggerFall->TriggerFrame(i);
-                    DebounceCounter = DebounceSamples;
-                    PreviousIsRising = false;
-                }
-
-                // Update previous signal value
                 PreviousSignalValue = CurrentSignal;
             }
+
+            BlockIndex += NumFrames;
         }
 
     private:
-        // Inputs
         FAudioBufferReadRef InputSignal;
         FTimeReadRef InputDebounce;
 
-        // Outputs
         FTriggerWriteRef OutputTriggerRise;
         FTriggerWriteRef OutputTriggerFall;
 
-        // Internal variables
-        float PreviousSignalValue;
-        bool PreviousIsRising = false;
-        int32 DebounceSamples;
-        int32 DebounceCounter;
         float SampleRate;
-        
-        // Variables to track changes in debounce time and sample rate
-        float LastDebounceTime = -1.0f;
-        float LastSampleRate = -1.0f;
+        float PreviousSignalValue = 0.0f;
+        bool PreviousIsRising = false;
+
+        int32 LastTriggerFrame = -1000000;
+        int32 BlockIndex = 0;
     };
 
     class FEdgeNode : public FNodeFacade
