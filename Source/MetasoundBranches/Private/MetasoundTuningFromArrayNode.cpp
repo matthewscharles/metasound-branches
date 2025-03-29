@@ -73,7 +73,7 @@ namespace Metasound
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 0;
                 Metadata.DisplayName = METASOUND_LOCTEXT("TuningFromArrayNodeDisplayName", "Tuning From Array");
-                Metadata.Description = METASOUND_LOCTEXT("TuningFromArrayNodeDesc", "Generates a frequency based on custom tuning per-note using an array.");
+                Metadata.Description = METASOUND_LOCTEXT("TuningFromArrayNodeDesc", "Generates a frequency based on custom tuning per-note, with array input.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = NodeInterface;
