@@ -17,11 +17,11 @@
 #include <sstream>
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundStandardNodes_ArrayJoin"
+#define LOCTEXT_NAMESPACE "MetasoundStandardNodes_ArrayToString"
 
 namespace Metasound
 {
-	namespace ArrayJoinNodeVertexNames
+	namespace ArrayToStringNodeVertexNames
 	{
 		METASOUND_PARAM(InputTriggerJoin, "Trigger", "Trigger to join the array elements.")
 		METASOUND_PARAM(InputArray, "Array", "Input array to join.")
@@ -32,7 +32,7 @@ namespace Metasound
 	}
 
 	template<typename ElementType>
-	class TArrayJoinOperator : public TExecutableOperator<TArrayJoinOperator<ElementType>>
+	class TArrayToStringOperator : public TExecutableOperator<TArrayToStringOperator<ElementType>>
 	{
 	public:
 		using FArrayType = TArray<ElementType>;
@@ -43,7 +43,7 @@ namespace Metasound
 
 		static const FVertexInterface& GetDefaultInterface()
 		{
-			using namespace ArrayJoinNodeVertexNames;
+			using namespace ArrayToStringNodeVertexNames;
 			static const FVertexInterface DefaultInterface(
 				FInputVertexInterface(
 					TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputTriggerJoin)),
@@ -92,7 +92,7 @@ namespace Metasound
 
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutResults)
 		{
-			using namespace ArrayJoinNodeVertexNames;
+			using namespace ArrayToStringNodeVertexNames;
 			const FInputVertexInterfaceData& InputData = InParams.InputData;
 
 			TDataReadReference<FTrigger> InTriggerJoin = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(
@@ -110,10 +110,10 @@ namespace Metasound
 				InParams.OperatorSettings
 			);
 
-			return MakeUnique<TArrayJoinOperator>(InParams, InTriggerJoin, InInputArray, InDelimiter);
+			return MakeUnique<TArrayToStringOperator>(InParams, InTriggerJoin, InInputArray, InDelimiter);
 		}
 
-		TArrayJoinOperator(
+		TArrayToStringOperator(
 			const FBuildOperatorParams& InParams,
 			TDataReadReference<FTrigger> InTriggerJoin,
 			FArrayDataReadReference InInputArray,
@@ -126,11 +126,11 @@ namespace Metasound
 		{
 		}
 
-		virtual ~TArrayJoinOperator() = default;
+		virtual ~TArrayToStringOperator() = default;
 
 		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace ArrayJoinNodeVertexNames;
+			using namespace ArrayToStringNodeVertexNames;
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTriggerJoin), TriggerJoin);
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputArray), InputArray);
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDelimiter), Delimiter);
@@ -138,7 +138,7 @@ namespace Metasound
 
 		virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace ArrayJoinNodeVertexNames;
+			using namespace ArrayToStringNodeVertexNames;
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTriggerOnJoin), TriggerOnJoin);
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputJoinedString), OutJoinedString);
 		}
@@ -187,15 +187,15 @@ namespace Metasound
 	};
 
     template<typename ElementType>
-    class TArrayJoinNode : public FNodeFacade
+    class TArrayToStringNode : public FNodeFacade
     {
     public:
-        TArrayJoinNode(const FNodeInitData& InInitData)
-            : FNodeFacade(InInitData.InstanceName, InInitData.InstanceID, TFacadeOperatorClass<TArrayJoinOperator<ElementType>>())
+        TArrayToStringNode(const FNodeInitData& InInitData)
+            : FNodeFacade(InInitData.InstanceName, InInitData.InstanceID, TFacadeOperatorClass<TArrayToStringOperator<ElementType>>())
         {
         }
     
-        virtual ~TArrayJoinNode() = default;
+        virtual ~TArrayToStringNode() = default;
     };
 	
 }
