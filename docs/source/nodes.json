@@ -34,7 +34,7 @@
     ]
   },
   {
-    "name": "Dust (Audio)",
+    "name": "Dust",
     "category": "Generators",
     "description": "Generate randomly timed impulses (unipolar or alternating polarity per impulse) with density control and audio-rate modulation.",
     "image": "DustAudio.svg",
@@ -49,28 +49,12 @@
     ]
   },
   {
-    "name": "Dust (Trigger)",
-    "category": "Generators",
-    "description": "Generate randomly timed impulses (unipolar or alternating polarity per impulse) with density control and audio-rate modulation.",
-    "image": "DustTrigger.svg",
-    "inputs": [
-      { "name": "Enabled", "description": "Enable or disable the dust node.", "type": "Bool" },
-      { "name": "Bi-Polar", "description": "Toggle between bipolar and unipolar impulse output.", "type": "Bool" },
-      { "name": "Density", "description": "Probability of impulse generation.", "type": "Float" },
-      { "name": "Modulation", "description": "Density control signal.", "type": "Audio" }
-    ],
-    "outputs": [
-      { "name": "Trigger Out", "description": "Generated impulse output.", "type": "Trigger" }
-    ]
-  },
-  {
     "name": "Edge",
     "category": "Envelopes",
-    "description": "Detect upward and downward changes in an input audio signal, with optional debounce.",
+    "description": "Detect upward and downward changes in an input audio signal.",
     "image": "Edge.svg",
     "inputs": [
-      { "name": "In", "description": "Input audio to monitor for edge detection.", "type": "Audio" },
-      { "name": "Debounce", "description": "Debounce time in seconds.", "type": "Time" }
+      { "name": "In", "description": "Input audio to monitor for edge detection.", "type": "Audio" }
     ],
     "outputs": [
       { "name": "Rise", "description": "Trigger on rise.", "type": "Trigger" },
@@ -274,11 +258,10 @@
   {
     "name": "Zero Crossing",
     "category": "Envelopes",
-    "description": "Detect zero crossings in an input audio signal, with optional debounce.",
+    "description": "Detect zero crossings in an input audio signal.",
     "image": "ZeroCrossingTrigger.svg",
     "inputs": [
-      { "name": "Signal", "description": "Input audio signal to monitor for zero crossings.", "type": "Audio" },
-      { "name": "Debounce", "description": "Debounce time in seconds.", "type": "Time" }
+      { "name": "Signal", "description": "Input audio signal to monitor for zero crossings.", "type": "Audio" }
     ],
     "outputs": [
       { "name": "Trigger", "description": "Trigger on zero crossing.", "type": "Trigger" }
