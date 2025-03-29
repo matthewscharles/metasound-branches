@@ -16,7 +16,7 @@ namespace Metasound
     namespace ZeroCrossingVertexNames
     {
         METASOUND_PARAM(InputSignal, "In", "Input audio to monitor for zero crossings.");
-        METASOUND_PARAM(InputDebounce, "Debounce", "Debounce time in seconds.");
+        METASOUND_PARAM(InputThreshold, "Threshold", "Minimum amplitude required to detect a zero crossing.");
         METASOUND_PARAM(OutputTriggerZeroCrossing, "Zero Crossing", "Trigger on zero crossing.");
     }
 
@@ -25,13 +25,11 @@ namespace Metasound
     public:
         FZeroCrossingOperator(
             const FAudioBufferReadRef& InSignal,
-            const FTimeReadRef& InDebounce,
-            float InSampleRate,
+            const FFloatReadRef& InThreshold,
             const FOperatorSettings& InSettings)
             : InputSignal(InSignal)
-            , InputDebounce(InDebounce)
+            , InputThreshold(InThreshold)
             , OutputTriggerZeroCrossing(FTriggerWriteRef::CreateNew(InSettings))
-            , SampleRate(InSampleRate)
         {
         }
 
@@ -42,7 +40,7 @@ namespace Metasound
             static const FVertexInterface Interface(
                 FInputVertexInterface(
                     TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputSignal)),
-                    TInputDataVertex<FTime>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputDebounce))
+                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputThreshold), 0.01f)
                 ),
                 FOutputVertexInterface(
                     TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTriggerZeroCrossing))
@@ -64,7 +62,7 @@ namespace Metasound
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("ZeroCrossingNodeDisplayName", "Zero Crossing");
-                Metadata.Description = METASOUND_LOCTEXT("ZeroCrossingNodeDesc", "Detect zero crossings in an input audio signal, with optional debounce.");
+                Metadata.Description = METASOUND_LOCTEXT("ZeroCrossingNodeDesc", "Detect zero crossings in an input audio signal, with optional amplitude threshold to handle noise.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = DeclareVertexInterface();
@@ -87,7 +85,7 @@ namespace Metasound
         {
             using namespace ZeroCrossingVertexNames;
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDebounce), InputDebounce);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputThreshold), InputThreshold);
         }
 
         virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
@@ -106,12 +104,10 @@ namespace Metasound
             TDataReadReference<FAudioBuffer> InputSignal = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(
                 METASOUND_GET_PARAM_NAME(InputSignal), InParams.OperatorSettings);
 
-            TDataReadReference<FTime> InputDebounce = InputData.GetOrCreateDefaultDataReadReference<FTime>(
-                METASOUND_GET_PARAM_NAME(InputDebounce), InParams.OperatorSettings);
+            TDataReadReference<float> InputThreshold = InputData.GetOrCreateDefaultDataReadReference<float>(
+                METASOUND_GET_PARAM_NAME(InputThreshold), InParams.OperatorSettings);
 
-            float SampleRate = InParams.OperatorSettings.GetSampleRate();
-
-            return MakeUnique<FZeroCrossingOperator>(InputSignal, InputDebounce, SampleRate, InParams.OperatorSettings);
+            return MakeUnique<FZeroCrossingOperator>(InputSignal, InputThreshold, InParams.OperatorSettings);
         }
 
         virtual void Reset(const IOperator::FResetParams& InParams)
@@ -126,9 +122,6 @@ namespace Metasound
             {
                 PreviousSignalValue = 0.0f;
             }
-
-            LastTriggerFrame = -1000000;
-            BlockIndex = 0;
         }
 
         void Execute()
@@ -137,45 +130,35 @@ namespace Metasound
 
             const float* SignalData = InputSignal->GetData();
             int32 NumFrames = InputSignal->Num();
-            const float DebounceTime = InputDebounce->GetSeconds();
-
-            int32 DebounceSamples = FMath::Max(1, static_cast<int32>(FMath::Clamp(DebounceTime, 0.001f, 5.0f) * SampleRate));
+            const float Threshold = FMath::Max(0.0f, *InputThreshold);
 
             for (int32 i = 0; i < NumFrames; ++i)
             {
                 float CurrentSignal = SignalData[i];
-                int32 CurrentFrame = BlockIndex + i;
 
-                bool PreviousNonPositive = (PreviousSignalValue <= 0.0f);
-                bool CurrentPositive = (CurrentSignal > 0.0f);
-                bool PreviousNonNegative = (PreviousSignalValue >= 0.0f);
-                bool CurrentNegative = (CurrentSignal < 0.0f);
+                bool PrevBelowNegThresh = PreviousSignalValue <= -Threshold;
+                bool PrevAbovePosThresh = PreviousSignalValue >= Threshold;
+                bool CurrAbovePosThresh = CurrentSignal > Threshold;
+                bool CurrBelowNegThresh = CurrentSignal < -Threshold;
 
-                bool Crossing = (PreviousNonPositive && CurrentPositive) || (PreviousNonNegative && CurrentNegative);
+                bool Crossing = (PrevBelowNegThresh && CurrAbovePosThresh) ||
+                                (PrevAbovePosThresh && CurrBelowNegThresh);
 
-                if (Crossing && (CurrentFrame - LastTriggerFrame) >= DebounceSamples)
+                if (Crossing)
                 {
                     OutputTriggerZeroCrossing->TriggerFrame(i);
-                    LastTriggerFrame = CurrentFrame;
                 }
 
                 PreviousSignalValue = CurrentSignal;
             }
-
-            BlockIndex += NumFrames;
         }
 
     private:
         FAudioBufferReadRef InputSignal;
-        FTimeReadRef InputDebounce;
-
+        FFloatReadRef InputThreshold;
         FTriggerWriteRef OutputTriggerZeroCrossing;
 
-        float SampleRate;
         float PreviousSignalValue = 0.0f;
-
-        int32 LastTriggerFrame = -1000000;
-        int32 BlockIndex = 0;
     };
 
     class FZeroCrossingNode : public FNodeFacade
