@@ -16,7 +16,7 @@ namespace Metasound
     namespace EdgeNames
     {
         METASOUND_PARAM(InputSignal, "In", "Input audio to monitor for edge detection.");
-        METASOUND_PARAM(InputThreshold, "Slope Threshold", "Minimum slope (delta) required to detect an edge.");
+        METASOUND_PARAM(InputDebounce, "Debounce", "Debounce time in seconds.");
 
         METASOUND_PARAM(OutputTriggerRise, "Rise", "Trigger on rise.");
         METASOUND_PARAM(OutputTriggerFall, "Fall", "Trigger on fall.");
@@ -27,12 +27,14 @@ namespace Metasound
     public:
         FEdgeOperator(
             const FAudioBufferReadRef& InSignal,
-            const FFloatReadRef& InThreshold,
+            const FTimeReadRef& InDebounce,
+            float InSampleRate,
             const FOperatorSettings& InSettings)
             : InputSignal(InSignal)
-            , InputThreshold(InThreshold)
+            , InputDebounce(InDebounce)
             , OutputTriggerRise(FTriggerWriteRef::CreateNew(InSettings))
             , OutputTriggerFall(FTriggerWriteRef::CreateNew(InSettings))
+            , SampleRate(InSampleRate)
         {
         }
 
@@ -43,7 +45,7 @@ namespace Metasound
             static const FVertexInterface Interface(
                 FInputVertexInterface(
                     TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputSignal)),
-                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputThreshold), 0.001f)
+                    TInputDataVertex<FTime>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputDebounce))
                 ),
                 FOutputVertexInterface(
                     TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTriggerRise)),
@@ -66,7 +68,7 @@ namespace Metasound
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("EdgeNodeDisplayName", "Edge");
-                Metadata.Description = METASOUND_LOCTEXT("EdgeNodeDesc", "Detect upward and downward changes in an input audio signal, using a minimum slope threshold to filter small fluctuations.");
+                Metadata.Description = METASOUND_LOCTEXT("EdgeNodeDesc", "Detect upward and downward changes in an input audio signal, with optional debounce.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = DeclareVertexInterface();
@@ -89,7 +91,7 @@ namespace Metasound
         {
             using namespace EdgeNames;
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputThreshold), InputThreshold);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDebounce), InputDebounce);
         }
 
         virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
@@ -109,10 +111,12 @@ namespace Metasound
             TDataReadReference<FAudioBuffer> InputSignal = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(
                 METASOUND_GET_PARAM_NAME(InputSignal), InParams.OperatorSettings);
 
-            TDataReadReference<float> InputThreshold = InputData.GetOrCreateDefaultDataReadReference<float>(
-                METASOUND_GET_PARAM_NAME(InputThreshold), InParams.OperatorSettings);
+            TDataReadReference<FTime> InputDebounce = InputData.GetOrCreateDefaultDataReadReference<FTime>(
+                METASOUND_GET_PARAM_NAME(InputDebounce), InParams.OperatorSettings);
 
-            return MakeUnique<FEdgeOperator>(InputSignal, InputThreshold, InParams.OperatorSettings);
+            float SampleRate = InParams.OperatorSettings.GetSampleRate();
+
+            return MakeUnique<FEdgeOperator>(InputSignal, InputDebounce, SampleRate, InParams.OperatorSettings);
         }
 
         virtual void Reset(const IOperator::FResetParams& InParams)
@@ -129,7 +133,8 @@ namespace Metasound
                 PreviousSignalValue = 0.0f;
             }
 
-            PreviousIsRising = false;
+            LastTriggerFrame = -1000000;
+            BlockIndex = 0;
         }
 
         void Execute()
@@ -139,37 +144,53 @@ namespace Metasound
 
             const float* SignalData = InputSignal->GetData();
             int32 NumFrames = InputSignal->Num();
-            const float Threshold = FMath::Max(0.0f, *InputThreshold);
+            const float DebounceTime = InputDebounce->GetSeconds();
+
+            int32 DebounceSamples = FMath::Max(1, static_cast<int32>(FMath::Clamp(DebounceTime, 0.001f, 5.0f) * SampleRate));
 
             for (int32 i = 0; i < NumFrames; ++i)
             {
                 float CurrentSignal = SignalData[i];
-                float Delta = CurrentSignal - PreviousSignalValue;
+                int32 CurrentFrame = BlockIndex + i;
 
-                if (Delta > Threshold && !PreviousIsRising)
+                if (CurrentSignal > PreviousSignalValue && !PreviousIsRising)
                 {
-                    OutputTriggerRise->TriggerFrame(i);
-                    PreviousIsRising = true;
+                    if ((CurrentFrame - LastTriggerFrame) >= DebounceSamples)
+                    {
+                        OutputTriggerRise->TriggerFrame(i);
+                        LastTriggerFrame = CurrentFrame;
+                        PreviousIsRising = true;
+                    }
                 }
-                else if (Delta < -Threshold && PreviousIsRising)
+                else if (CurrentSignal < PreviousSignalValue && PreviousIsRising)
                 {
-                    OutputTriggerFall->TriggerFrame(i);
-                    PreviousIsRising = false;
+                    if ((CurrentFrame - LastTriggerFrame) >= DebounceSamples)
+                    {
+                        OutputTriggerFall->TriggerFrame(i);
+                        LastTriggerFrame = CurrentFrame;
+                        PreviousIsRising = false;
+                    }
                 }
 
                 PreviousSignalValue = CurrentSignal;
             }
+
+            BlockIndex += NumFrames;
         }
 
     private:
         FAudioBufferReadRef InputSignal;
-        FFloatReadRef InputThreshold;
+        FTimeReadRef InputDebounce;
 
         FTriggerWriteRef OutputTriggerRise;
         FTriggerWriteRef OutputTriggerFall;
 
+        float SampleRate;
         float PreviousSignalValue = 0.0f;
         bool PreviousIsRising = false;
+
+        int32 LastTriggerFrame = -1000000;
+        int32 BlockIndex = 0;
     };
 
     class FEdgeNode : public FNodeFacade
