@@ -116,10 +116,10 @@ namespace Metasound
             {
                 FVertexInterface NodeInterface = DeclareVertexInterface();
                 FNodeClassMetadata Metadata;
-                Metadata.ClassName = { TEXT("UE"), TEXT("Frequency Array From Tuning"), TEXT("Float") };
+                Metadata.ClassName = { TEXT("UE"), TEXT("Tuning To Frequency Array"), TEXT("Float") };
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 1;
-                Metadata.DisplayName = METASOUND_LOCTEXT("TuningArrayNodeDisplayName", "Frequency Array From Tuning");
+                Metadata.DisplayName = METASOUND_LOCTEXT("TuningArrayNodeDisplayName", "Tuning To Frequency Array");
                 Metadata.Description = METASOUND_LOCTEXT("TuningArrayNodeDesc", "Generates an array of frequencies based on custom tuning with cent values per-note.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
