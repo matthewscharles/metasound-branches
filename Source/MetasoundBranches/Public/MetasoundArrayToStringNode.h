@@ -65,7 +65,7 @@ namespace Metasound
 				// Use the array type's name as the third element to differentiate specializations.
 				FName DataTypeName = GetMetasoundDataTypeName<FArrayType>();
 				FName OperatorName = TEXT("Array To String");
-				FText NodeDisplayName = METASOUND_LOCTEXT_FORMAT("ArrayOpJoinDisplayNamePattern", "Array ({0}) To String", GetMetasoundDataTypeDisplayText<FArrayType>());
+				FText NodeDisplayName = METASOUND_LOCTEXT_FORMAT("ArrayOpJoinDisplayNamePattern", "Array To String ({0})", GetMetasoundDataTypeDisplayText<FArrayType>());
 				const FText NodeDescription = LOCTEXT("ArrayOpJoinDesc", "Joins the elements of an array into a single string using a specified delimiter.");
 				FVertexInterface NodeInterface = GetDefaultInterface();
 
