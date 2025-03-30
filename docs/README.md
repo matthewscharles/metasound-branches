@@ -55,7 +55,11 @@ Click on each node name below for a summary including inputs and outputs.
 In addition to improvements to the range of nodes, all items are now available via sub-categories within Branches.
 
 ### Additions
+- Array Sum
+- Array To String
 - Delta Time
+- Tuning From Array
+- Tuning To Frequency Array
 
 ### Changes
 - The audio and trigger versions of Dust have been combined.

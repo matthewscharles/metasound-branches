@@ -1,5 +1,65 @@
 [
   {
+    "name": "Array To String (Bool:Array)",
+    "category": "Array",
+    "description": "Joins the elements of an array of booleans into a single string using a specified delimiter.",
+    "image": "ArrayToStringBool.svg",
+    "inputs": [
+      { "name": "Trigger", "description": "Trigger to join the array elements.", "type": "Trigger" },
+      { "name": "Array", "description": "Input array of booleans.", "type": "Array<Bool>" },
+      { "name": "Delimiter", "description": "Delimiter string to insert between array elements.", "type": "String" }
+    ],
+    "outputs": [
+      { "name": "On Trigger", "description": "Triggers when the converted string is output.", "type": "Trigger" },
+      { "name": "String", "description": "The joined string.", "type": "String" }
+    ]
+  },
+  {
+    "name": "Array To String (Int32:Array)",
+    "category": "Array",
+    "description": "Joins the elements of an array of integers (Int32) into a single string using a specified delimiter.",
+    "image": "ArrayToStringInt32.svg",
+    "inputs": [
+      { "name": "Trigger", "description": "Trigger to join the array elements.", "type": "Trigger" },
+      { "name": "Array", "description": "Input array of integers.", "type": "Array<Int32>" },
+      { "name": "Delimiter", "description": "Delimiter string to insert between array elements.", "type": "String" }
+    ],
+    "outputs": [
+      { "name": "On Trigger", "description": "Triggers when the converted string is output.", "type": "Trigger" },
+      { "name": "String", "description": "The joined string.", "type": "String" }
+    ]
+  },
+  {
+    "name": "Array To String (Float:Array)",
+    "category": "Array",
+    "description": "Joins the elements of an array of floats into a single string using a specified delimiter.",
+    "image": "ArrayToStringFloat.svg",
+    "inputs": [
+      { "name": "Trigger", "description": "Trigger to join the array elements.", "type": "Trigger" },
+      { "name": "Array", "description": "Input array of floats.", "type": "Array<Float>" },
+      { "name": "Delimiter", "description": "Delimiter string to insert between array elements.", "type": "String" }
+    ],
+    "outputs": [
+      { "name": "On Trigger", "description": "Triggers when the converted string is output.", "type": "Trigger" },
+      { "name": "String", "description": "The joined string.", "type": "String" }
+    ]
+  },
+  {
+    "name": "Array To String (String:Array)",
+    "category": "Array",
+    "description": "Joins the elements of an array of strings into a single string using a specified delimiter.",
+    "image": "ArrayToStringString.svg",
+    "inputs": [
+      { "name": "Trigger", "description": "Trigger to join the array elements.", "type": "Trigger" },
+      { "name": "Array", "description": "Input array of strings.", "type": "Array<String>" },
+      { "name": "Delimiter", "description": "Delimiter string to insert between array elements.", "type": "String" }
+    ],
+    "outputs": [
+      { "name": "On Trigger", "description": "Triggers when the converted string is output.", "type": "Trigger" },
+      { "name": "String", "description": "The joined string.", "type": "String" }
+    ]
+  },
+  {
     "name": "Bool To Audio",
     "category": "Conversions",
     "description": "Convert a boolean value to an audio signal, with optional rise and fall times.",
@@ -34,18 +94,37 @@
     ]
   },
   {
+    "name": "Delta Time",
+    "category": "Time",
+    "description": "Outputs the elapsed time between consecutive triggers.",
+    "image": "DeltaTime.svg",
+    "inputs": [
+      { "name": "Trigger", "description": "Trigger input to calculate delta time.", "type": "Trigger" },
+      { "name": "Reset", "description": "Trigger input to reset the stored time without outputting a delta.", "type": "Trigger" }
+    ],
+    "outputs": [
+      { "name": "On Trigger", "description": "Trigger output when the delta time is calculated.", "type": "Trigger" },
+      { "name": "On Reset", "description": "Trigger output when the time is reset.", "type": "Trigger" },
+      { "name": "Delta", "description": "Time difference between consecutive triggers in seconds.", "type": "Time" }
+    ]
+  },
+  {
     "name": "Dust",
     "category": "Generators",
-    "description": "Generate randomly timed impulses (unipolar or alternating polarity per impulse) with density control and audio-rate modulation.",
+    "description": "Generates randomly timed impulses (uni or bi-polar) alongside triggers, with optional audio-rate modulation.",
     "image": "DustAudio.svg",
     "inputs": [
       { "name": "Enabled", "description": "Enable or disable the dust node.", "type": "Bool" },
       { "name": "Bi-Polar", "description": "Toggle between bipolar and unipolar impulse output.", "type": "Bool" },
-      { "name": "Density", "description": "Probability of impulse generation.", "type": "Float" },
-      { "name": "Modulation", "description": "Density control signal.", "type": "Audio" }
+      { "name": "Seed", "description": "Seed for the random number generator (-1 uses the current time).", "type": "Int" },
+      { "name": "Density", "description": "Base density of impulses (roughly equivalent to Hz).", "type": "Float" },
+      { "name": "Density Modulation", "description": "Audio modulation for density.", "type": "Audio" },
+      { "name": "Amp Variation", "description": "Base amplitude variation (0=fixed, 1=fully random).", "type": "Float" },
+      { "name": "Amp Variation Modulation", "description": "Audio modulation for amplitude variation.", "type": "Audio" }
     ],
     "outputs": [
-      { "name": "Impulse Out", "description": "Generated impulse output.", "type": "Audio" }
+      { "name": "Impulse Out", "description": "Generated impulse output.", "type": "Audio" },
+      { "name": "Trigger Out", "description": "Generated trigger output.", "type": "Trigger" }
     ]
   },
   {
@@ -64,18 +143,18 @@
   {
     "name": "EDO",
     "category": "Tuning",
-    "description": "Generate frequencies for tuning systems using equally divided octaves (float) with a MIDI note input. Set a reference frequency and reference MIDI note (defaults to A440).",
+    "description": "Generates a frequency based on equal division of the octave.",
     "image": "EDO.svg",
     "inputs": [
-      { "name": "Note Number", "description": "Input MIDI note number.", "type": "Int32" },
-      { "name": "Reference Frequency", "description": "Reference frequency.", "type": "Float" },
-      { "name": "Reference MIDI Note", "description": "Reference MIDI note (integer).", "type": "Int32" },
-      { "name": "Divisions", "description": "Number of divisions of the octave (integer).", "type": "Int32" }
+      { "name": "Note Number", "description": "Input MIDI note number.", "type": "Int" },
+      { "name": "Reference Frequency", "description": "Reference frequency (default is 440 Hz).", "type": "Float" },
+      { "name": "Reference Note", "description": "Reference MIDI note (default is 69).", "type": "Int" },
+      { "name": "Divisions", "description": "Number of divisions of the octave (default is 12).", "type": "Int" }
     ],
     "outputs": [
       { "name": "Frequency", "description": "Output frequency.", "type": "Float" }
     ]
-  },
+  }
   {
     "name": "Impulse",
     "category": "Generators",
@@ -96,11 +175,12 @@
     "description": "A chain of allpass filters acting as a phase disperser to soften transients.",
     "image": "PhaseDisperser.svg",
     "inputs": [
-      { "name": "In", "description": "Incoming audio.", "type": "Audio" },
-      { "name": "Stages", "description": "Number of allpass filter stages to apply (maximum 128).", "type": "Int32" }
+      { "name": "In", "description": "Incoming audio signal.", "type": "Audio" },
+      { "name": "Stages", "description": "Number of allpass filter stages to apply.", "type": "Int" },
+      { "name": "Maximum Stages", "description": "Upper bound on the number of filters (evaluated once on instantiation).", "type": "Int" }
     ],
     "outputs": [
-      { "name": "Out", "description": "Phase-dispersed audio.", "type": "Audio" }
+      { "name": "Out", "description": "Phase-dispersed audio signal.", "type": "Audio" }
     ]
   },
   {
@@ -234,25 +314,28 @@
   {
     "name": "Tuning",
     "category": "Tuning",
-    "description": "Quantize a float value to a custom 12-note tuning, with adjustment in cents per-note.",
+    "description": "Generates a frequency based on custom tuning per-note.",
     "image": "Tuning.svg",
     "inputs": [
-      { "name": "Note Number", "description": "Input MIDI note number (integer).", "type": "Int32" },
-      { "name": "+/- Cents C", "description": "Tuning adjustment for note 0 in cents.", "type": "Float" },
-      { "name": "+/- Cents C# / Db", "description": "Tuning adjustment for note 1 in cents.", "type": "Float" },
-      { "name": "+/- Cents D", "description": "Tuning adjustment for note 2 in cents.", "type": "Float" },
-      { "name": "+/- Cents D# / Eb", "description": "Tuning adjustment for note 3 in cents.", "type": "Float" },
-      { "name": "+/- Cents E", "description": "Tuning adjustment for note 4 in cents.", "type": "Float" },
-      { "name": "+/- Cents F", "description": "Tuning adjustment for note 5 in cents.", "type": "Float" },
-      { "name": "+/- Cents F# / Gb", "description": "Tuning adjustment for note 6 in cents.", "type": "Float" },
-      { "name": "+/- Cents G", "description": "Tuning adjustment for note 7 in cents.", "type": "Float" },
-      { "name": "+/- Cents G# / Ab", "description": "Tuning adjustment for note 8 in cents.", "type": "Float" },
-      { "name": "+/- Cents A", "description": "Tuning adjustment for note 9 in cents.", "type": "Float" },
-      { "name": "+/- Cents A# / Bb", "description": "Tuning adjustment for note 10 in cents.", "type": "Float" },
-      { "name": "+/- Cents B", "description": "Tuning adjustment for note 11 in cents.", "type": "Float" }
+      { "name": "Trigger", "description": "Triggers tuning update.", "type": "Trigger" },
+      { "name": "MIDI Note Number", "description": "Input MIDI note number (integer).", "type": "Int" },
+      { "name": "Reference Frequency", "description": "Reference frequency in Hz (default is 440 Hz).", "type": "Float" },
+      { "name": "Reference Note", "description": "Reference MIDI note number (default is 69).", "type": "Int" },
+      { "name": "Cents 0", "description": "C adjustment in cents.", "type": "Float" },
+      { "name": "Cents 1", "description": "C♯ / D♭ adjustment in cents.", "type": "Float" },
+      { "name": "Cents 2", "description": "D adjustment in cents.", "type": "Float" },
+      { "name": "Cents 3", "description": "D♯ / E♭ adjustment in cents.", "type": "Float" },
+      { "name": "Cents 4", "description": "E adjustment in cents.", "type": "Float" },
+      { "name": "Cents 5", "description": "F adjustment in cents.", "type": "Float" },
+      { "name": "Cents 6", "description": "F♯ / G♭ adjustment in cents.", "type": "Float" },
+      { "name": "Cents 7", "description": "G adjustment in cents.", "type": "Float" },
+      { "name": "Cents 8", "description": "G♯ / A♭ adjustment in cents.", "type": "Float" },
+      { "name": "Cents 9", "description": "A adjustment in cents.", "type": "Float" },
+      { "name": "Cents 10", "description": "A♯ / B♭ adjustment in cents.", "type": "Float" },
+      { "name": "Cents 11", "description": "B adjustment in cents.", "type": "Float" }
     ],
     "outputs": [
-      { "name": "Frequency", "description": "Output frequency (float).", "type": "Float" }
+      { "name": "Frequency", "description": "Output frequency.", "type": "Float" }
     ]
   },
   {
