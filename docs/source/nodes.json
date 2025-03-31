@@ -154,7 +154,7 @@
     "outputs": [
       { "name": "Frequency", "description": "Output frequency.", "type": "Float" }
     ]
-  }
+  },
   {
     "name": "Impulse",
     "category": "Generators",

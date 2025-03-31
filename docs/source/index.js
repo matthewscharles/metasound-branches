@@ -11,7 +11,7 @@ if (!fs.existsSync(outputDir)) {
 const data = JSON.parse(fs.readFileSync(inputFile, 'utf8'));
 
 const sidebarContent = data.map((d, i) => {
-    const safeName = d.name.replace(/\s+/g, '');
+    const safeName = d.name.replace(/\s+/g, '').replace(':Array', '');
     const nodeFileName = `${safeName}.html`;
     const space = i > 0 ? '            ' : '';
     return `${space}<li><a href="${nodeFileName}">${d.name}</a></li>`;
@@ -110,7 +110,7 @@ data.forEach(node => {
 </html>
 `;
 
-  const fileName = name.replace(/\s+/g, '') + '.html';
+  const fileName = name.replace(/\s+/g, '').replace(':Array', '') + '.html';
   const filePath = path.join(outputDir, fileName);
   
   fs.writeFileSync(filePath, htmlContent, 'utf8');

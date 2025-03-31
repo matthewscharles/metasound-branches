@@ -11,8 +11,13 @@
 <body>
     <nav class="sidebar">
         <ul>
+            <li><a href="ArrayToString(Bool).html">Array To String (Bool:Array)</a></li>
+            <li><a href="ArrayToString(Int32).html">Array To String (Int32:Array)</a></li>
+            <li><a href="ArrayToString(Float).html">Array To String (Float:Array)</a></li>
+            <li><a href="ArrayToString(String).html">Array To String (String:Array)</a></li>
             <li><a href="BoolToAudio.html">Bool To Audio</a></li>
             <li><a href="ClockDivider.html">Clock Divider</a></li>
+            <li><a href="DeltaTime.html">Delta Time</a></li>
             <li><a href="Dust.html">Dust</a></li>
             <li><a href="Edge.html">Edge</a></li>
             <li><a href="EDO.html">EDO</a></li>
@@ -34,7 +39,7 @@
     <h1><a href="https://matthewscharles.github.io/metasound-branches/">MetaSound Branches</a></h1>
     <h2>Tuning</h2>
     <p><strong>Category:</strong> Tuning</p>
-    <p>Quantize a float value to a custom 12-note tuning, with adjustment in cents per-note.</p>
+    <p>Generates a frequency based on custom tuning per-note.</p>
     <img src="./svg/Tuning.svg" alt="Tuning">
     <h3>Inputs</h3>
     <table>
@@ -48,92 +53,113 @@
       <tbody>
         
       <tr>
-        <td>Note Number</td>
+        <td>Trigger</td>
+        <td>Triggers tuning update.</td>
+        <td>Trigger</td>
+      </tr>
+    
+
+      <tr>
+        <td>MIDI Note Number</td>
         <td>Input MIDI note number (integer).</td>
-        <td>Int32</td>
+        <td>Int</td>
       </tr>
     
 
       <tr>
-        <td>+/- Cents C</td>
-        <td>Tuning adjustment for note 0 in cents.</td>
+        <td>Reference Frequency</td>
+        <td>Reference frequency in Hz (default is 440 Hz).</td>
         <td>Float</td>
       </tr>
     
 
       <tr>
-        <td>+/- Cents C# / Db</td>
-        <td>Tuning adjustment for note 1 in cents.</td>
+        <td>Reference Note</td>
+        <td>Reference MIDI note number (default is 69).</td>
+        <td>Int</td>
+      </tr>
+    
+
+      <tr>
+        <td>Cents 0</td>
+        <td>C adjustment in cents.</td>
         <td>Float</td>
       </tr>
     
 
       <tr>
-        <td>+/- Cents D</td>
-        <td>Tuning adjustment for note 2 in cents.</td>
+        <td>Cents 1</td>
+        <td>C♯ / D♭ adjustment in cents.</td>
         <td>Float</td>
       </tr>
     
 
       <tr>
-        <td>+/- Cents D# / Eb</td>
-        <td>Tuning adjustment for note 3 in cents.</td>
+        <td>Cents 2</td>
+        <td>D adjustment in cents.</td>
         <td>Float</td>
       </tr>
     
 
       <tr>
-        <td>+/- Cents E</td>
-        <td>Tuning adjustment for note 4 in cents.</td>
+        <td>Cents 3</td>
+        <td>D♯ / E♭ adjustment in cents.</td>
         <td>Float</td>
       </tr>
     
 
       <tr>
-        <td>+/- Cents F</td>
-        <td>Tuning adjustment for note 5 in cents.</td>
+        <td>Cents 4</td>
+        <td>E adjustment in cents.</td>
         <td>Float</td>
       </tr>
     
 
       <tr>
-        <td>+/- Cents F# / Gb</td>
-        <td>Tuning adjustment for note 6 in cents.</td>
+        <td>Cents 5</td>
+        <td>F adjustment in cents.</td>
         <td>Float</td>
       </tr>
     
 
       <tr>
-        <td>+/- Cents G</td>
-        <td>Tuning adjustment for note 7 in cents.</td>
+        <td>Cents 6</td>
+        <td>F♯ / G♭ adjustment in cents.</td>
         <td>Float</td>
       </tr>
     
 
       <tr>
-        <td>+/- Cents G# / Ab</td>
-        <td>Tuning adjustment for note 8 in cents.</td>
+        <td>Cents 7</td>
+        <td>G adjustment in cents.</td>
         <td>Float</td>
       </tr>
     
 
       <tr>
-        <td>+/- Cents A</td>
-        <td>Tuning adjustment for note 9 in cents.</td>
+        <td>Cents 8</td>
+        <td>G♯ / A♭ adjustment in cents.</td>
         <td>Float</td>
       </tr>
     
 
       <tr>
-        <td>+/- Cents A# / Bb</td>
-        <td>Tuning adjustment for note 10 in cents.</td>
+        <td>Cents 9</td>
+        <td>A adjustment in cents.</td>
         <td>Float</td>
       </tr>
     
 
       <tr>
-        <td>+/- Cents B</td>
-        <td>Tuning adjustment for note 11 in cents.</td>
+        <td>Cents 10</td>
+        <td>A♯ / B♭ adjustment in cents.</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Cents 11</td>
+        <td>B adjustment in cents.</td>
         <td>Float</td>
       </tr>
     
@@ -153,7 +179,7 @@
         
       <tr>
         <td>Frequency</td>
-        <td>Output frequency (float).</td>
+        <td>Output frequency.</td>
         <td>Float</td>
       </tr>
     

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Stereo Balance</title>
+  <title>Array To String (Float:Array)</title>
   <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -37,10 +37,10 @@
     </nav>
   <main>
     <h1><a href="https://matthewscharles.github.io/metasound-branches/">MetaSound Branches</a></h1>
-    <h2>Stereo Balance</h2>
-    <p><strong>Category:</strong> Spatialization</p>
-    <p>Adjust the balance of a stereo signal.</p>
-    <img src="./svg/StereoBalance.svg" alt="Stereo Balance">
+    <h2>Array To String (Float:Array)</h2>
+    <p><strong>Category:</strong> Array</p>
+    <p>Joins the elements of an array of floats into a single string using a specified delimiter.</p>
+    <img src="./svg/ArrayToStringFloat.svg" alt="Array To String (Float:Array)">
     <h3>Inputs</h3>
     <table>
       <thead>
@@ -53,23 +53,23 @@
       <tbody>
         
       <tr>
-        <td>In L</td>
-        <td>Left channel.</td>
-        <td>Audio</td>
+        <td>Trigger</td>
+        <td>Trigger to join the array elements.</td>
+        <td>Trigger</td>
       </tr>
     
 
       <tr>
-        <td>In R</td>
-        <td>Right channel.</td>
-        <td>Audio</td>
+        <td>Array</td>
+        <td>Input array of floats.</td>
+        <td>Array<Float></td>
       </tr>
     
 
       <tr>
-        <td>Balance</td>
-        <td>Balance control ranging from -1.0 (full left) to 1.0 (full right).</td>
-        <td>Float</td>
+        <td>Delimiter</td>
+        <td>Delimiter string to insert between array elements.</td>
+        <td>String</td>
       </tr>
     
       </tbody>
@@ -87,16 +87,16 @@
       <tbody>
         
       <tr>
-        <td>Out L</td>
-        <td>Left channel of the adjusted stereo output signal.</td>
-        <td>Audio</td>
+        <td>On Trigger</td>
+        <td>Triggers when the converted string is output.</td>
+        <td>Trigger</td>
       </tr>
     
 
       <tr>
-        <td>Out R</td>
-        <td>Right channel of the adjusted stereo output signal.</td>
-        <td>Audio</td>
+        <td>String</td>
+        <td>The joined string.</td>
+        <td>String</td>
       </tr>
     
       </tbody>

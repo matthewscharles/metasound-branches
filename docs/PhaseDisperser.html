@@ -11,8 +11,13 @@
 <body>
     <nav class="sidebar">
         <ul>
+            <li><a href="ArrayToString(Bool).html">Array To String (Bool:Array)</a></li>
+            <li><a href="ArrayToString(Int32).html">Array To String (Int32:Array)</a></li>
+            <li><a href="ArrayToString(Float).html">Array To String (Float:Array)</a></li>
+            <li><a href="ArrayToString(String).html">Array To String (String:Array)</a></li>
             <li><a href="BoolToAudio.html">Bool To Audio</a></li>
             <li><a href="ClockDivider.html">Clock Divider</a></li>
+            <li><a href="DeltaTime.html">Delta Time</a></li>
             <li><a href="Dust.html">Dust</a></li>
             <li><a href="Edge.html">Edge</a></li>
             <li><a href="EDO.html">EDO</a></li>
@@ -49,15 +54,22 @@
         
       <tr>
         <td>In</td>
-        <td>Incoming audio.</td>
+        <td>Incoming audio signal.</td>
         <td>Audio</td>
       </tr>
     
 
       <tr>
         <td>Stages</td>
-        <td>Number of allpass filter stages to apply (maximum 128).</td>
-        <td>Int32</td>
+        <td>Number of allpass filter stages to apply.</td>
+        <td>Int</td>
+      </tr>
+    
+
+      <tr>
+        <td>Maximum Stages</td>
+        <td>Upper bound on the number of filters (evaluated once on instantiation).</td>
+        <td>Int</td>
       </tr>
     
       </tbody>
@@ -76,7 +88,7 @@
         
       <tr>
         <td>Out</td>
-        <td>Phase-dispersed audio.</td>
+        <td>Phase-dispersed audio signal.</td>
         <td>Audio</td>
       </tr>
     

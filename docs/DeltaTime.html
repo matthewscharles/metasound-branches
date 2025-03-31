@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Stereo Balance</title>
+  <title>Delta Time</title>
   <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -37,10 +37,10 @@
     </nav>
   <main>
     <h1><a href="https://matthewscharles.github.io/metasound-branches/">MetaSound Branches</a></h1>
-    <h2>Stereo Balance</h2>
-    <p><strong>Category:</strong> Spatialization</p>
-    <p>Adjust the balance of a stereo signal.</p>
-    <img src="./svg/StereoBalance.svg" alt="Stereo Balance">
+    <h2>Delta Time</h2>
+    <p><strong>Category:</strong> Time</p>
+    <p>Outputs the elapsed time between consecutive triggers.</p>
+    <img src="./svg/DeltaTime.svg" alt="Delta Time">
     <h3>Inputs</h3>
     <table>
       <thead>
@@ -53,23 +53,16 @@
       <tbody>
         
       <tr>
-        <td>In L</td>
-        <td>Left channel.</td>
-        <td>Audio</td>
+        <td>Trigger</td>
+        <td>Trigger input to calculate delta time.</td>
+        <td>Trigger</td>
       </tr>
     
 
       <tr>
-        <td>In R</td>
-        <td>Right channel.</td>
-        <td>Audio</td>
-      </tr>
-    
-
-      <tr>
-        <td>Balance</td>
-        <td>Balance control ranging from -1.0 (full left) to 1.0 (full right).</td>
-        <td>Float</td>
+        <td>Reset</td>
+        <td>Trigger input to reset the stored time without outputting a delta.</td>
+        <td>Trigger</td>
       </tr>
     
       </tbody>
@@ -87,16 +80,23 @@
       <tbody>
         
       <tr>
-        <td>Out L</td>
-        <td>Left channel of the adjusted stereo output signal.</td>
-        <td>Audio</td>
+        <td>On Trigger</td>
+        <td>Trigger output when the delta time is calculated.</td>
+        <td>Trigger</td>
       </tr>
     
 
       <tr>
-        <td>Out R</td>
-        <td>Right channel of the adjusted stereo output signal.</td>
-        <td>Audio</td>
+        <td>On Reset</td>
+        <td>Trigger output when the time is reset.</td>
+        <td>Trigger</td>
+      </tr>
+    
+
+      <tr>
+        <td>Delta</td>
+        <td>Time difference between consecutive triggers in seconds.</td>
+        <td>Time</td>
       </tr>
     
       </tbody>

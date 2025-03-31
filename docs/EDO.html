@@ -11,8 +11,13 @@
 <body>
     <nav class="sidebar">
         <ul>
+            <li><a href="ArrayToString(Bool).html">Array To String (Bool:Array)</a></li>
+            <li><a href="ArrayToString(Int32).html">Array To String (Int32:Array)</a></li>
+            <li><a href="ArrayToString(Float).html">Array To String (Float:Array)</a></li>
+            <li><a href="ArrayToString(String).html">Array To String (String:Array)</a></li>
             <li><a href="BoolToAudio.html">Bool To Audio</a></li>
             <li><a href="ClockDivider.html">Clock Divider</a></li>
+            <li><a href="DeltaTime.html">Delta Time</a></li>
             <li><a href="Dust.html">Dust</a></li>
             <li><a href="Edge.html">Edge</a></li>
             <li><a href="EDO.html">EDO</a></li>
@@ -34,7 +39,7 @@
     <h1><a href="https://matthewscharles.github.io/metasound-branches/">MetaSound Branches</a></h1>
     <h2>EDO</h2>
     <p><strong>Category:</strong> Tuning</p>
-    <p>Generate frequencies for tuning systems using equally divided octaves (float) with a MIDI note input. Set a reference frequency and reference MIDI note (defaults to A440).</p>
+    <p>Generates a frequency based on equal division of the octave.</p>
     <img src="./svg/EDO.svg" alt="EDO">
     <h3>Inputs</h3>
     <table>
@@ -50,28 +55,28 @@
       <tr>
         <td>Note Number</td>
         <td>Input MIDI note number.</td>
-        <td>Int32</td>
+        <td>Int</td>
       </tr>
     
 
       <tr>
         <td>Reference Frequency</td>
-        <td>Reference frequency.</td>
+        <td>Reference frequency (default is 440 Hz).</td>
         <td>Float</td>
       </tr>
     
 
       <tr>
-        <td>Reference MIDI Note</td>
-        <td>Reference MIDI note (integer).</td>
-        <td>Int32</td>
+        <td>Reference Note</td>
+        <td>Reference MIDI note (default is 69).</td>
+        <td>Int</td>
       </tr>
     
 
       <tr>
         <td>Divisions</td>
-        <td>Number of divisions of the octave (integer).</td>
-        <td>Int32</td>
+        <td>Number of divisions of the octave (default is 12).</td>
+        <td>Int</td>
       </tr>
     
       </tbody>

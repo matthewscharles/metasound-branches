@@ -11,8 +11,13 @@
 <body>
     <nav class="sidebar">
         <ul>
+            <li><a href="ArrayToString(Bool).html">Array To String (Bool:Array)</a></li>
+            <li><a href="ArrayToString(Int32).html">Array To String (Int32:Array)</a></li>
+            <li><a href="ArrayToString(Float).html">Array To String (Float:Array)</a></li>
+            <li><a href="ArrayToString(String).html">Array To String (String:Array)</a></li>
             <li><a href="BoolToAudio.html">Bool To Audio</a></li>
             <li><a href="ClockDivider.html">Clock Divider</a></li>
+            <li><a href="DeltaTime.html">Delta Time</a></li>
             <li><a href="Dust.html">Dust</a></li>
             <li><a href="Edge.html">Edge</a></li>
             <li><a href="EDO.html">EDO</a></li>
@@ -34,7 +39,7 @@
     <h1><a href="https://matthewscharles.github.io/metasound-branches/">MetaSound Branches</a></h1>
     <h2>Dust</h2>
     <p><strong>Category:</strong> Generators</p>
-    <p>Generate randomly timed impulses (unipolar or alternating polarity per impulse) with density control and audio-rate modulation.</p>
+    <p>Generates randomly timed impulses (uni or bi-polar) alongside triggers, with optional audio-rate modulation.</p>
     <img src="./svg/DustAudio.svg" alt="Dust">
     <h3>Inputs</h3>
     <table>
@@ -62,15 +67,36 @@
     
 
       <tr>
+        <td>Seed</td>
+        <td>Seed for the random number generator (-1 uses the current time).</td>
+        <td>Int</td>
+      </tr>
+    
+
+      <tr>
         <td>Density</td>
-        <td>Probability of impulse generation.</td>
+        <td>Base density of impulses (roughly equivalent to Hz).</td>
         <td>Float</td>
       </tr>
     
 
       <tr>
-        <td>Modulation</td>
-        <td>Density control signal.</td>
+        <td>Density Modulation</td>
+        <td>Audio modulation for density.</td>
+        <td>Audio</td>
+      </tr>
+    
+
+      <tr>
+        <td>Amp Variation</td>
+        <td>Base amplitude variation (0=fixed, 1=fully random).</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Amp Variation Modulation</td>
+        <td>Audio modulation for amplitude variation.</td>
         <td>Audio</td>
       </tr>
     
@@ -92,6 +118,13 @@
         <td>Impulse Out</td>
         <td>Generated impulse output.</td>
         <td>Audio</td>
+      </tr>
+    
+
+      <tr>
+        <td>Trigger Out</td>
+        <td>Generated trigger output.</td>
+        <td>Trigger</td>
       </tr>
     
       </tbody>
