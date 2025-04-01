@@ -55,11 +55,11 @@ Click on each node name below for a summary including inputs and outputs.
 In addition to improvements to the range of nodes, all items are now available via sub-categories within Branches.
 
 ### Additions
-- Array Sum
 - Array To String
 - Delta Time
 - Tuning From Array
 - Tuning To Frequency Array
+- Sum (Array)
 
 ### Changes
 - The audio and trigger versions of Dust have been combined.
@@ -67,6 +67,8 @@ In addition to improvements to the range of nodes, all items are now available v
 - Tuning and EDO now require a trigger for output.
 - All stereo tools now accept audio rate modulation for smooth panning effects.
 
+### Removals
+- Dust (Trigger)
 
 ---
 

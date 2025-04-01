@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Impulse</title>
+  <title>Sum (Time:Array)</title>
   <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -41,10 +41,10 @@
     </nav>
   <main>
     <h1><a href="https://matthewscharles.github.io/metasound-branches/">MetaSound Branches</a></h1>
-    <h2>Impulse</h2>
-    <p><strong>Category:</strong> Generators</p>
-    <p>Trigger a one-sample impulse (unipolar or alternating polarity per impulse).</p>
-    <img src="./svg/Impulse.svg" alt="Impulse">
+    <h2>Sum (Time:Array)</h2>
+    <p><strong>Category:</strong> Array</p>
+    <p>Outputs the sum of all elements in the input array when triggered.</p>
+    <img src="./svg/ArraySumTime.svg" alt="Sum (Time:Array)">
     <h3>Inputs</h3>
     <table>
       <thead>
@@ -57,16 +57,16 @@
       <tbody>
         
       <tr>
-        <td>Trigger</td>
-        <td>Trigger input to generate an impulse.</td>
+        <td>Sum</td>
+        <td>Trigger to sum the array.</td>
         <td>Trigger</td>
       </tr>
     
 
       <tr>
-        <td>Bi-Polar</td>
-        <td>Toggle between bipolar and unipolar impulse output.</td>
-        <td>Bool</td>
+        <td>Array</td>
+        <td>Input array of time values.</td>
+        <td>Array<Time></td>
       </tr>
     
       </tbody>
@@ -84,16 +84,16 @@
       <tbody>
         
       <tr>
-        <td>On Trigger</td>
-        <td>Trigger passthrough.</td>
+        <td>On Sum</td>
+        <td>Triggers when the sum is output.</td>
         <td>Trigger</td>
       </tr>
     
 
       <tr>
-        <td>Impulse Out</td>
-        <td>Generated impulse output.</td>
-        <td>Audio</td>
+        <td>Sum</td>
+        <td>The sum of the array elements.</td>
+        <td>Time</td>
       </tr>
     
       </tbody>

@@ -62,7 +62,6 @@ namespace Metasound
 		{
 			auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
 			{
-				// Use the array type's name as the third element to differentiate specializations.
 				FName DataTypeName = GetMetasoundDataTypeName<FArrayType>();
 				FName OperatorName = TEXT("Array To String");
 				FText NodeDisplayName = METASOUND_LOCTEXT_FORMAT("ArrayOpJoinDisplayNamePattern", "Array To String ({0})", GetMetasoundDataTypeDisplayText<FArrayType>());

@@ -1,7 +1,5 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-
-
 #include "MetasoundBranches/Public/MetasoundArraySumNode.h"
 #include "MetasoundTime.h"
 #include "MetasoundNodeRegistrationMacro.h"

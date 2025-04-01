@@ -312,6 +312,48 @@
     ]
   },
   {
+    "name": "Sum (Int32:Array)",
+    "category": "Array",
+    "description": "Outputs the sum of all elements in the input array when triggered.",
+    "image": "ArraySumInt32.svg",
+    "inputs": [
+      { "name": "Sum", "description": "Trigger to sum the array.", "type": "Trigger" },
+      { "name": "Array", "description": "Input array of integers.", "type": "Array<Int32>" }
+    ],
+    "outputs": [
+      { "name": "On Sum", "description": "Triggers when the sum is output.", "type": "Trigger" },
+      { "name": "Sum", "description": "The sum of the array elements.", "type": "Int32" }
+    ]
+  },
+  {
+    "name": "Sum (Float:Array)",
+    "category": "Array",
+    "description": "Outputs the sum of all elements in the input array when triggered.",
+    "image": "ArraySumFloat.svg",
+    "inputs": [
+      { "name": "Sum", "description": "Trigger to sum the array.", "type": "Trigger" },
+      { "name": "Array", "description": "Input array of floats.", "type": "Array<Float>" }
+    ],
+    "outputs": [
+      { "name": "On Sum", "description": "Triggers when the sum is output.", "type": "Trigger" },
+      { "name": "Sum", "description": "The sum of the array elements.", "type": "Float" }
+    ]
+  },
+  {
+    "name": "Sum (Time:Array)",
+    "category": "Array",
+    "description": "Outputs the sum of all elements in the input array when triggered.",
+    "image": "ArraySumTime.svg",
+    "inputs": [
+      { "name": "Sum", "description": "Trigger to sum the array.", "type": "Trigger" },
+      { "name": "Array", "description": "Input array of time values.", "type": "Array<Time>" }
+    ],
+    "outputs": [
+      { "name": "On Sum", "description": "Triggers when the sum is output.", "type": "Trigger" },
+      { "name": "Sum", "description": "The sum of the array elements.", "type": "Time" }
+    ]
+  },
+  {
     "name": "Tuning",
     "category": "Tuning",
     "description": "Generates a frequency based on custom tuning per-note.",
@@ -336,6 +378,34 @@
     ],
     "outputs": [
       { "name": "Frequency", "description": "Output frequency.", "type": "Float" }
+    ]
+  },
+  {
+    "name": "Tuning To Frequency Array",
+    "category": "Tuning",
+    "description": "Generates an array of frequencies based on custom tuning with cent values per-note.",
+    "image": "TuningToFrequencyArray.svg",
+    "inputs": [
+      { "name": "Trigger", "description": "Triggers tuning update.", "type": "Trigger" },
+      { "name": "Start", "description": "Start note (integer).", "type": "Int" },
+      { "name": "End", "description": "End note (integer).", "type": "Int" },
+      { "name": "Reference Frequency", "description": "Reference frequency in Hz.", "type": "Float" },
+      { "name": "Reference Note", "description": "Reference MIDI note number.", "type": "Int" },
+      { "name": "Cents 0", "description": "C adjustment in cents.", "type": "Float" },
+      { "name": "Cents 1", "description": "C♯ / D♭ adjustment in cents.", "type": "Float" },
+      { "name": "Cents 2", "description": "D adjustment in cents.", "type": "Float" },
+      { "name": "Cents 3", "description": "D♯ / E♭ adjustment in cents.", "type": "Float" },
+      { "name": "Cents 4", "description": "E adjustment in cents.", "type": "Float" },
+      { "name": "Cents 5", "description": "F adjustment in cents.", "type": "Float" },
+      { "name": "Cents 6", "description": "F♯ / G♭ adjustment in cents.", "type": "Float" },
+      { "name": "Cents 7", "description": "G adjustment in cents.", "type": "Float" },
+      { "name": "Cents 8", "description": "G♯ / A♭ adjustment in cents.", "type": "Float" },
+      { "name": "Cents 9", "description": "A adjustment in cents.", "type": "Float" },
+      { "name": "Cents 10", "description": "A♯ / B♭ adjustment in cents.", "type": "Float" },
+      { "name": "Cents 11", "description": "B adjustment in cents.", "type": "Float" }
+    ],
+    "outputs": [
+      { "name": "Array", "description": "Float array of frequencies.", "type": "Array<Float>" }
     ]
   },
   {

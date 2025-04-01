@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Impulse</title>
+  <title>Tuning To Frequency Array</title>
   <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -41,10 +41,10 @@
     </nav>
   <main>
     <h1><a href="https://matthewscharles.github.io/metasound-branches/">MetaSound Branches</a></h1>
-    <h2>Impulse</h2>
-    <p><strong>Category:</strong> Generators</p>
-    <p>Trigger a one-sample impulse (unipolar or alternating polarity per impulse).</p>
-    <img src="./svg/Impulse.svg" alt="Impulse">
+    <h2>Tuning To Frequency Array</h2>
+    <p><strong>Category:</strong> Tuning</p>
+    <p>Generates an array of frequencies based on custom tuning with cent values per-note.</p>
+    <img src="./svg/TuningToFrequencyArray.svg" alt="Tuning To Frequency Array">
     <h3>Inputs</h3>
     <table>
       <thead>
@@ -58,15 +58,120 @@
         
       <tr>
         <td>Trigger</td>
-        <td>Trigger input to generate an impulse.</td>
+        <td>Triggers tuning update.</td>
         <td>Trigger</td>
       </tr>
     
 
       <tr>
-        <td>Bi-Polar</td>
-        <td>Toggle between bipolar and unipolar impulse output.</td>
-        <td>Bool</td>
+        <td>Start</td>
+        <td>Start note (integer).</td>
+        <td>Int</td>
+      </tr>
+    
+
+      <tr>
+        <td>End</td>
+        <td>End note (integer).</td>
+        <td>Int</td>
+      </tr>
+    
+
+      <tr>
+        <td>Reference Frequency</td>
+        <td>Reference frequency in Hz.</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Reference Note</td>
+        <td>Reference MIDI note number.</td>
+        <td>Int</td>
+      </tr>
+    
+
+      <tr>
+        <td>Cents 0</td>
+        <td>C adjustment in cents.</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Cents 1</td>
+        <td>C♯ / D♭ adjustment in cents.</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Cents 2</td>
+        <td>D adjustment in cents.</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Cents 3</td>
+        <td>D♯ / E♭ adjustment in cents.</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Cents 4</td>
+        <td>E adjustment in cents.</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Cents 5</td>
+        <td>F adjustment in cents.</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Cents 6</td>
+        <td>F♯ / G♭ adjustment in cents.</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Cents 7</td>
+        <td>G adjustment in cents.</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Cents 8</td>
+        <td>G♯ / A♭ adjustment in cents.</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Cents 9</td>
+        <td>A adjustment in cents.</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Cents 10</td>
+        <td>A♯ / B♭ adjustment in cents.</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Cents 11</td>
+        <td>B adjustment in cents.</td>
+        <td>Float</td>
       </tr>
     
       </tbody>
@@ -84,16 +189,9 @@
       <tbody>
         
       <tr>
-        <td>On Trigger</td>
-        <td>Trigger passthrough.</td>
-        <td>Trigger</td>
-      </tr>
-    
-
-      <tr>
-        <td>Impulse Out</td>
-        <td>Generated impulse output.</td>
-        <td>Audio</td>
+        <td>Array</td>
+        <td>Float array of frequencies.</td>
+        <td>Array<Float></td>
       </tr>
     
       </tbody>

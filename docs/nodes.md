@@ -20,5 +20,9 @@
 | [`Stereo Gain`](https://matthewscharles.github.io/metasound-branches/StereoGain.html) | Mix | Adjust gain for a stereo signal. |
 | [`Stereo Inverter`](https://matthewscharles.github.io/metasound-branches/StereoInverter.html) | Spatialization | Invert and/or swap stereo channels. |
 | [`Stereo Width`](https://matthewscharles.github.io/metasound-branches/StereoWidth.html) | Spatialization | Stereo width adjustment (0-200%), using mid-side processing. |
+| [`Sum (Int32:Array)`](https://matthewscharles.github.io/metasound-branches/Sum(Int32:Array).html) | Array | Outputs the sum of all elements in the input array when triggered. |
+| [`Sum (Float:Array)`](https://matthewscharles.github.io/metasound-branches/Sum(Float:Array).html) | Array | Outputs the sum of all elements in the input array when triggered. |
+| [`Sum (Time:Array)`](https://matthewscharles.github.io/metasound-branches/Sum(Time:Array).html) | Array | Outputs the sum of all elements in the input array when triggered. |
 | [`Tuning`](https://matthewscharles.github.io/metasound-branches/Tuning.html) | Tuning | Generates a frequency based on custom tuning per-note. |
+| [`Tuning To Frequency Array`](https://matthewscharles.github.io/metasound-branches/TuningToFrequencyArray.html) | Tuning | Generates an array of frequencies based on custom tuning with cent values per-note. |
 | [`Zero Crossing`](https://matthewscharles.github.io/metasound-branches/ZeroCrossing.html) | Envelopes | Detect zero crossings in an input audio signal. |
