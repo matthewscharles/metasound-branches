@@ -19,8 +19,9 @@ namespace Metasound
         METASOUND_PARAM(InputReset, "Reset", "Reset trigger for the shift register.")
         METASOUND_PARAM(InputDefault, "Default", "Default float for the shift register.")
         METASOUND_PARAM(InputReverse, "Reverse", "Reverse flag for the shift register.")
+        METASOUND_PARAM(InputOutputOnReset, "Output On Reset", "When true, a reset will immediately output default values.")
         METASOUND_PARAM(OutputTrigger, "On Trigger", "Output trigger following the shift.")
-        METASOUND_PARAM(OutputReset, "On Reset", "Output trigger on reset.")
+        METASOUND_PARAM(OutputReset, "On Reset", "Output trigger when Output On Reset is true.")
         METASOUND_PARAM(OutputDirectionChange, "On Direction Change", "Output trigger on direction change.")
         METASOUND_PARAM(OutputSignal1, "Stage 1", "Shifted output at stage 1.")
         METASOUND_PARAM(OutputSignal2, "Stage 2", "Shifted output at stage 2.")
@@ -41,12 +42,14 @@ namespace Metasound
             const FTriggerReadRef& InInputTrigger,
             const FTriggerReadRef& InInputReset,
             const FFloatReadRef& InInputDefault,
-            const TDataReadReference<bool>& InInputReverse)
+            const TDataReadReference<bool>& InInputReverse,
+            const TDataReadReference<bool>& InInputOutputOnReset)
             : InputSignal(InInputSignal)
             , InputTrigger(InInputTrigger)
             , InputReset(InInputReset)
             , InputDefault(InInputDefault)
             , InputReverse(InInputReverse)
+            , InputOutputOnReset(InInputOutputOnReset)
             , OutputTrigger(FTriggerWriteRef::CreateNew(InSettings))
             , OutputResetTrigger(FTriggerWriteRef::CreateNew(InSettings))
             , OutputDirectionChangeTrigger(FTriggerWriteRef::CreateNew(InSettings))
@@ -67,7 +70,6 @@ namespace Metasound
             , ShiftedValue7(0.0f)
             , ShiftedValue8(0.0f)
             , bReverseState(false)
-            , bReversePending(false)
             , bResetPending(false)
         {
         }
@@ -81,7 +83,8 @@ namespace Metasound
                     TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputTrigger)),
                     TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputReset)),
                     TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputDefault)),
-                    TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputReverse))
+                    TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputReverse)),
+                    TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputOutputOnReset))
                 ),
                 FOutputVertexInterface(
                     TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTrigger)),
@@ -110,7 +113,7 @@ namespace Metasound
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 1;
                 Metadata.DisplayName = METASOUND_LOCTEXT("ShiftRegisterNodeDisplayName", "Shift Register");
-                Metadata.Description = METASOUND_LOCTEXT("ShiftRegisterNodeDesc", "Eight stage shift register node with additional controls.");
+                Metadata.Description = METASOUND_LOCTEXT("ShiftRegisterNodeDesc", "Shift register node with eight stages and additional reset/output options.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = NodeInterface;
@@ -135,6 +138,7 @@ namespace Metasound
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputReset), InputReset);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDefault), InputDefault);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputReverse), InputReverse);
+            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputOutputOnReset), InputOutputOnReset);
         }
 
         virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
@@ -157,19 +161,20 @@ namespace Metasound
         {
             using namespace ShiftRegisterNodeVertexNames;
             const FInputVertexInterfaceData& InputData = InParams.InputData;
-            const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();
             TDataReadReference<float> InputSignal = InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputSignal), InParams.OperatorSettings);
             TDataReadReference<FTrigger> InputTrigger = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTrigger), InParams.OperatorSettings);
             TDataReadReference<FTrigger> InputReset = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputReset), InParams.OperatorSettings);
             TDataReadReference<float> InputDefault = InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputDefault), InParams.OperatorSettings);
             TDataReadReference<bool> InputReverse = InputData.GetOrCreateDefaultDataReadReference<bool>(METASOUND_GET_PARAM_NAME(InputReverse), InParams.OperatorSettings);
+            TDataReadReference<bool> InputOutputOnReset = InputData.GetOrCreateDefaultDataReadReference<bool>(METASOUND_GET_PARAM_NAME(InputOutputOnReset), InParams.OperatorSettings);
             return MakeUnique<FShiftRegisterOperator>(
                 InParams.OperatorSettings,
                 InputSignal,
                 InputTrigger,
                 InputReset,
                 InputDefault,
-                InputReverse
+                InputReverse,
+                InputOutputOnReset
             );
         }
 
@@ -178,85 +183,92 @@ namespace Metasound
             OutputTrigger->AdvanceBlock();
             OutputResetTrigger->AdvanceBlock();
             OutputDirectionChangeTrigger->AdvanceBlock();
-
+        
+            bool bResetOccurred = false;
+            bool bTriggerOccurred = false;
+            int32 ResetFrame = INDEX_NONE;
+        
             InputReset->ExecuteBlock(
-                [](int32, int32)
+                [](int32, int32) {},
+                [&](int32 StartFrame, int32 EndFrame)
                 {
-                },
-                [&](int32, int32)
-                {
-                    bResetPending = true;
-                }
-            );
-
-            bool CurrentReverse = *InputReverse;
-            if(CurrentReverse != bReverseState)
-            {
-                bReversePending = true;
-            }
-
-            InputTrigger->ExecuteBlock(
-                [](int32, int32)
-                {
-                },
-                [&](int32 StartFrame, int32)
-                {
-                    if(bResetPending)
+                    bResetOccurred = true;
+                    ResetFrame = StartFrame;
+                    ShiftedValue1 = *InputDefault;
+                    ShiftedValue2 = *InputDefault;
+                    ShiftedValue3 = *InputDefault;
+                    ShiftedValue4 = *InputDefault;
+                    ShiftedValue5 = *InputDefault;
+                    ShiftedValue6 = *InputDefault;
+                    ShiftedValue7 = *InputDefault;
+                    ShiftedValue8 = *InputDefault;
+        
+                    if (*InputOutputOnReset)
                     {
-                        ShiftedValue1 = *InputDefault;
-                        ShiftedValue2 = *InputDefault;
-                        ShiftedValue3 = *InputDefault;
-                        ShiftedValue4 = *InputDefault;
-                        ShiftedValue5 = *InputDefault;
-                        ShiftedValue6 = *InputDefault;
-                        ShiftedValue7 = *InputDefault;
-                        ShiftedValue8 = *InputDefault;
                         OutputResetTrigger->TriggerFrame(StartFrame);
-                        bResetPending = false;
                     }
                     else
                     {
-                        if(bReverseState)
-                        {
-                            ShiftedValue1 = ShiftedValue2;
-                            ShiftedValue2 = ShiftedValue3;
-                            ShiftedValue3 = ShiftedValue4;
-                            ShiftedValue4 = ShiftedValue5;
-                            ShiftedValue5 = ShiftedValue6;
-                            ShiftedValue6 = ShiftedValue7;
-                            ShiftedValue7 = ShiftedValue8;
-                            ShiftedValue8 = *InputSignal;
-                        }
-                        else
-                        {
-                            ShiftedValue8 = ShiftedValue7;
-                            ShiftedValue7 = ShiftedValue6;
-                            ShiftedValue6 = ShiftedValue5;
-                            ShiftedValue5 = ShiftedValue4;
-                            ShiftedValue4 = ShiftedValue3;
-                            ShiftedValue3 = ShiftedValue2;
-                            ShiftedValue2 = ShiftedValue1;
-                            ShiftedValue1 = *InputSignal;
-                        }
-                        OutputTrigger->TriggerFrame(StartFrame);
-                    }
-                    if(bReversePending)
-                    {
-                        OutputDirectionChangeTrigger->TriggerFrame(StartFrame);
-                        bReverseState = *InputReverse;
-                        bReversePending = false;
+                        bResetPending = true;
                     }
                 }
             );
-
-            *OutputSignal1 = ShiftedValue1;
-            *OutputSignal2 = ShiftedValue2;
-            *OutputSignal3 = ShiftedValue3;
-            *OutputSignal4 = ShiftedValue4;
-            *OutputSignal5 = ShiftedValue5;
-            *OutputSignal6 = ShiftedValue6;
-            *OutputSignal7 = ShiftedValue7;
-            *OutputSignal8 = ShiftedValue8;
+        
+            InputTrigger->ExecuteBlock(
+                [](int32, int32) {},
+                [&](int32 StartFrame, int32 EndFrame)
+                {
+                    bTriggerOccurred = true;
+                    if (bResetPending)
+                    {
+                        OutputResetTrigger->TriggerFrame(StartFrame);
+                        bResetPending = false;
+                    }
+        
+                    if (*InputReverse)
+                    {
+                        ShiftedValue1 = ShiftedValue2;
+                        ShiftedValue2 = ShiftedValue3;
+                        ShiftedValue3 = ShiftedValue4;
+                        ShiftedValue4 = ShiftedValue5;
+                        ShiftedValue5 = ShiftedValue6;
+                        ShiftedValue6 = ShiftedValue7;
+                        ShiftedValue7 = ShiftedValue8;
+                        ShiftedValue8 = *InputSignal;
+                    }
+                    else
+                    {
+                        ShiftedValue8 = ShiftedValue7;
+                        ShiftedValue7 = ShiftedValue6;
+                        ShiftedValue6 = ShiftedValue5;
+                        ShiftedValue5 = ShiftedValue4;
+                        ShiftedValue4 = ShiftedValue3;
+                        ShiftedValue3 = ShiftedValue2;
+                        ShiftedValue2 = ShiftedValue1;
+                        ShiftedValue1 = *InputSignal;
+                    }
+                    OutputTrigger->TriggerFrame(StartFrame);
+                }
+            );
+        
+            bool CurrentReverse = *InputReverse;
+            if (CurrentReverse != bReverseState)
+            {
+                OutputDirectionChangeTrigger->TriggerFrame(0);
+                bReverseState = CurrentReverse;
+            }
+        
+            if (bTriggerOccurred || (bResetOccurred && *InputOutputOnReset))
+            {
+                *OutputSignal1 = ShiftedValue1;
+                *OutputSignal2 = ShiftedValue2;
+                *OutputSignal3 = ShiftedValue3;
+                *OutputSignal4 = ShiftedValue4;
+                *OutputSignal5 = ShiftedValue5;
+                *OutputSignal6 = ShiftedValue6;
+                *OutputSignal7 = ShiftedValue7;
+                *OutputSignal8 = ShiftedValue8;
+            }
         }
 
     private:
@@ -265,6 +277,7 @@ namespace Metasound
         FTriggerReadRef InputReset;
         FFloatReadRef InputDefault;
         TDataReadReference<bool> InputReverse;
+        TDataReadReference<bool> InputOutputOnReset;
         FTriggerWriteRef OutputTrigger;
         FTriggerWriteRef OutputResetTrigger;
         FTriggerWriteRef OutputDirectionChangeTrigger;
@@ -285,7 +298,6 @@ namespace Metasound
         float ShiftedValue7;
         float ShiftedValue8;
         bool bReverseState;
-        bool bReversePending;
         bool bResetPending;
     };
 
