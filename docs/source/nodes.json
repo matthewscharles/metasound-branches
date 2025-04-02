@@ -381,6 +381,22 @@
     ]
   },
   {
+    "name": "Tuning From Array",
+    "category": "Tuning",
+    "description": "Generates a frequency based on custom tuning per-note, with array input.",
+    "image": "TuningFromArray.svg",
+    "inputs": [
+      { "name": "Trigger", "description": "Triggers output.", "type": "Trigger" },
+      { "name": "MIDI Note Number", "description": "Input MIDI note number (integer).", "type": "Int" },
+      { "name": "Tuning Cents Array", "description": "Array of tuning adjustments in cents for each note in the octave.", "type": "Array<Float>" },
+      { "name": "Reference Frequency", "description": "Reference frequency in Hz.", "type": "Float" },
+      { "name": "Reference Note", "description": "Reference MIDI note number.", "type": "Int" }
+    ],
+    "outputs": [
+      { "name": "Frequency", "description": "Output frequency.", "type": "Float" }
+    ]
+  },
+  {
     "name": "Tuning To Frequency Array",
     "category": "Tuning",
     "description": "Generates an array of frequencies based on custom tuning with cent values per-note.",
