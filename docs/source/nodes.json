@@ -186,14 +186,20 @@
   {
     "name": "Shift Register",
     "category": "Modulation",
-    "description": "An eight-stage shift register for floats.",
+    "description": "Shift register node with eight stages and additional reset/output options.",
     "image": "ShiftRegister.svg",
     "inputs": [
-      { "name": "Signal", "description": "Input signal to be shifted.", "type": "Float" },
-      { "name": "Trigger", "description": "Trigger input to shift the register.", "type": "Trigger" }
+      { "name": "In", "description": "Input float to the shift register.", "type": "Float" },
+      { "name": "Trigger", "description": "Trigger.", "type": "Trigger" },
+      { "name": "Reset", "description": "Reset trigger for the shift register.", "type": "Trigger" },
+      { "name": "Default", "description": "Default float for the shift register.", "type": "Float" },
+      { "name": "Reverse", "description": "Reverse flag for the shift register.", "type": "Bool" },
+      { "name": "Output On Reset", "description": "When true, a reset will immediately output default values.", "type": "Bool" }
     ],
     "outputs": [
-      { "name": "On Trigger", "description": "Output trigger following the shift" },
+      { "name": "On Trigger", "description": "Output trigger following the shift.", "type": "Trigger" },
+      { "name": "On Reset", "description": "Output trigger when Output On Reset is true.", "type": "Trigger" },
+      { "name": "On Direction Change", "description": "Output trigger on direction change.", "type": "Trigger" },
       { "name": "Stage 1", "description": "Shifted output at stage 1.", "type": "Float" },
       { "name": "Stage 2", "description": "Shifted output at stage 2.", "type": "Float" },
       { "name": "Stage 3", "description": "Shifted output at stage 3.", "type": "Float" },
