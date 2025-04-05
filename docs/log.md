@@ -64,4 +64,5 @@
 | 03/27 | - Start notes for v1.1.  Draft trigger limiter. |
 | 03/28 | - Improve debounce for Edge and Zero Crossing. |
 | 03/29 | - Remove debounce for Edge and Zero Crossing in favour of separate trigger limiter, for now.<br>- Refine node collection and update docs. |
-| 04/03 | - Add Greater Than prototype (for phase modulated pulse wave). |
+| 04/03 | - Add Greater Than prototype (for phase modulated pulse wave), and Gate. |
+| 04/03 | - Add Less Than prototype. |
