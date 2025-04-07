@@ -1,6 +1,6 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundLessThanEqualNode.h"
+#include "MetasoundBranches/Public/MetasoundNotEqualNode.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
@@ -8,21 +8,21 @@
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundStandardNodesCategories.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundLessThanEqualNode"
+#define LOCTEXT_NAMESPACE "MetasoundNotEqualNode"
 
 namespace Metasound
 {
-	namespace LessThanEqualNodeVertexNames
+	namespace NotEqualNodeVertexNames
 	{
 		METASOUND_PARAM(InputSignal,  "In",        "Audio input.");
 		METASOUND_PARAM(Threshold,    "Threshold", "Float threshold to compare input against.");
 		METASOUND_PARAM(OutputSignal, "Out",       "Output signal if input < threshold.");
 	}
 
-	class FLessThanEqualOperator : public TExecutableOperator<FLessThanEqualOperator>
+	class FNotEqualOperator : public TExecutableOperator<FNotEqualOperator>
 	{
 	public:
-		FLessThanEqualOperator(
+		FNotEqualOperator(
 			const FOperatorSettings& InSettings,
 			const FAudioBufferReadRef& InAudio,
 			const FFloatReadRef& InThreshold
@@ -35,7 +35,7 @@ namespace Metasound
 
 		static const FVertexInterface& DeclareVertexInterface()
 		{
-			using namespace LessThanEqualNodeVertexNames;
+			using namespace NotEqualNodeVertexNames;
 
 			static const FVertexInterface Interface(
 				FInputVertexInterface(
@@ -55,11 +55,11 @@ namespace Metasound
 			auto CreateMetadata = []() -> FNodeClassMetadata
 			{
 				FNodeClassMetadata Metadata;
-				Metadata.ClassName = { TEXT("UE"), TEXT("LessThanEqual"), TEXT("Audio") };
+				Metadata.ClassName = { TEXT("UE"), TEXT("NotEqual"), TEXT("Audio") };
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
-				Metadata.DisplayName = LOCTEXT("LessThanEqualNodeDisplayName", "<=");
-				Metadata.Description = LOCTEXT("LessThanEqualNodeDesc", "Outputs audio signal of 1 if input < threshold.");
+				Metadata.DisplayName = LOCTEXT("NotEqualNodeDisplayName", "!=");
+				Metadata.Description = LOCTEXT("NotEqualNodeDesc", "Outputs audio signal of 1 if input < threshold.");
 				Metadata.Author = TEXT("Charles Matthews");
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
 				Metadata.DefaultInterface = DeclareVertexInterface();
@@ -76,7 +76,7 @@ namespace Metasound
 
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
 		{
-			using namespace LessThanEqualNodeVertexNames;
+			using namespace NotEqualNodeVertexNames;
 
 			const FInputVertexInterfaceData& InputData = InParams.InputData;
 
@@ -86,21 +86,21 @@ namespace Metasound
 			TDataReadReference<float> InThreshold =
 				InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(Threshold), InParams.OperatorSettings);
 
-			return MakeUnique<FLessThanEqualOperator>(InParams.OperatorSettings, InAudio, InThreshold);
+			return MakeUnique<FNotEqualOperator>(InParams.OperatorSettings, InAudio, InThreshold);
 		}
 
 		METASOUND_DISABLE_LEGACY_IO()
 
 		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace LessThanEqualNodeVertexNames;
+			using namespace NotEqualNodeVertexNames;
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), AudioIn);
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(Threshold), Threshold);
 		}
 
 		virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace LessThanEqualNodeVertexNames;
+			using namespace NotEqualNodeVertexNames;
 			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputSignal), AudioOut);
 		}
 
@@ -112,7 +112,7 @@ namespace Metasound
 
 			for (int32 i = 0; i < BlockSize; ++i)
 			{
-				OutData[i] = (InData[i] <= CompareThreshold) ? 1.0f : 0.0f;
+				OutData[i] = (InData[i] != CompareThreshold) ? 1.0f : 0.0f;
 			}
 		}
 
@@ -123,15 +123,15 @@ namespace Metasound
 		int32 BlockSize;
 	};
 
-	class FLessThanEqualNode : public FNodeFacade
+	class FNotEqualNode : public FNodeFacade
 	{
 	public:
-		FLessThanEqualNode(const FNodeInitData& InitData)
-			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FLessThanEqualOperator>())
+		FNotEqualNode(const FNodeInitData& InitData)
+			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FNotEqualOperator>())
 		{}
 	};
 
-	METASOUND_REGISTER_NODE(FLessThanEqualNode);
+	METASOUND_REGISTER_NODE(FNotEqualNode);
 }
 
 #undef LOCTEXT_NAMESPACE
