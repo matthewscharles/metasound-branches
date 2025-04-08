@@ -59,7 +59,7 @@ namespace Metasound
 				Metadata.ClassName = { TEXT("UE"), TEXT("GreaterThanEqual"), TEXT("Audio") };
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
-				Metadata.DisplayName = LOCTEXT("GreaterThanEqualNodeDisplayName", ">");
+				Metadata.DisplayName = LOCTEXT("GreaterThanEqualNodeDisplayName", ">=");
 				Metadata.Description = LOCTEXT("GreaterThanEqualNodeDesc", "Outputs audio signal of 1 if input >= threshold.");
 				Metadata.Author = TEXT("Charles Matthews");
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
