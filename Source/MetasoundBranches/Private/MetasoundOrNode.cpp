@@ -16,7 +16,7 @@ namespace Metasound
 	{
 		METASOUND_PARAM(InputSignal,  "In",        "Audio input.");
 		METASOUND_PARAM(Threshold,    "Threshold", "Float threshold to compare input against.");
-		METASOUND_PARAM(OutputSignal, "Out",       "Output signal if input > threshold.");
+		METASOUND_PARAM(OutputSignal, "Out",       "Output signal if input || threshold.");
 	}
 
 	class FOrOperator : public TExecutableOperator<FOrOperator>
@@ -59,7 +59,7 @@ namespace Metasound
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
 				Metadata.DisplayName = LOCTEXT("OrNodeDisplayName", "||");
-				Metadata.Description = LOCTEXT("OrNodeDesc", "Outputs audio signal of 1 if input > threshold.");
+				Metadata.Description = LOCTEXT("OrNodeDesc", "Outputs audio signal of 1 if input || threshold.");
 				Metadata.Author = TEXT("Charles Matthews");
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
 				Metadata.DefaultInterface = DeclareVertexInterface();
