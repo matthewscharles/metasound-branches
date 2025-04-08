@@ -9,7 +9,6 @@
 #include "MetasoundStandardNodesCategories.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
-
 #define LOCTEXT_NAMESPACE "MetasoundGreaterThanEqualNode"
 
 namespace Metasound
