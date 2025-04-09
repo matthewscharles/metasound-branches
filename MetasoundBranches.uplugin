@@ -21,8 +21,11 @@
     "Modules": [{
             "Name": "MetasoundBranches",
             "Type": "Runtime",
-            "LoadingPhase": "EarliestPossible",
-            "PlatformAllowList":["Win64", "Mac"]    
+            "LoadingPhase": "Default",
+            "PlatformAllowList":["Win64", "Mac"],
+            "AdditionalDependencies": [
+                "MetasoundEditor"
+            ]    
     }],
     "Content": true,
     "Plugins": [{

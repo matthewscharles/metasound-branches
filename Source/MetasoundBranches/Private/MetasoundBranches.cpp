@@ -10,7 +10,6 @@ TSharedPtr<FSlateStyleSet> FMetasoundBranchesModule::StyleSet = nullptr;
 
 void FMetasoundBranchesModule::StartupModule()
 {
-    // Inject brush into the existing MetaSound style set
     if (const ISlateStyle* ExistingStyle = FSlateStyleRegistry::FindSlateStyle("MetaSoundStyle"))
     {
         FSlateStyleSet* MutableStyle = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(ExistingStyle));
@@ -26,6 +25,13 @@ void FMetasoundBranchesModule::StartupModule()
                 TEXT("MetasoundEditor.Graph.Node.Custom.GreaterThan"),
                 new FSlateImageBrush(
                     MutableStyle->RootToContentDir(TEXT("node_math_greaterthan_40x.png")),
+                    FVector2D(40.f, 40.f)
+                )
+            );
+            MutableStyle->Set(
+                TEXT("MetasoundEditor.Graph.Node.Custom.GreaterThanEqual"),
+                new FSlateImageBrush(
+                    MutableStyle->RootToContentDir(TEXT("node_math_greaterthanequal_40x.png")),
                     FVector2D(40.f, 40.f)
                 )
             );
@@ -45,7 +51,6 @@ void FMetasoundBranchesModule::StartupModule()
 
 void FMetasoundBranchesModule::ShutdownModule()
 {
-    // Nothing to unregister from MetaSoundStyle in this case
 }
 
 IMPLEMENT_MODULE(FMetasoundBranchesModule, MetasoundBranches);
