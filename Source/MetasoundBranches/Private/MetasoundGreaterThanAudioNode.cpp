@@ -1,6 +1,6 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundGreaterThanAudioNode.h"
+#include "MetasoundBranches/Public/MetasoundGreaterThanAudioAudioNode.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
@@ -15,9 +15,9 @@ namespace Metasound
 {
 	namespace GreaterThanAudioAudioNodeVertexNames
 	{
-		METASOUND_PARAM(InputSignalA,  "A",         "First audio input.");
-		METASOUND_PARAM(InputSignalB,  "B",         "Second audio input to compare against.");
-		METASOUND_PARAM(OutputSignal,  "Out",       "Output: 1.0 where A > B, else 0.0.");
+		METASOUND_PARAM(InputSignalA, "A", "First audio input.");
+		METASOUND_PARAM(InputSignalB, "B", "Second audio input to compare against.");
+		METASOUND_PARAM(OutputSignal, "Out", "Output: 1.0 where A > B, else 0.0.");
 	}
 
 	class FGreaterThanAudioAudioOperator : public TExecutableOperator<FGreaterThanAudioAudioOperator>
@@ -59,7 +59,7 @@ namespace Metasound
 				Metadata.ClassName = { TEXT("UE"), TEXT("GreaterThanAudio"), TEXT("Audio") };
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
-				Metadata.DisplayName = LOCTEXT("GreaterThanAudioAudioNodeDisplayName", "Greater Than (Audio)");
+				Metadata.DisplayName = LOCTEXT("GreaterThanAudioAudioNodeDisplayName", "Greater Than (Audio > Audio)");
 				Metadata.Description = LOCTEXT("GreaterThanAudioAudioNodeDesc", "Outputs 1.0 where A > B, else 0.0.");
 				Metadata.Author = TEXT("Charles Matthews");
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;

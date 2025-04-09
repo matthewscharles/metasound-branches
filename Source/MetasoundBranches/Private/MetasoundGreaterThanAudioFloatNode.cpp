@@ -1,6 +1,6 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundGreaterThanFloatNode.h"
+#include "MetasoundBranches/Public/MetasoundGreaterThanAudioFloatNode.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
@@ -9,34 +9,34 @@
 #include "MetasoundStandardNodesCategories.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundGreaterThanFloatNode"
+#define LOCTEXT_NAMESPACE "MetasoundGreaterThanAudioFloatNode"
 
 namespace Metasound
 {
-	namespace GreaterThanFloatNodeVertexNames
+	namespace GreaterThanAudioFloatNodeVertexNames
 	{
-		METASOUND_PARAM(InputSignal,  "In",        "Audio input.");
-		METASOUND_PARAM(Threshold,    "Threshold", "Float threshold to compare input against.");
-		METASOUND_PARAM(OutputSignal, "Out",       "Output signal: 1.0 if input > threshold, else 0.0.");
+		METASOUND_PARAM(InputSignal,  "A",         "Audio input.");
+		METASOUND_PARAM(Threshold,    "B",         "Float to compare against.");
+		METASOUND_PARAM(OutputSignal, "Out",       "Output: 1.0 where A > B, else 0.0.");
 	}
 
-	class FGreaterThanOperator : public TExecutableOperator<FGreaterThanOperator>
+	class FGreaterThanAudioFloatOperator : public TExecutableOperator<FGreaterThanAudioFloatOperator>
 	{
 	public:
-		FGreaterThanOperator(
+		FGreaterThanAudioFloatOperator(
 			const FOperatorSettings& InSettings,
-			const FAudioBufferReadRef& InAudio,
-			const FFloatReadRef& InThreshold
+			const FAudioBufferReadRef& InA,
+			const FFloatReadRef& InB
 		)
-			: AudioIn(InAudio)
-			, Threshold(InThreshold)
-			, AudioOut(FAudioBufferWriteRef::CreateNew(InSettings))
+			: A(InA)
+			, B(InB)
+			, Out(FAudioBufferWriteRef::CreateNew(InSettings))
 			, BlockSize(InSettings.GetNumFramesPerBlock())
 		{}
 
 		static const FVertexInterface& DeclareVertexInterface()
 		{
-			using namespace GreaterThanFloatNodeVertexNames;
+			using namespace GreaterThanAudioFloatNodeVertexNames;
 
 			static const FVertexInterface Interface(
 				FInputVertexInterface(
@@ -56,11 +56,11 @@ namespace Metasound
 			auto CreateMetadata = []() -> FNodeClassMetadata
 			{
 				FNodeClassMetadata Metadata;
-				Metadata.ClassName = { TEXT("UE"), TEXT("GreaterThan"), TEXT("Float") };
+				Metadata.ClassName = { TEXT("UE"), TEXT("GreaterThanFloat"), TEXT("Audio") };
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
-				Metadata.DisplayName = LOCTEXT("GreaterThanFloatNodeDisplayName", "Greater Than");
-				Metadata.Description = LOCTEXT("GreaterThanFloatNodeDesc", "Outputs 1.0 where input > threshold, else 0.0.");
+				Metadata.DisplayName = LOCTEXT("GreaterThanAudioFloatNodeDisplayName", "Greater Than (Audio > Float)");
+				Metadata.Description = LOCTEXT("GreaterThanAudioFloatNodeDesc", "Outputs 1.0 where A > B, else 0.0.");
 				Metadata.Author = TEXT("Charles Matthews");
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
 				Metadata.DefaultInterface = DeclareVertexInterface();
@@ -85,62 +85,62 @@ namespace Metasound
 
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
 		{
-			using namespace GreaterThanFloatNodeVertexNames;
+			using namespace GreaterThanAudioFloatNodeVertexNames;
 
 			const FInputVertexInterfaceData& InputData = InParams.InputData;
 
-			TDataReadReference<FAudioBuffer> InAudio =
+			TDataReadReference<FAudioBuffer> InA =
 				InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputSignal), InParams.OperatorSettings);
 
-			TDataReadReference<float> InThreshold =
+			TDataReadReference<float> InB =
 				InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(Threshold), InParams.OperatorSettings);
 
-			return MakeUnique<FGreaterThanOperator>(InParams.OperatorSettings, InAudio, InThreshold);
+			return MakeUnique<FGreaterThanAudioFloatOperator>(InParams.OperatorSettings, InA, InB);
 		}
 
 		METASOUND_DISABLE_LEGACY_IO()
 
 		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace GreaterThanFloatNodeVertexNames;
-			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), AudioIn);
-			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(Threshold), Threshold);
+			using namespace GreaterThanAudioFloatNodeVertexNames;
+			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), A);
+			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(Threshold), B);
 		}
 
 		virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace GreaterThanFloatNodeVertexNames;
-			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputSignal), AudioOut);
+			using namespace GreaterThanAudioFloatNodeVertexNames;
+			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputSignal), Out);
 		}
 
 		virtual void Execute()
 		{
-			const float* InData = AudioIn->GetData();
-			float* OutData = AudioOut->GetData();
-			const float CompareThreshold = *Threshold;
+			const float* AData = A->GetData();
+			float* OutData = Out->GetData();
+			const float CompareB = *B;
 
 			for (int32 i = 0; i < BlockSize; ++i)
 			{
-				OutData[i] = (InData[i] > CompareThreshold) ? 1.0f : 0.0f;
+				OutData[i] = (AData[i] > CompareB) ? 1.0f : 0.0f;
 			}
 		}
 
 	private:
-		FAudioBufferReadRef AudioIn;
-		FFloatReadRef Threshold;
-		FAudioBufferWriteRef AudioOut;
+		FAudioBufferReadRef A;
+		FFloatReadRef B;
+		FAudioBufferWriteRef Out;
 		int32 BlockSize;
 	};
 
-	class FGreaterThanFloatNode : public FNodeFacade
+	class FGreaterThanAudioFloatNode : public FNodeFacade
 	{
 	public:
-		FGreaterThanFloatNode(const FNodeInitData& InitData)
-			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FGreaterThanOperator>())
+		FGreaterThanAudioFloatNode(const FNodeInitData& InitData)
+			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FGreaterThanAudioFloatOperator>())
 		{}
 	};
 
-	METASOUND_REGISTER_NODE(FGreaterThanFloatNode);
+	METASOUND_REGISTER_NODE(FGreaterThanAudioFloatNode);
 }
 
 #undef LOCTEXT_NAMESPACE
