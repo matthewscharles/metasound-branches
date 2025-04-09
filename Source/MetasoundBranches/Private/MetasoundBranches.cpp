@@ -1,3 +1,5 @@
+// Copyright Charles Matthews 2025. All Rights Reserved.
+
 #include "MetasoundBranches/Public/MetasoundBranches.h"
 #include "Modules/ModuleManager.h"
 #include "Styling/SlateStyle.h"
@@ -8,43 +10,42 @@ TSharedPtr<FSlateStyleSet> FMetasoundBranchesModule::StyleSet = nullptr;
 
 void FMetasoundBranchesModule::StartupModule()
 {
-    if (!StyleSet.IsValid())
+    // Inject brush into the existing MetaSound style set
+    if (const ISlateStyle* ExistingStyle = FSlateStyleRegistry::FindSlateStyle("MetaSoundStyle"))
     {
-        StyleSet = MakeShareable(new FSlateStyleSet("MetasoundEditor"));
+        FSlateStyleSet* MutableStyle = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(ExistingStyle));
 
         if (TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(TEXT("MetasoundBranches")))
         {
             const FString PluginContentDir = Plugin->GetBaseDir();
-            StyleSet->SetContentRoot(PluginContentDir / TEXT("Resources/Icons"));
-        }
-        else
-        {
-        }
+            const FString FullIconPath = PluginContentDir / TEXT("Resources/Icons");
 
-        StyleSet->Set(
-            TEXT("MetasoundEditor.Graph.Node.Custom.GreaterThan"),
-            new FSlateImageBrush(
-                StyleSet->RootToContentDir(TEXT("node_math_greaterthan_40x.png")),
-                FVector2D(40.f, 40.f)
-            )
-        );
+            MutableStyle->SetContentRoot(FullIconPath);
 
-        FSlateStyleRegistry::RegisterSlateStyle(*StyleSet);
+            MutableStyle->Set(
+                TEXT("MetasoundEditor.Graph.Node.Custom.GreaterThan"),
+                new FSlateImageBrush(
+                    MutableStyle->RootToContentDir(TEXT("node_math_greaterthan_40x.png")),
+                    FVector2D(40.f, 40.f)
+                )
+            );
+
+            UE_LOG(LogTemp, Log, TEXT("Injected brush into MetaSoundStyle: %s"),
+                *MutableStyle->GetBrush("MetasoundEditor.Graph.Node.Custom.GreaterThan")->GetResourceName().ToString());
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("MetaSoundStyle not found in style registry!"));
     }
 
-    UE_LOG(LogTemp, Log, TEXT("Brush registered: %s"), *StyleSet->GetBrush("MetasoundEditor.Graph.Node.Custom.GreaterThan")->GetResourceName().ToString());
-    
     using namespace Metasound;
     FMetasoundFrontendRegistryContainer::Get()->RegisterPendingNodes();
 }
 
 void FMetasoundBranchesModule::ShutdownModule()
 {
-    if (StyleSet.IsValid())
-    {
-        FSlateStyleRegistry::UnRegisterSlateStyle(StyleSet->GetStyleSetName());
-        StyleSet.Reset();
-    }
+    // Nothing to unregister from MetaSoundStyle in this case
 }
 
 IMPLEMENT_MODULE(FMetasoundBranchesModule, MetasoundBranches);
