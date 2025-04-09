@@ -15,7 +15,10 @@ public class MetasoundBranches : ModuleRules
                 "MetasoundEngine",
                 "MetasoundStandardNodes",
                 "MetasoundFrontend", 
-                "MetasoundGraphCore"
+                "MetasoundGraphCore",
+                "Slate",
+                "SlateCore",
+                "Projects"
             }
         );
 

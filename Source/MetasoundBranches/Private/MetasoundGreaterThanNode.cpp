@@ -17,7 +17,7 @@ namespace Metasound
 	{
 		METASOUND_PARAM(InputSignal,  "In",        "Audio input.");
 		METASOUND_PARAM(Threshold,    "Threshold", "Float threshold to compare input against.");
-		METASOUND_PARAM(OutputSignal, "Out",       "Output signal if input > threshold.");
+		METASOUND_PARAM(OutputSignal, "Out",       "Output signal: 1.0 if input > threshold, else 0.0.");
 	}
 
 	class FGreaterThanOperator : public TExecutableOperator<FGreaterThanOperator>
@@ -59,8 +59,8 @@ namespace Metasound
 				Metadata.ClassName = { TEXT("UE"), TEXT("GreaterThan"), TEXT("Audio") };
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
-				Metadata.DisplayName = LOCTEXT("GreaterThanNodeDisplayName", ">");
-				Metadata.Description = LOCTEXT("GreaterThanNodeDesc", "Outputs audio signal of 1 if input > threshold.");
+				Metadata.DisplayName = LOCTEXT("GreaterThanNodeDisplayName", "Greater Than");
+				Metadata.Description = LOCTEXT("GreaterThanNodeDesc", "Outputs 1.0 where input > threshold, else 0.0.");
 				Metadata.Author = TEXT("Charles Matthews");
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
 				Metadata.DefaultInterface = DeclareVertexInterface();
@@ -68,6 +68,14 @@ namespace Metasound
 					METASOUND_LOCTEXT("Custom", "Branches"),
 					METASOUND_LOCTEXT("CustomSub", "Math")
 				};
+
+				FNodeDisplayStyle DisplayStyle;
+				DisplayStyle.ImageName = TEXT("MetasoundEditor.Graph.Node.Custom.GreaterThan");
+				DisplayStyle.bShowName = false;
+				DisplayStyle.bShowInputNames = false;
+				DisplayStyle.bShowOutputNames = false;
+				Metadata.DisplayStyle = DisplayStyle;
+
 				return Metadata;
 			};
 
