@@ -1,6 +1,6 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundGreaterThanAudioAudioNode.h"
+#include "MetasoundBranches/Public/MetasoundGreaterThanAudioNode.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
@@ -9,21 +9,21 @@
 #include "MetasoundStandardNodesCategories.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundGreaterThanAudioAudioNode"
+#define LOCTEXT_NAMESPACE "MetasoundGreaterThanAudioNode"
 
 namespace Metasound
 {
-	namespace GreaterThanAudioAudioNodeVertexNames
+	namespace GreaterThanAudioNodeVertexNames
 	{
 		METASOUND_PARAM(InputSignalA, "A", "First audio input.");
 		METASOUND_PARAM(InputSignalB, "B", "Second audio input to compare against.");
 		METASOUND_PARAM(OutputSignal, "Out", "Output: 1.0 where A > B, else 0.0.");
 	}
 
-	class FGreaterThanAudioAudioOperator : public TExecutableOperator<FGreaterThanAudioAudioOperator>
+	class FGreaterThanAudioOperator : public TExecutableOperator<FGreaterThanAudioOperator>
 	{
 	public:
-		FGreaterThanAudioAudioOperator(
+		FGreaterThanAudioOperator(
 			const FOperatorSettings& InSettings,
 			const FAudioBufferReadRef& InA,
 			const FAudioBufferReadRef& InB
@@ -36,7 +36,7 @@ namespace Metasound
 
 		static const FVertexInterface& DeclareVertexInterface()
 		{
-			using namespace GreaterThanAudioAudioNodeVertexNames;
+			using namespace GreaterThanAudioNodeVertexNames;
 
 			static const FVertexInterface Interface(
 				FInputVertexInterface(
@@ -59,8 +59,8 @@ namespace Metasound
 				Metadata.ClassName = { TEXT("UE"), TEXT("GreaterThanAudio"), TEXT("Audio") };
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
-				Metadata.DisplayName = LOCTEXT("GreaterThanAudioAudioNodeDisplayName", "Greater Than (Audio > Audio)");
-				Metadata.Description = LOCTEXT("GreaterThanAudioAudioNodeDesc", "Outputs 1.0 where A > B, else 0.0.");
+				Metadata.DisplayName = LOCTEXT("GreaterThanAudioNodeDisplayName", "Greater Than (Audio > Audio)");
+				Metadata.Description = LOCTEXT("GreaterThanAudioNodeDesc", "Outputs 1.0 where A > B, else 0.0.");
 				Metadata.Author = TEXT("Charles Matthews");
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
 				Metadata.DefaultInterface = DeclareVertexInterface();
@@ -85,7 +85,7 @@ namespace Metasound
 
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
 		{
-			using namespace GreaterThanAudioAudioNodeVertexNames;
+			using namespace GreaterThanAudioNodeVertexNames;
 
 			const FInputVertexInterfaceData& InputData = InParams.InputData;
 
@@ -95,21 +95,21 @@ namespace Metasound
 			TDataReadReference<FAudioBuffer> InB =
 				InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputSignalB), InParams.OperatorSettings);
 
-			return MakeUnique<FGreaterThanAudioAudioOperator>(InParams.OperatorSettings, InA, InB);
+			return MakeUnique<FGreaterThanAudioOperator>(InParams.OperatorSettings, InA, InB);
 		}
 
 		METASOUND_DISABLE_LEGACY_IO()
 
 		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace GreaterThanAudioAudioNodeVertexNames;
+			using namespace GreaterThanAudioNodeVertexNames;
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignalA), A);
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignalB), B);
 		}
 
 		virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace GreaterThanAudioAudioNodeVertexNames;
+			using namespace GreaterThanAudioNodeVertexNames;
 			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputSignal), Out);
 		}
 
@@ -132,15 +132,15 @@ namespace Metasound
 		int32 BlockSize;
 	};
 
-	class FGreaterThanAudioAudioNode : public FNodeFacade
+	class FGreaterThanAudioNode : public FNodeFacade
 	{
 	public:
-		FGreaterThanAudioAudioNode(const FNodeInitData& InitData)
-			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FGreaterThanAudioAudioOperator>())
+		FGreaterThanAudioNode(const FNodeInitData& InitData)
+			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FGreaterThanAudioOperator>())
 		{}
 	};
 
-	METASOUND_REGISTER_NODE(FGreaterThanAudioAudioNode);
+	METASOUND_REGISTER_NODE(FGreaterThanAudioNode);
 }
 
 #undef LOCTEXT_NAMESPACE
