@@ -74,6 +74,7 @@ namespace Metasound
 				DisplayStyle.bShowName = false;
 				DisplayStyle.bShowInputNames = false;
 				DisplayStyle.bShowOutputNames = false;
+				Metadata.DisplayStyle = DisplayStyle;
 				
 				return Metadata;
 			};

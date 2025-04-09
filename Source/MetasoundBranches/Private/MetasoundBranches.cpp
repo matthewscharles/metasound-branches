@@ -36,8 +36,6 @@ void FMetasoundBranchesModule::StartupModule()
                 )
             );
 
-            UE_LOG(LogTemp, Log, TEXT("Injected brush into MetaSoundStyle: %s"),
-                *MutableStyle->GetBrush("MetasoundEditor.Graph.Node.Custom.GreaterThan")->GetResourceName().ToString());
         }
     }
     else
