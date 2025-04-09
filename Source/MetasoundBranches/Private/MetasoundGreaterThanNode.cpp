@@ -71,10 +71,32 @@ namespace Metasound
 
 				FNodeDisplayStyle DisplayStyle;
 				DisplayStyle.ImageName = TEXT("MetasoundEditor.Graph.Node.Custom.GreaterThan");
+				// DisplayStyle.ImageName = TEXT("MetasoundEditor.Graph.Node.Math.Add");
 				DisplayStyle.bShowName = false;
 				DisplayStyle.bShowInputNames = false;
 				DisplayStyle.bShowOutputNames = false;
 				Metadata.DisplayStyle = DisplayStyle;
+				
+				//* troubleshooting
+				
+			// 	if (const ISlateStyle* S = FSlateStyleRegistry::FindSlateStyle("MetasoundBranchesStyle"))
+			// 	{
+			// 		UE_LOG(LogTemp, Log, TEXT("From node: Found style set: %s"), *S->GetStyleSetName().ToString());
+
+			// 		const FSlateBrush* Brush = S->GetBrush("MetasoundEditor.Graph.Node.Custom.GreaterThan");
+			// 		if (Brush)
+			// 		{
+			// 			UE_LOG(LogTemp, Log, TEXT("From node: Found brush with resource name: %s"), *Brush->GetResourceName().ToString());
+			// 		}
+			// 		else
+			// 		{
+			// 			UE_LOG(LogTemp, Warning, TEXT("From node: Brush key not found in style set."));
+			// 		}
+			// 	}
+			// 	else
+			// 	{
+			// 		UE_LOG(LogTemp, Warning, TEXT("From node: Could not find MetasoundBranchesStyle in registry."));
+			// 	}
 
 				return Metadata;
 			};

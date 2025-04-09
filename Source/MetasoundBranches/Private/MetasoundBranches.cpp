@@ -4,16 +4,13 @@
 #include "Styling/SlateStyleRegistry.h"
 #include "Interfaces/IPluginManager.h"
 
-// If you use something like FPaths::Combine, you also need #include "Misc/Paths.h"
-
 TSharedPtr<FSlateStyleSet> FMetasoundBranchesModule::StyleSet = nullptr;
 
 void FMetasoundBranchesModule::StartupModule()
 {
-    // Create it only once
     if (!StyleSet.IsValid())
     {
-        StyleSet = MakeShareable(new FSlateStyleSet("MetasoundBranchesStyle"));
+        StyleSet = MakeShareable(new FSlateStyleSet("MetasoundEditor"));
 
         if (TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(TEXT("MetasoundBranches")))
         {
@@ -35,6 +32,8 @@ void FMetasoundBranchesModule::StartupModule()
         FSlateStyleRegistry::RegisterSlateStyle(*StyleSet);
     }
 
+    UE_LOG(LogTemp, Log, TEXT("Brush registered: %s"), *StyleSet->GetBrush("MetasoundEditor.Graph.Node.Custom.GreaterThan")->GetResourceName().ToString());
+    
     using namespace Metasound;
     FMetasoundFrontendRegistryContainer::Get()->RegisterPendingNodes();
 }

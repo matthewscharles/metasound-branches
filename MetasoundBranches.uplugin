@@ -24,6 +24,7 @@
             "LoadingPhase": "EarliestPossible",
             "PlatformAllowList":["Win64", "Mac"]    
     }],
+    "Content": true,
     "Plugins": [{
         "Name": "Metasound",
         "Enabled": true
