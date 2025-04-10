@@ -68,6 +68,14 @@ namespace Metasound
 					METASOUND_LOCTEXT("Custom", "Branches"),
 					METASOUND_LOCTEXT("CustomSub", "Math")
 				};
+				
+				FNodeDisplayStyle DisplayStyle;
+				DisplayStyle.ImageName = TEXT("MetasoundEditor.Graph.Node.Custom.NotEqualTo");
+				DisplayStyle.bShowName = false;
+				DisplayStyle.bShowInputNames = false;
+				DisplayStyle.bShowOutputNames = false;
+				Metadata.DisplayStyle = DisplayStyle;
+				
 				return Metadata;
 			};
 

@@ -70,7 +70,7 @@ namespace Metasound
 				};
 				
 				FNodeDisplayStyle DisplayStyle;
-				DisplayStyle.ImageName = TEXT("MetasoundEditor.Graph.Node.Custom.GreaterThanEqual");
+				DisplayStyle.ImageName = TEXT("MetasoundEditor.Graph.Node.Custom.GreaterThanEqualTo");
 				DisplayStyle.bShowName = false;
 				DisplayStyle.bShowInputNames = false;
 				DisplayStyle.bShowOutputNames = false;
