@@ -67,4 +67,4 @@
 | 04/03 | - Add Greater Than prototype (for phase modulated pulse wave), and Gate. |
 | 04/04 | - Add Less Than prototype. |
 | 04/05 | - Add >=, <=, ==, !=, ||, && prototypes. |
-| 04/09 | - Remove slew component from Bool To Audio, match design of standard conversion nodes.<br>- Test graphics for math nodes.  |
+| 04/09 | - Remove slew component from Bool To Audio, match design of standard conversion nodes.<br>- Test graphics for math nodes, move development to branch.  |
