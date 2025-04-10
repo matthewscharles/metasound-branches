@@ -9,15 +9,15 @@
 #include "MetasoundStandardNodesCategories.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundAudioOrFloat"
+#define LOCTEXT_NAMESPACE "MetasoundAudioOrFloatNode"
 
 namespace Metasound
 {
 	namespace AudioOrFloatVertexNames
 	{
-		METASOUND_PARAM(InputSignal,  "In",        "Audio input.");
-		METASOUND_PARAM(Threshold,    "Threshold", "Float threshold to compare input against.");
-		METASOUND_PARAM(OutputSignal, "Out",       "Output signal if input || threshold.");
+		METASOUND_PARAM(InputSignalA, "InA", "Audio input to compare.");
+		METASOUND_PARAM(InputSignalB, "InB", "Float value to compare against.");
+		METASOUND_PARAM(OutputSignal, "Out", "Output: 1.0 where InA || InB, else 0.0.");
 	}
 
 	class FAudioOrFloatOperator : public TExecutableOperator<FAudioOrFloatOperator>
@@ -25,12 +25,12 @@ namespace Metasound
 	public:
 		FAudioOrFloatOperator(
 			const FOperatorSettings& InSettings,
-			const FAudioBufferReadRef& InAudio,
-			const FFloatReadRef& InThreshold
+			const FAudioBufferReadRef& InA,
+			const FFloatReadRef& InB
 		)
-			: AudioIn(InAudio)
-			, Threshold(InThreshold)
-			, AudioOut(FAudioBufferWriteRef::CreateNew(InSettings))
+			: A(InA)
+			, B(InB)
+			, Out(FAudioBufferWriteRef::CreateNew(InSettings))
 			, BlockSize(InSettings.GetNumFramesPerBlock())
 		{}
 
@@ -40,8 +40,8 @@ namespace Metasound
 
 			static const FVertexInterface Interface(
 				FInputVertexInterface(
-					TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputSignal)),
-					TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(Threshold))
+					TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputSignalA)),
+					TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputSignalB))
 				),
 				FOutputVertexInterface(
 					TOutputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputSignal))
@@ -56,11 +56,11 @@ namespace Metasound
 			auto CreateMetadata = []() -> FNodeClassMetadata
 			{
 				FNodeClassMetadata Metadata;
-				Metadata.ClassName = { TEXT("UE"), TEXT("Or"), TEXT("Audio") };
+				Metadata.ClassName = { TEXT("UE"), TEXT("OrFloat"), TEXT("Audio") };
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
-				Metadata.DisplayName = LOCTEXT("AudioOrFloatDisplayName", "||");
-				Metadata.Description = LOCTEXT("AudioOrFloatDesc", "Outputs audio signal of 1 if input || threshold.");
+				Metadata.DisplayName = LOCTEXT("AudioOrFloatDisplayName", "Or (Audio || Float)");
+				Metadata.Description = LOCTEXT("AudioOrFloatDesc", "Outputs 1.0 where InA is non-zero or InB is non-zero, otherwise 0.0.");
 				Metadata.Author = TEXT("Charles Matthews");
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
 				Metadata.DefaultInterface = DeclareVertexInterface();
@@ -68,14 +68,18 @@ namespace Metasound
 					METASOUND_LOCTEXT("Custom", "Branches"),
 					METASOUND_LOCTEXT("CustomSub", "Math")
 				};
-				
+				Metadata.Keywords = {
+					METASOUND_LOCTEXT("OrKeyword", "||"),
+					METASOUND_LOCTEXT("CompareKeyword", "Compare")
+				};
+
 				FNodeDisplayStyle DisplayStyle;
 				DisplayStyle.ImageName = TEXT("MetasoundEditor.Graph.Node.Custom.Or");
 				DisplayStyle.bShowName = false;
 				DisplayStyle.bShowInputNames = false;
 				DisplayStyle.bShowOutputNames = false;
 				Metadata.DisplayStyle = DisplayStyle;
-				
+
 				return Metadata;
 			};
 
@@ -89,13 +93,13 @@ namespace Metasound
 
 			const FInputVertexInterfaceData& InputData = InParams.InputData;
 
-			TDataReadReference<FAudioBuffer> InAudio =
-				InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputSignal), InParams.OperatorSettings);
+			TDataReadReference<FAudioBuffer> InA =
+				InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputSignalA), InParams.OperatorSettings);
 
-			TDataReadReference<float> InThreshold =
-				InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(Threshold), InParams.OperatorSettings);
+			TDataReadReference<float> InB =
+				InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputSignalB), InParams.OperatorSettings);
 
-			return MakeUnique<FAudioOrFloatOperator>(InParams.OperatorSettings, InAudio, InThreshold);
+			return MakeUnique<FAudioOrFloatOperator>(InParams.OperatorSettings, InA, InB);
 		}
 
 		METASOUND_DISABLE_LEGACY_IO()
@@ -103,44 +107,44 @@ namespace Metasound
 		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
 		{
 			using namespace AudioOrFloatVertexNames;
-			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), AudioIn);
-			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(Threshold), Threshold);
+			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignalA), A);
+			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignalB), B);
 		}
 
 		virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
 		{
 			using namespace AudioOrFloatVertexNames;
-			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputSignal), AudioOut);
+			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputSignal), Out);
 		}
 
 		virtual void Execute()
 		{
-			const float* InData = AudioIn->GetData();
-			float* OutData = AudioOut->GetData();
-			const float CompareThreshold = *Threshold;
+			const float* AData = A->GetData();
+			float* OutData = Out->GetData();
+			const float CompareB = *B;
 
 			for (int32 i = 0; i < BlockSize; ++i)
 			{
-				OutData[i] = (InData[i] || CompareThreshold) ? 1.0f : 0.0f;
+				OutData[i] = (AData[i] || CompareB) ? 1.0f : 0.0f;
 			}
 		}
 
 	private:
-		FAudioBufferReadRef AudioIn;
-		FFloatReadRef Threshold;
-		FAudioBufferWriteRef AudioOut;
+		FAudioBufferReadRef A;
+		FFloatReadRef B;
+		FAudioBufferWriteRef Out;
 		int32 BlockSize;
 	};
 
-	class FAudioOrFloat : public FNodeFacade
+	class FAudioOrFloatNode : public FNodeFacade
 	{
 	public:
-		FAudioOrFloat(const FNodeInitData& InitData)
+		FAudioOrFloatNode(const FNodeInitData& InitData)
 			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FAudioOrFloatOperator>())
 		{}
 	};
 
-	METASOUND_REGISTER_NODE(FAudioOrFloat);
+	METASOUND_REGISTER_NODE(FAudioOrFloatNode);
 }
 
 #undef LOCTEXT_NAMESPACE
