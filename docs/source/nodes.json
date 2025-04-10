@@ -62,12 +62,10 @@
   {
     "name": "Bool To Audio",
     "category": "Conversions",
-    "description": "Convert a boolean value to an audio signal, with optional rise and fall times.",
+    "description": "Convert a boolean value (block rate) to audio signal (0 or 1).",
     "image": "BoolToAudio.svg",
     "inputs": [
-      { "name": "Value", "description": "Boolean input to convert to audio.", "type": "Bool" },
-      { "name": "Rise Time", "description": "Rise time in seconds.", "type": "Time" },
-      { "name": "Fall Time", "description": "Fall time in seconds.", "type": "Time" }
+      { "name": "Value", "description": "Boolean input to convert to audio.", "type": "Bool" }
     ],
     "outputs": [
       { "name": "Out", "description": "Audio signal.", "type": "Audio" }

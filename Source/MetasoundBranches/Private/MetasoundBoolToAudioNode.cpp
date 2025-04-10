@@ -53,7 +53,7 @@ namespace Metasound
                 Metadata.MajorVersion = 2;
                 Metadata.MinorVersion = 0;
                 Metadata.DisplayName = METASOUND_LOCTEXT("BoolToAudioDisplayName", "Bool To Audio");
-                Metadata.Description = METASOUND_LOCTEXT("BoolToAudioDesc", "Converts a boolean value (block rate) to audio signal (0 or 1).");
+                Metadata.Description = METASOUND_LOCTEXT("BoolToAudioDesc", "Convert a boolean value (block rate) to audio signal (0 or 1).");
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = DeclareVertexInterface();

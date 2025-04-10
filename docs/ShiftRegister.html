@@ -35,6 +35,7 @@
             <li><a href="Sum(Float).html">Sum (Float:Array)</a></li>
             <li><a href="Sum(Time).html">Sum (Time:Array)</a></li>
             <li><a href="Tuning.html">Tuning</a></li>
+            <li><a href="TuningFromArray.html">Tuning From Array</a></li>
             <li><a href="TuningToFrequencyArray.html">Tuning To Frequency Array</a></li>
             <li><a href="ZeroCrossing.html">Zero Crossing</a></li>
         </ul>
@@ -43,7 +44,7 @@
     <h1><a href="https://matthewscharles.github.io/metasound-branches/">MetaSound Branches</a></h1>
     <h2>Shift Register</h2>
     <p><strong>Category:</strong> Modulation</p>
-    <p>An eight-stage shift register for floats.</p>
+    <p>Shift register node with eight stages and additional reset/output options.</p>
     <img src="./svg/ShiftRegister.svg" alt="Shift Register">
     <h3>Inputs</h3>
     <table>
@@ -57,16 +58,44 @@
       <tbody>
         
       <tr>
-        <td>Signal</td>
-        <td>Input signal to be shifted.</td>
+        <td>In</td>
+        <td>Input float to the shift register.</td>
         <td>Float</td>
       </tr>
     
 
       <tr>
         <td>Trigger</td>
-        <td>Trigger input to shift the register.</td>
+        <td>Trigger.</td>
         <td>Trigger</td>
+      </tr>
+    
+
+      <tr>
+        <td>Reset</td>
+        <td>Reset trigger for the shift register.</td>
+        <td>Trigger</td>
+      </tr>
+    
+
+      <tr>
+        <td>Default</td>
+        <td>Default float for the shift register.</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Reverse</td>
+        <td>Reverse flag for the shift register.</td>
+        <td>Bool</td>
+      </tr>
+    
+
+      <tr>
+        <td>Output On Reset</td>
+        <td>When true, a reset will immediately output default values.</td>
+        <td>Bool</td>
       </tr>
     
       </tbody>
@@ -85,8 +114,22 @@
         
       <tr>
         <td>On Trigger</td>
-        <td>Output trigger following the shift</td>
-        <td>undefined</td>
+        <td>Output trigger following the shift.</td>
+        <td>Trigger</td>
+      </tr>
+    
+
+      <tr>
+        <td>On Reset</td>
+        <td>Output trigger when Output On Reset is true.</td>
+        <td>Trigger</td>
+      </tr>
+    
+
+      <tr>
+        <td>On Direction Change</td>
+        <td>Output trigger on direction change.</td>
+        <td>Trigger</td>
       </tr>
     
 

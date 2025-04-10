@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Slew (Audio)</title>
+  <title>Tuning From Array</title>
   <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -42,10 +42,10 @@
     </nav>
   <main>
     <h1><a href="https://matthewscharles.github.io/metasound-branches/">MetaSound Branches</a></h1>
-    <h2>Slew (Audio)</h2>
-    <p><strong>Category:</strong> Filters</p>
-    <p>A slew rate limiter to smooth out the rise and fall times of an audio signal.</p>
-    <img src="./svg/SlewAudio.svg" alt="Slew (Audio)">
+    <h2>Tuning From Array</h2>
+    <p><strong>Category:</strong> Tuning</p>
+    <p>Generates a frequency based on custom tuning per-note, with array input.</p>
+    <img src="./svg/TuningFromArray.svg" alt="Tuning From Array">
     <h3>Inputs</h3>
     <table>
       <thead>
@@ -58,23 +58,37 @@
       <tbody>
         
       <tr>
-        <td>In</td>
-        <td>Audio signal to smooth.</td>
-        <td>Audio</td>
+        <td>Trigger</td>
+        <td>Triggers output.</td>
+        <td>Trigger</td>
       </tr>
     
 
       <tr>
-        <td>Rise Time</td>
-        <td>Rise time in seconds.</td>
-        <td>Time</td>
+        <td>MIDI Note Number</td>
+        <td>Input MIDI note number (integer).</td>
+        <td>Int</td>
       </tr>
     
 
       <tr>
-        <td>Fall Time</td>
-        <td>Fall time in seconds.</td>
-        <td>Time</td>
+        <td>Tuning Cents Array</td>
+        <td>Array of tuning adjustments in cents for each note in the octave.</td>
+        <td>Array<Float></td>
+      </tr>
+    
+
+      <tr>
+        <td>Reference Frequency</td>
+        <td>Reference frequency in Hz.</td>
+        <td>Float</td>
+      </tr>
+    
+
+      <tr>
+        <td>Reference Note</td>
+        <td>Reference MIDI note number.</td>
+        <td>Int</td>
       </tr>
     
       </tbody>
@@ -92,9 +106,9 @@
       <tbody>
         
       <tr>
-        <td>Out</td>
-        <td>Slew rate limited output signal.</td>
-        <td>Audio</td>
+        <td>Frequency</td>
+        <td>Output frequency.</td>
+        <td>Float</td>
       </tr>
     
       </tbody>

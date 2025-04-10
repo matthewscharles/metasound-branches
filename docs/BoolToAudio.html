@@ -35,6 +35,7 @@
             <li><a href="Sum(Float).html">Sum (Float:Array)</a></li>
             <li><a href="Sum(Time).html">Sum (Time:Array)</a></li>
             <li><a href="Tuning.html">Tuning</a></li>
+            <li><a href="TuningFromArray.html">Tuning From Array</a></li>
             <li><a href="TuningToFrequencyArray.html">Tuning To Frequency Array</a></li>
             <li><a href="ZeroCrossing.html">Zero Crossing</a></li>
         </ul>
@@ -43,7 +44,7 @@
     <h1><a href="https://matthewscharles.github.io/metasound-branches/">MetaSound Branches</a></h1>
     <h2>Bool To Audio</h2>
     <p><strong>Category:</strong> Conversions</p>
-    <p>Convert a boolean value to an audio signal, with optional rise and fall times.</p>
+    <p>Convert a boolean value (block rate) to audio signal (0 or 1).</p>
     <img src="./svg/BoolToAudio.svg" alt="Bool To Audio">
     <h3>Inputs</h3>
     <table>
@@ -60,20 +61,6 @@
         <td>Value</td>
         <td>Boolean input to convert to audio.</td>
         <td>Bool</td>
-      </tr>
-    
-
-      <tr>
-        <td>Rise Time</td>
-        <td>Rise time in seconds.</td>
-        <td>Time</td>
-      </tr>
-    
-
-      <tr>
-        <td>Fall Time</td>
-        <td>Fall time in seconds.</td>
-        <td>Time</td>
       </tr>
     
       </tbody>
