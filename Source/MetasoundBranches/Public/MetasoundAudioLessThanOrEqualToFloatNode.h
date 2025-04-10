@@ -7,9 +7,9 @@
 
 namespace MetasoundBranches
 {
-    class FMetasoundGreaterThanAudioNode : public Metasound::FNode
+    class FMetasoundAudioLessThanOrEqualToFloatNode : public Metasound::FNode
     {
     public:
-        FMetasoundGreaterThanAudioNode();
+        FMetasoundAudioLessThanOrEqualToFloatNode();
     };
 }
