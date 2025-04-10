@@ -21,26 +21,34 @@ void FMetasoundBranchesModule::StartupModule()
 
             MutableStyle->SetContentRoot(FullIconPath);
 
-            MutableStyle->Set(
-                TEXT("MetasoundEditor.Graph.Node.Custom.GreaterThan"),
-                new FSlateImageBrush(
-                    MutableStyle->RootToContentDir(TEXT("node_math_greaterthan_40x.png")),
-                    FVector2D(40.f, 40.f)
-                )
-            );
-            MutableStyle->Set(
-                TEXT("MetasoundEditor.Graph.Node.Custom.GreaterThanEqual"),
-                new FSlateImageBrush(
-                    MutableStyle->RootToContentDir(TEXT("node_math_greaterthanequal_40x.png")),
-                    FVector2D(40.f, 40.f)
-                )
-            );
+            MutableStyle->Set(TEXT("MetasoundEditor.Graph.Node.Custom.And"),
+                new FSlateImageBrush(MutableStyle->RootToContentDir(TEXT("node_math_and_40x.png")), FVector2D(40.f, 40.f)));
 
+            MutableStyle->Set(TEXT("MetasoundEditor.Graph.Node.Custom.EqualTo"),
+                new FSlateImageBrush(MutableStyle->RootToContentDir(TEXT("node_math_equalto_40x.png")), FVector2D(40.f, 40.f)));
+
+            MutableStyle->Set(TEXT("MetasoundEditor.Graph.Node.Custom.GreaterThan"),
+                new FSlateImageBrush(MutableStyle->RootToContentDir(TEXT("node_math_greaterthan_40x.png")), FVector2D(40.f, 40.f)));
+
+            MutableStyle->Set(TEXT("MetasoundEditor.Graph.Node.Custom.GreaterThanEqualTo"),
+                new FSlateImageBrush(MutableStyle->RootToContentDir(TEXT("node_math_greaterthanorequalto_40x.png")), FVector2D(40.f, 40.f)));
+
+            MutableStyle->Set(TEXT("MetasoundEditor.Graph.Node.Custom.LessThan"),
+                new FSlateImageBrush(MutableStyle->RootToContentDir(TEXT("node_math_lessthan_40x.png")), FVector2D(40.f, 40.f)));
+
+            MutableStyle->Set(TEXT("MetasoundEditor.Graph.Node.Custom.LessThanEqualTo"),
+                new FSlateImageBrush(MutableStyle->RootToContentDir(TEXT("node_math_lessthanorequalto_40x.png")), FVector2D(40.f, 40.f)));
+
+            MutableStyle->Set(TEXT("MetasoundEditor.Graph.Node.Custom.NotEqualTo"),
+                new FSlateImageBrush(MutableStyle->RootToContentDir(TEXT("node_math_notequalto_40x.png")), FVector2D(40.f, 40.f)));
+
+            MutableStyle->Set(TEXT("MetasoundEditor.Graph.Node.Custom.Or"),
+                new FSlateImageBrush(MutableStyle->RootToContentDir(TEXT("node_math_or_40x.png")), FVector2D(40.f, 40.f)));
         }
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("MetaSoundStyle not found in style registry!"));
+        UE_LOG(LogTemp, Error, TEXT("MetaSoundStyle not found in style registry, cannot register image brushes for Branches module."));
     }
 
     using namespace Metasound;
