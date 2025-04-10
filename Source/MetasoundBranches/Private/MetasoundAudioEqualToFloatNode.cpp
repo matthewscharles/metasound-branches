@@ -1,6 +1,6 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundEqualNode.h"
+#include "MetasoundBranches/Public/MetasoundAudioEqualToFloatNode.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
@@ -8,21 +8,21 @@
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundStandardNodesCategories.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundEqualNode"
+#define LOCTEXT_NAMESPACE "MetasoundAudioEqualToFloatNode"
 
 namespace Metasound
 {
-	namespace EqualNodeVertexNames
+	namespace AudioEqualToFloatNodeVertexNames
 	{
 		METASOUND_PARAM(InputSignal,  "In",        "Audio input.");
 		METASOUND_PARAM(Threshold,    "Threshold", "Float threshold to compare input against.");
 		METASOUND_PARAM(OutputSignal, "Out",       "Output signal if input == threshold.");
 	}
 
-	class FEqualOperator : public TExecutableOperator<FEqualOperator>
+	class FAudioEqualToFloatOperator : public TExecutableOperator<FAudioEqualToFloatOperator>
 	{
 	public:
-		FEqualOperator(
+		FAudioEqualToFloatOperator(
 			const FOperatorSettings& InSettings,
 			const FAudioBufferReadRef& InAudio,
 			const FFloatReadRef& InThreshold
@@ -35,7 +35,7 @@ namespace Metasound
 
 		static const FVertexInterface& DeclareVertexInterface()
 		{
-			using namespace EqualNodeVertexNames;
+			using namespace AudioEqualToFloatNodeVertexNames;
 
 			static const FVertexInterface Interface(
 				FInputVertexInterface(
@@ -58,8 +58,8 @@ namespace Metasound
 				Metadata.ClassName = { TEXT("UE"), TEXT("Equal"), TEXT("Audio") };
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
-				Metadata.DisplayName = LOCTEXT("EqualNodeDisplayName", "==");
-				Metadata.Description = LOCTEXT("EqualNodeDesc", "Outputs audio signal of 1 if input == threshold.");
+				Metadata.DisplayName = LOCTEXT("AudioEqualToFloatNodeDisplayName", "==");
+				Metadata.Description = LOCTEXT("AudioEqualToFloatNodeDesc", "Outputs audio signal of 1 if input == threshold.");
 				Metadata.Author = TEXT("Charles Matthews");
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
 				Metadata.DefaultInterface = DeclareVertexInterface();
@@ -76,7 +76,7 @@ namespace Metasound
 
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
 		{
-			using namespace EqualNodeVertexNames;
+			using namespace AudioEqualToFloatNodeVertexNames;
 
 			const FInputVertexInterfaceData& InputData = InParams.InputData;
 
@@ -86,21 +86,21 @@ namespace Metasound
 			TDataReadReference<float> InThreshold =
 				InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(Threshold), InParams.OperatorSettings);
 
-			return MakeUnique<FEqualOperator>(InParams.OperatorSettings, InAudio, InThreshold);
+			return MakeUnique<FAudioEqualToFloatOperator>(InParams.OperatorSettings, InAudio, InThreshold);
 		}
 
 		METASOUND_DISABLE_LEGACY_IO()
 
 		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace EqualNodeVertexNames;
+			using namespace AudioEqualToFloatNodeVertexNames;
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), AudioIn);
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(Threshold), Threshold);
 		}
 
 		virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace EqualNodeVertexNames;
+			using namespace AudioEqualToFloatNodeVertexNames;
 			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputSignal), AudioOut);
 		}
 
@@ -123,15 +123,15 @@ namespace Metasound
 		int32 BlockSize;
 	};
 
-	class FEqualNode : public FNodeFacade
+	class FAudioEqualToFloatNode : public FNodeFacade
 	{
 	public:
-		FEqualNode(const FNodeInitData& InitData)
-			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FEqualOperator>())
+		FAudioEqualToFloatNode(const FNodeInitData& InitData)
+			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FAudioEqualToFloatOperator>())
 		{}
 	};
 
-	METASOUND_REGISTER_NODE(FEqualNode);
+	METASOUND_REGISTER_NODE(FAudioEqualToFloatNode);
 }
 
 #undef LOCTEXT_NAMESPACE

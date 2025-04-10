@@ -1,6 +1,6 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundAndNode.h"
+#include "MetasoundBranches/Public/MetasoundAudioAndAudioNode.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
@@ -9,21 +9,21 @@
 #include "MetasoundStandardNodesCategories.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundAndNode"
+#define LOCTEXT_NAMESPACE "MetasoundAudioAndAudioNode"
 
 namespace Metasound
 {
-	namespace AndNodeVertexNames
+	namespace AudioAndAudioNodeVertexNames
 	{
 		METASOUND_PARAM(InputSignal,  "In",        "Audio input.");
 		METASOUND_PARAM(Threshold,    "Threshold", "Float threshold to compare input against.");
 		METASOUND_PARAM(OutputSignal, "Out",       "Output signal if input && threshold.");
 	}
 
-	class FAndOperator : public TExecutableOperator<FAndOperator>
+	class FAudioAndAudioOperator : public TExecutableOperator<FAudioAndAudioOperator>
 	{
 	public:
-		FAndOperator(
+		FAudioAndAudioOperator(
 			const FOperatorSettings& InSettings,
 			const FAudioBufferReadRef& InAudio,
 			const FFloatReadRef& InThreshold
@@ -36,7 +36,7 @@ namespace Metasound
 
 		static const FVertexInterface& DeclareVertexInterface()
 		{
-			using namespace AndNodeVertexNames;
+			using namespace AudioAndAudioNodeVertexNames;
 
 			static const FVertexInterface Interface(
 				FInputVertexInterface(
@@ -59,8 +59,8 @@ namespace Metasound
 				Metadata.ClassName = { TEXT("UE"), TEXT("And"), TEXT("Audio") };
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
-				Metadata.DisplayName = LOCTEXT("AndNodeDisplayName", "&&");
-				Metadata.Description = LOCTEXT("AndNodeDesc", "Outputs audio signal of 1 if input && threshold.");
+				Metadata.DisplayName = LOCTEXT("AudioAndAudioNodeDisplayName", "&&");
+				Metadata.Description = LOCTEXT("AudioAndAudioNodeDesc", "Outputs audio signal of 1 if input && threshold.");
 				Metadata.Author = TEXT("Charles Matthews");
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
 				Metadata.DefaultInterface = DeclareVertexInterface();
@@ -77,7 +77,7 @@ namespace Metasound
 
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
 		{
-			using namespace AndNodeVertexNames;
+			using namespace AudioAndAudioNodeVertexNames;
 
 			const FInputVertexInterfaceData& InputData = InParams.InputData;
 
@@ -87,21 +87,21 @@ namespace Metasound
 			TDataReadReference<float> InThreshold =
 				InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(Threshold), InParams.OperatorSettings);
 
-			return MakeUnique<FAndOperator>(InParams.OperatorSettings, InAudio, InThreshold);
+			return MakeUnique<FAudioAndAudioOperator>(InParams.OperatorSettings, InAudio, InThreshold);
 		}
 
 		METASOUND_DISABLE_LEGACY_IO()
 
 		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace AndNodeVertexNames;
+			using namespace AudioAndAudioNodeVertexNames;
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), AudioIn);
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(Threshold), Threshold);
 		}
 
 		virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace AndNodeVertexNames;
+			using namespace AudioAndAudioNodeVertexNames;
 			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputSignal), AudioOut);
 		}
 
@@ -124,15 +124,15 @@ namespace Metasound
 		int32 BlockSize;
 	};
 
-	class FAndNode : public FNodeFacade
+	class FAudioAndAudioNode : public FNodeFacade
 	{
 	public:
-		FAndNode(const FNodeInitData& InitData)
-			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FAndOperator>())
+		FAudioAndAudioNode(const FNodeInitData& InitData)
+			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FAudioAndAudioOperator>())
 		{}
 	};
 
-	METASOUND_REGISTER_NODE(FAndNode);
+	METASOUND_REGISTER_NODE(FAudioAndAudioNode);
 }
 
 #undef LOCTEXT_NAMESPACE

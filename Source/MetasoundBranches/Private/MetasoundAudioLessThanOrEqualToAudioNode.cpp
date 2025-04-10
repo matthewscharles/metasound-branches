@@ -1,6 +1,6 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundLessThanNode.h"
+#include "MetasoundBranches/Public/MetasoundAudioLessThanOrEqualToAudioNode.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
@@ -9,21 +9,21 @@
 #include "MetasoundStandardNodesCategories.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundLessThanNode"
+#define LOCTEXT_NAMESPACE "MetasoundAudioLessThanOrEqualToAudioNode"
 
 namespace Metasound
 {
-	namespace LessThanNodeVertexNames
+	namespace AudioLessThanOrEqualToAudioNodeVertexNames
 	{
 		METASOUND_PARAM(InputSignal,  "In",        "Audio input.");
 		METASOUND_PARAM(Threshold,    "Threshold", "Float threshold to compare input against.");
-		METASOUND_PARAM(OutputSignal, "Out",       "Output signal if input < threshold.");
+		METASOUND_PARAM(OutputSignal, "Out",       "Output signal if input <= threshold.");
 	}
 
-	class FLessThanOperator : public TExecutableOperator<FLessThanOperator>
+	class FAudioLessThanOrEqualToAudioOperator : public TExecutableOperator<FAudioLessThanOrEqualToAudioOperator>
 	{
 	public:
-		FLessThanOperator(
+		FAudioLessThanOrEqualToAudioOperator(
 			const FOperatorSettings& InSettings,
 			const FAudioBufferReadRef& InAudio,
 			const FFloatReadRef& InThreshold
@@ -36,7 +36,7 @@ namespace Metasound
 
 		static const FVertexInterface& DeclareVertexInterface()
 		{
-			using namespace LessThanNodeVertexNames;
+			using namespace AudioLessThanOrEqualToAudioNodeVertexNames;
 
 			static const FVertexInterface Interface(
 				FInputVertexInterface(
@@ -56,11 +56,11 @@ namespace Metasound
 			auto CreateMetadata = []() -> FNodeClassMetadata
 			{
 				FNodeClassMetadata Metadata;
-				Metadata.ClassName = { TEXT("UE"), TEXT("LessThan"), TEXT("Audio") };
+				Metadata.ClassName = { TEXT("UE"), TEXT("AudioLessThanOrEqualToAudio"), TEXT("Audio") };
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
-				Metadata.DisplayName = LOCTEXT("LessThanNodeDisplayName", "<");
-				Metadata.Description = LOCTEXT("LessThanNodeDesc", "Outputs audio signal of 1 if input < threshold.");
+				Metadata.DisplayName = LOCTEXT("AudioLessThanOrEqualToAudioNodeDisplayName", "<=");
+				Metadata.Description = LOCTEXT("AudioLessThanOrEqualToAudioNodeDesc", "Outputs audio signal of 1 if input <= threshold.");
 				Metadata.Author = TEXT("Charles Matthews");
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
 				Metadata.DefaultInterface = DeclareVertexInterface();
@@ -77,7 +77,7 @@ namespace Metasound
 
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
 		{
-			using namespace LessThanNodeVertexNames;
+			using namespace AudioLessThanOrEqualToAudioNodeVertexNames;
 
 			const FInputVertexInterfaceData& InputData = InParams.InputData;
 
@@ -87,21 +87,21 @@ namespace Metasound
 			TDataReadReference<float> InThreshold =
 				InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(Threshold), InParams.OperatorSettings);
 
-			return MakeUnique<FLessThanOperator>(InParams.OperatorSettings, InAudio, InThreshold);
+			return MakeUnique<FAudioLessThanOrEqualToAudioOperator>(InParams.OperatorSettings, InAudio, InThreshold);
 		}
 
 		METASOUND_DISABLE_LEGACY_IO()
 
 		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace LessThanNodeVertexNames;
+			using namespace AudioLessThanOrEqualToAudioNodeVertexNames;
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), AudioIn);
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(Threshold), Threshold);
 		}
 
 		virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace LessThanNodeVertexNames;
+			using namespace AudioLessThanOrEqualToAudioNodeVertexNames;
 			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputSignal), AudioOut);
 		}
 
@@ -113,7 +113,7 @@ namespace Metasound
 
 			for (int32 i = 0; i < BlockSize; ++i)
 			{
-				OutData[i] = (InData[i] < CompareThreshold) ? 1.0f : 0.0f;
+				OutData[i] = (InData[i] <= CompareThreshold) ? 1.0f : 0.0f;
 			}
 		}
 
@@ -124,15 +124,15 @@ namespace Metasound
 		int32 BlockSize;
 	};
 
-	class FLessThanNode : public FNodeFacade
+	class FAudioLessThanOrEqualToAudioNode : public FNodeFacade
 	{
 	public:
-		FLessThanNode(const FNodeInitData& InitData)
-			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FLessThanOperator>())
+		FAudioLessThanOrEqualToAudioNode(const FNodeInitData& InitData)
+			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FAudioLessThanOrEqualToAudioOperator>())
 		{}
 	};
 
-	METASOUND_REGISTER_NODE(FLessThanNode);
+	METASOUND_REGISTER_NODE(FAudioLessThanOrEqualToAudioNode);
 }
 
 #undef LOCTEXT_NAMESPACE
