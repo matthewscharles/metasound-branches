@@ -56,10 +56,10 @@ namespace Metasound
 			auto CreateMetadata = []() -> FNodeClassMetadata
 			{
 				FNodeClassMetadata Metadata;
-				Metadata.ClassName = { TEXT("UE"), TEXT("LessThanFloat"), TEXT("Audio") };
+				Metadata.ClassName = { TEXT("UE"), TEXT("Less"), TEXT("Audio") };
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
-				Metadata.DisplayName = LOCTEXT("AudioLessThanFloatNodeDisplayName", "Less Than (Audio < Float)");
+				Metadata.DisplayName = LOCTEXT("AudioLessThanFloatNodeDisplayName", "Less (Audio < Float)");
 				Metadata.Description = LOCTEXT("AudioLessThanFloatNodeDesc", "Outputs 1.0 where InA is less than InB, otherwise 0.0.");
 				Metadata.Author = TEXT("Charles Matthews");
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;

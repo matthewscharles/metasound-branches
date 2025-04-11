@@ -58,7 +58,7 @@ namespace Metasound
 				Metadata.ClassName = { TEXT("UE"), TEXT("Equal"), TEXT("Float") };
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
-				Metadata.DisplayName = LOCTEXT("AudioEqualToFloatNodeDisplayName", "Equal To (Audio == Float)");
+				Metadata.DisplayName = LOCTEXT("AudioEqualToFloatNodeDisplayName", "Equal (Audio == Float)");
 				Metadata.Description = LOCTEXT("AudioEqualToFloatNodeDesc", "Outputs 1.0 where A == B, else 0.0.");
 				Metadata.Author = TEXT("Charles Matthews");
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
