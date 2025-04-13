@@ -6,6 +6,8 @@
 #include "Styling/SlateStyleRegistry.h"
 #include "Interfaces/IPluginManager.h"
 
+#define LOCTEXT_NAMESPACE "FMetasoundBranchesModule"
+
 TSharedPtr<FSlateStyleSet> FMetasoundBranchesModule::StyleSet = nullptr;
 
 void FMetasoundBranchesModule::StartupModule()
@@ -58,5 +60,7 @@ void FMetasoundBranchesModule::StartupModule()
 void FMetasoundBranchesModule::ShutdownModule()
 {
 }
+
+#undef LOCTEXT_NAMESPACE
 
 IMPLEMENT_MODULE(FMetasoundBranchesModule, MetasoundBranches);
