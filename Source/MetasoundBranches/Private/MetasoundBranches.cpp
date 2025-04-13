@@ -5,6 +5,8 @@
 #include "Styling/SlateStyle.h"
 #include "Styling/SlateStyleRegistry.h"
 #include "Interfaces/IPluginManager.h"
+#include "MetasoundFrontendRegistries.h"
+#include "MetasoundDataTypeRegistrationMacro.h"
 
 #define LOCTEXT_NAMESPACE "FMetasoundBranchesModule"
 
