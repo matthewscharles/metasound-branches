@@ -67,3 +67,4 @@
 | 04/03 | - Add Greater Than prototype (for phase modulated pulse wave), and Gate. |
 | 04/04 | - Add Less Than prototype. |
 | 04/05 | - Add >=, <=, ==, !=, ||, && prototypes. |
+| 04/13 | - Finish rolling out audio versions of comparison nodes with icons, test on Windows |
