@@ -1,6 +1,6 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundTuningFromArrayNode.h"
+#include "MetasoundBranches/Public/MetasoundTuningFromCentArrayNode.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundPrimitives.h"
 #include "MetasoundNodeRegistrationMacro.h"
@@ -8,11 +8,11 @@
 #include "MetasoundParamHelper.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundStandardNodes_TuningFromArrayNode"
+#define LOCTEXT_NAMESPACE "MetasoundStandardNodes_TuningFromCentArrayNode"
 
 namespace Metasound
 {
-    namespace TuningFromArrayNodeVertexNames
+    namespace TuningFromCentArrayNodeVertexNames
     {
         METASOUND_PARAM(InputUpdateTrigger, "Trigger", "Triggers output.");
         METASOUND_PARAM(InputMIDINoteNumber, "MIDI Note Number", "Input MIDI note number (integer).");
@@ -22,10 +22,10 @@ namespace Metasound
         METASOUND_PARAM(OutputFrequency, "Frequency", "Output frequency.");
     }
 
-    class FTuningFromArrayNodeOperator : public TExecutableOperator<FTuningFromArrayNodeOperator>
+    class FTuningFromCentArrayNodeOperator : public TExecutableOperator<FTuningFromCentArrayNodeOperator>
     {
     public:
-        FTuningFromArrayNodeOperator(
+        FTuningFromCentArrayNodeOperator(
             const FOperatorSettings& InSettings,
             const FInt32ReadRef& InMIDINoteNumber,
             const TDataReadReference<TArray<float>>& InTuningCentsArray,
@@ -43,7 +43,7 @@ namespace Metasound
 
         static const FVertexInterface& DeclareVertexInterface()
         {
-            using namespace TuningFromArrayNodeVertexNames;
+            using namespace TuningFromCentArrayNodeVertexNames;
 
             static const FVertexInterface Interface(
                 FInputVertexInterface(
@@ -69,11 +69,11 @@ namespace Metasound
 
                 FNodeClassMetadata Metadata;
 
-                Metadata.ClassName = { TEXT("UE"), TEXT("Tuning From Array"), TEXT("Float") };
+                Metadata.ClassName = { TEXT("UE"), TEXT("Tuning From Cent Array"), TEXT("Float") };
                 Metadata.MajorVersion = 1;
                 Metadata.MinorVersion = 0;
-                Metadata.DisplayName = METASOUND_LOCTEXT("TuningFromArrayNodeDisplayName", "Tuning From Array");
-                Metadata.Description = METASOUND_LOCTEXT("TuningFromArrayNodeDesc", "Generates a frequency based on custom tuning per-note, with array input.");
+                Metadata.DisplayName = METASOUND_LOCTEXT("TuningFromCentArrayNodeDisplayName", "Tuning From Cent Array");
+                Metadata.Description = METASOUND_LOCTEXT("TuningFromCentArrayNodeDesc", "Generates a frequency based on custom tuning per-note, based on an array of offset values in cents.");
                 Metadata.Author = "Charles Matthews";
                 Metadata.PromptIfMissing = PluginNodeMissingPrompt;
                 Metadata.DefaultInterface = NodeInterface;
@@ -94,7 +94,7 @@ namespace Metasound
         
         virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
         {
-            using namespace TuningFromArrayNodeVertexNames;
+            using namespace TuningFromCentArrayNodeVertexNames;
 
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputUpdateTrigger), UpdateTrigger);
             InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputMIDINoteNumber), MIDINoteNumber);
@@ -105,13 +105,13 @@ namespace Metasound
         
         virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
         {
-            using namespace TuningFromArrayNodeVertexNames;
+            using namespace TuningFromCentArrayNodeVertexNames;
             InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputFrequency), OutputFrequency);
         }
 
         static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
         {
-            using namespace TuningFromArrayNodeVertexNames;
+            using namespace TuningFromCentArrayNodeVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
 
@@ -132,7 +132,7 @@ namespace Metasound
             FTriggerReadRef UpdateTrigger = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(
                 METASOUND_GET_PARAM_NAME(InputUpdateTrigger), InParams.OperatorSettings);
 
-            return MakeUnique<FTuningFromArrayNodeOperator>(
+            return MakeUnique<FTuningFromCentArrayNodeOperator>(
                 InParams.OperatorSettings, MIDINoteNumber, TuningCentsArray, ReferenceFrequency, ReferenceMIDINote, UpdateTrigger
             );
         }
@@ -176,16 +176,16 @@ namespace Metasound
         FFloatWriteRef OutputFrequency;
     };
 
-    class FTuningFromArrayNode : public FNodeFacade
+    class FTuningFromCentArrayNode : public FNodeFacade
     {
     public:
-        FTuningFromArrayNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FTuningFromArrayNodeOperator>())
+        FTuningFromCentArrayNode(const FNodeInitData& InitData)
+            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FTuningFromCentArrayNodeOperator>())
         {
         }
     };
     
-    METASOUND_REGISTER_NODE(FTuningFromArrayNode);
+    METASOUND_REGISTER_NODE(FTuningFromCentArrayNode);
 }
 
 #undef LOCTEXT_NAMESPACE

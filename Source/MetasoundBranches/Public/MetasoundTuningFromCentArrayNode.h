@@ -7,9 +7,9 @@
 
 namespace MetasoundBranches
 {
-    class FMetasoundTuningFromArrayNode : public Metasound::FNode
+    class FMetasoundTuningFromCentArrayNode : public Metasound::FNode
     {
     public:
-        FMetasoundTuningFromArrayNode();
+        FMetasoundTuningFromCentArrayNode();
     };
 }
