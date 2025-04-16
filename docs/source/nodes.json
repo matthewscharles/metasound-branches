@@ -239,29 +239,13 @@
   {
     "name": "Stereo Balance",
     "category": "Spatialization",
-    "description": "Adjust the balance of a stereo signal.",
+    "description": "Adjusts the balance of a stereo signal with optional audio-rate modulation.",
     "image": "StereoBalance.svg",
     "inputs": [
-      { "name": "In L", "description": "Left channel.", "type": "Audio" },
-      { "name": "In R", "description": "Right channel.", "type": "Audio" },
-      { "name": "Balance", "description": "Balance control ranging from -1.0 (full left) to 1.0 (full right).", "type": "Float" }
-    ],
-    "outputs": [
-      { "name": "Out L", "description": "Left channel of the adjusted stereo output signal.", "type": "Audio" },
-      { "name": "Out R", "description": "Right channel of the adjusted stereo output signal.", "type": "Audio" }
-    ]
-  },
-  {
-    "name": "Stereo Crossfade",
-    "category": "Envelopes",
-    "description": "Crossfade between two stereo signals.",
-    "image": "StereoCrossfade.svg",
-    "inputs": [
-      { "name": "In1 L", "description": "Left channel of first input.", "type": "Audio" },
-      { "name": "In1 R", "description": "Right channel of first input.", "type": "Audio" },
-      { "name": "In2 L", "description": "Left channel of second input.", "type": "Audio" },
-      { "name": "In2 R", "description": "Right channel of second input.", "type": "Audio" },
-      { "name": "Crossfade", "description": "Crossfade between the two inputs (0.0 to 1.0).", "type": "Float" }
+      { "name": "In L", "description": "Left channel audio input.", "type": "Audio" },
+      { "name": "In R", "description": "Right channel audio input.", "type": "Audio" },
+      { "name": "Balance", "description": "Balance control ranging from -1.0 (full left) to 1.0 (full right).", "type": "Float" },
+      { "name": "Modulation", "description": "Audio-rate balance modulation signal.", "type": "Audio" }
     ],
     "outputs": [
       { "name": "Out L", "description": "Left output channel.", "type": "Audio" },
@@ -269,14 +253,33 @@
     ]
   },
   {
+    "name": "Stereo Crossfade",
+    "category": "Envelopes",
+    "description": "Crossfades between two stereo signals with optional audio-rate modulation.",
+    "image": "StereoCrossfade.svg",
+    "inputs": [
+      { "name": "In1 L", "description": "Left channel of first input.", "type": "Audio" },
+      { "name": "In1 R", "description": "Right channel of first input.", "type": "Audio" },
+      { "name": "In2 L", "description": "Left channel of second input.", "type": "Audio" },
+      { "name": "In2 R", "description": "Right channel of second input.", "type": "Audio" },
+      { "name": "Crossfade", "description": "Crossfade between the two inputs (0.0 to 1.0).", "type": "Float" },
+      { "name": "Modulation", "description": "Audio-rate crossfade modulation.", "type": "Audio" }
+    ],
+    "outputs": [
+      { "name": "Out L", "description": "Left channel of the output signal.", "type": "Audio" },
+      { "name": "Out R", "description": "Right channel of the output signal.", "type": "Audio" }
+    ]
+  },
+  {
     "name": "Stereo Gain",
     "category": "Mix",
-    "description": "Adjust gain for a stereo signal.",
+    "description": "Scales a stereo input to a gain value with optional audio-rate modulation.",
     "image": "StereoGain.svg",
     "inputs": [
-      { "name": "In L", "description": "Left channel.", "type": "Audio" },
-      { "name": "In R", "description": "Right channel.", "type": "Audio" },
-      { "name": "Balance", "description": "Gain control (0.0 to 1.0).", "type": "Float" }
+      { "name": "In L", "description": "Left channel audio input.", "type": "Audio" },
+      { "name": "In R", "description": "Right channel audio input.", "type": "Audio" },
+      { "name": "Gain (Lin)", "description": "Gain control (0.0 to 1.0).", "type": "Float" },
+      { "name": "Modulation", "description": "Audio rate gain modulation.", "type": "Audio" }
     ],
     "outputs": [
       { "name": "Out L", "description": "Left output channel.", "type": "Audio" },
@@ -303,12 +306,13 @@
   {
     "name": "Stereo Width",
     "category": "Spatialization",
-    "description": "Stereo width adjustment (0-200%), using mid-side processing.",
+    "description": "Adjusts the stereo width of a signal with optional audio-rate modulation.",
     "image": "StereoWidth.svg",
     "inputs": [
       { "name": "In L", "description": "Left channel.", "type": "Audio" },
       { "name": "In R", "description": "Right channel.", "type": "Audio" },
-      { "name": "Width", "description": "Stereo width factor ranging from 0 to 200% (0 - 2).", "type": "Float" }
+      { "name": "Width", "description": "Stereo width factor ranging from 0 to 200% (0 - 2).", "type": "Float" },
+      { "name": "Modulation", "description": "Audio rate gain modulation.", "type": "Audio" }
     ],
     "outputs": [
       { "name": "Out L", "description": "Left channel of the adjusted stereo output signal.", "type": "Audio" },
