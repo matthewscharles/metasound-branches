@@ -7,9 +7,9 @@
 
 namespace MetasoundBranches
 {
-    class FMetasoundCrossfadeStereoNode : public Metasound::FNode
+    class FMetasoundStereoCrossfadeNode : public Metasound::FNode
     {
     public:
-        FMetasoundCrossfadeStereoNode();
+        FMetasoundStereoCrossfadeNode();
     };
 }
