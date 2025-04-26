@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="-4482.4825 -716.7403 34.41964 26.625" width="34.41964" height="26.625">
+  <defs/>
+  <g id="Canvas_1" stroke-dasharray="none" fill="none" stroke="none" fill-opacity="1" stroke-opacity="1">
+    <title>Canvas 1</title>
+    <g id="Canvas_1_Layer_19">
+      <title>Layer 19</title>
+      <g id="Group_1294">
+        <title>Audio</title>
+        <g id="Graphic_1296">
+          <ellipse cx="-4469.322" cy="-703.4278" rx="11.6606870130665" ry="11.8125188752161" fill="black"/>
+          <ellipse cx="-4469.322" cy="-703.4278" rx="11.6606870130665" ry="11.8125188752161" stroke="#cd79cb" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+        </g>
+        <g id="Graphic_1295">
+          <path d="M -4454.726 -710.0528 L -4448.063 -703.4278 L -4454.726 -696.8028 Z" fill="#ce78ca"/>
+          <path d="M -4454.726 -710.0528 L -4448.063 -703.4278 L -4454.726 -696.8028 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="0"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -83,7 +83,7 @@ namespace Metasound
 			auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
 			{
 				FNodeClassMetadata Metadata;
-				Metadata.ClassName = { TEXT("UE"), TEXT("Dust (Audio)"), TEXT("Audio") };
+				Metadata.ClassName = { TEXT("UE"), TEXT("Dust"), TEXT("Audio") };
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 1;
 				Metadata.DisplayName = LOCTEXT("DustNodeDisplayName", "Dust (Audio)");
