@@ -15,8 +15,8 @@ namespace Metasound
 {
 	namespace AudioLessThanOrEqualToAudioNodeVertexNames
 	{
-		METASOUND_PARAM(InputSignalA, "InA", "First audio signal to compare.");
-		METASOUND_PARAM(InputSignalB, "InB", "Second audio signal to compare.");
+		METASOUND_PARAM(InputSignalA, "In A", "First audio signal to compare.");
+		METASOUND_PARAM(InputSignalB, "In B", "Second audio signal to compare.");
 		METASOUND_PARAM(OutputSignal, "Out", "Output: 1.0 where InA <= InB, else 0.0.");
 	}
 

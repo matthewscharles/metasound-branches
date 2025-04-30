@@ -15,8 +15,8 @@ namespace Metasound
 {
 	namespace AudioLessThanFloatNodeVertexNames
 	{
-		METASOUND_PARAM(InputSignalA, "InA", "Audio input to compare.");
-		METASOUND_PARAM(InputSignalB, "InB", "Float threshold to compare against.");
+		METASOUND_PARAM(InputSignalA, "In A", "Audio input to compare.");
+		METASOUND_PARAM(InputSignalB, "In B", "Float threshold to compare against.");
 		METASOUND_PARAM(OutputSignal, "Out", "Output: 1.0 where InA < InB, else 0.0.");
 	}
 
