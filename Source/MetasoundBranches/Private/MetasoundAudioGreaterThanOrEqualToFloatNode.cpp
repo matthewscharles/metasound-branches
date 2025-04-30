@@ -56,7 +56,7 @@ namespace Metasound
 			auto CreateMetadata = []() -> FNodeClassMetadata
 			{
 				FNodeClassMetadata Metadata;
-				Metadata.ClassName = { TEXT("UE"), TEXT("Greater Equal"), TEXT("Audio") };
+				Metadata.ClassName = { TEXT("UE"), TEXT("Greater Equal"), TEXT("Float") };
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
 				Metadata.DisplayName = LOCTEXT("AudioGreaterThanOrEqualToFloatNodeDisplayName", "Greater Equal (Audio >= Float)");
