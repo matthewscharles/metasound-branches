@@ -14,8 +14,8 @@ namespace Metasound
 {
     namespace RoundFloatNodeVertexNames
     {
-        METASOUND_PARAM(InputSignal, "In", "Float to round.");
-        METASOUND_PARAM(OutputSignal, "Out", "Rounded float.");
+        METASOUND_PARAM(InputSignal, "In", "Input value to be rounded up.");
+        METASOUND_PARAM(OutputSignal, "Out", "Output value after rounding up.");
     }
 
     class FRoundFloatOperator : public TExecutableOperator<FRoundFloatOperator>
@@ -62,6 +62,13 @@ namespace Metasound
                     METASOUND_LOCTEXT("Custom", "Branches"),
                     METASOUND_LOCTEXT("CustomSub", "Math")
                 };
+                
+                Metadata.Keywords = {
+					METASOUND_LOCTEXT("GreaterThanKeyword", "Int"),
+					METASOUND_LOCTEXT("GreaterThanKeyword2", "Up")
+					METASOUND_LOCTEXT("GreaterThanKeyword2", "Ceiling")
+				};
+                
                 return Metadata;
             };
 
@@ -97,7 +104,7 @@ namespace Metasound
             return MakeUnique<FRoundFloatOperator>(InParams.OperatorSettings, InputSignal);
         }
 
-        virtual void Execute() override
+        virtual void Execute()
         {
             *OutputSignal = FMath::RoundToFloat(*InputSignal);
         }

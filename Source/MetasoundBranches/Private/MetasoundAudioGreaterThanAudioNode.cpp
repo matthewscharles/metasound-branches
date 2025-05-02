@@ -68,6 +68,7 @@ namespace Metasound
 					METASOUND_LOCTEXT("Custom", "Branches"),
 					METASOUND_LOCTEXT("CustomSub", "Math")
 				};
+				
 				Metadata.Keywords = {
 					METASOUND_LOCTEXT("GreaterThanKeyword", ">"),
 					METASOUND_LOCTEXT("GreaterThanKeyword2", "Compare")
