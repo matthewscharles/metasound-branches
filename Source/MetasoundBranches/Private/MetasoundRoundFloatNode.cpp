@@ -65,7 +65,7 @@ namespace Metasound
                 
                 Metadata.Keywords = {
 					METASOUND_LOCTEXT("GreaterThanKeyword", "Int"),
-					METASOUND_LOCTEXT("GreaterThanKeyword2", "Up")
+					METASOUND_LOCTEXT("GreaterThanKeyword2", "Up"),
 					METASOUND_LOCTEXT("GreaterThanKeyword2", "Ceiling")
 				};
                 
