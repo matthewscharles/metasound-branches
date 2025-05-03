@@ -69,4 +69,4 @@
 | 04/05 | - Add >=, <=, ==, !=, ||, && prototypes. |
 | 04/13 | - Finish rolling out audio versions of comparison nodes with icons, test on Windows |
 | 05/02 | - Add Floor and Round for Float |
-| 05/03 | - Add experimental nodes wrapping FMath: GetRangePct, SmoothStep, Greatest Common Divisor |
+| 05/03 | - Add experimental nodes wrapping FMath: GetRangePct, SmoothStep, Greatest Common Divisor.<br>- Add AnyOf and AllOf (without using Algo). |
