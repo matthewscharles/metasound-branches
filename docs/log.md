@@ -68,3 +68,4 @@
 | 04/04 | - Add Less Than prototype. |
 | 04/05 | - Add >=, <=, ==, !=, ||, && prototypes. |
 | 04/13 | - Finish rolling out audio versions of comparison nodes with icons, test on Windows |
+| 05/02 | - Add Floor and Round for Float |
