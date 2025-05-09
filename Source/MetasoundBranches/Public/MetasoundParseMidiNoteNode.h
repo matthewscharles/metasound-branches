@@ -54,29 +54,25 @@ namespace Metasound
 
         static const FNodeClassMetadata& GetNodeInfo()
         {
-            auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
+            static const FNodeClassMetadata Metadata = []() -> FNodeClassMetadata
             {
-                return MetasoundArrayNodesPrivate::CreateArrayNodeClassMetadata(
-                    GetMetasoundDataTypeName<ElementType>(), // Correct here: use FName, not FText
-                    TEXT("ParseMidiNote"),
-                    METASOUND_LOCTEXT_FORMAT("ParseMidiNoteName", "Parse MIDI Note ({0})", GetMetasoundDataTypeDisplayText<ElementType>()),
-                    LOCTEXT("ParseMidiNoteDesc", "Parses a note string to MIDI."),
-                    GetDefaultInterface(), // You can replace with your actual VertexInterface
-                    1,
-                    0,
-                    false
-                );
-            };
-
-            static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
-            const_cast<FNodeClassMetadata&>(Metadata).Author = TEXT("Charles Matthews");
-            const_cast<FNodeClassMetadata&>(Metadata).PromptIfMissing = PluginNodeMissingPrompt;
-            const_cast<FNodeClassMetadata&>(Metadata).CategoryHierarchy = {
-                METASOUND_LOCTEXT("Custom", "Branches"),
-                METASOUND_LOCTEXT("CustomSub", "MIDI")
-            };
-            const_cast<FNodeClassMetadata&>(Metadata).Keywords = TArray<FText>();
-
+                FNodeClassMetadata M;
+                M.ClassName = { StandardNodes::Namespace, TEXT("ParseMidiNote"), GetMetasoundDataTypeName<ElementType>() };
+                M.MajorVersion = 1;
+                M.MinorVersion = 0;
+                M.DisplayName = METASOUND_LOCTEXT_FORMAT("ParseMidiNoteName", "Parse MIDI Note ({0})", GetMetasoundDataTypeDisplayText<ElementType>());
+                M.Description = LOCTEXT("ParseMidiNoteDesc", "Parses a note string to MIDI.");
+                M.Author = TEXT("Charles Matthews");
+                M.PromptIfMissing = PluginNodeMissingPrompt;
+                M.CategoryHierarchy = {
+                    METASOUND_LOCTEXT("Custom", "Branches"),
+                    METASOUND_LOCTEXT("CustomSub", "MIDI")
+                };
+                M.Keywords = {};
+                M.DefaultInterface = GetDefaultInterface();
+                return M;
+            }();
+        
             return Metadata;
         }
 
