@@ -56,24 +56,27 @@ namespace Metasound
         {
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
             {
-                FNodeClassMetadata Metadata;
-                Metadata.ClassName = { StandardNodes::Namespace, TEXT("ParseMidiNote"), StandardNodes::AudioVariant };
-                Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 0;
-                Metadata.DisplayName = METASOUND_LOCTEXT_FORMAT("ParseMidiNoteName", "Parse MIDI Note ({0})", GetMetasoundDataTypeDisplayText<ElementType>());
-                Metadata.Description = LOCTEXT("ParseMidiNoteDesc", "Parses a note string to MIDI.");
-                Metadata.Author = TEXT("Charles Matthews");
-                Metadata.PromptIfMissing = PluginNodeMissingPrompt;
-                Metadata.CategoryHierarchy = {
-                    METASOUND_LOCTEXT("Custom", "Branches"),
-                    METASOUND_LOCTEXT("CustomSub", "MIDI")
-                };
-                Metadata.Keywords = TArray<FText>();
-
-                return Metadata;
+                return MetasoundArrayNodesPrivate::CreateArrayNodeClassMetadata(
+                    GetMetasoundDataTypeName<ElementType>(), // Correct here: use FName, not FText
+                    TEXT("ParseMidiNote"),
+                    METASOUND_LOCTEXT_FORMAT("ParseMidiNoteName", "Parse MIDI Note ({0})", GetMetasoundDataTypeDisplayText<ElementType>()),
+                    LOCTEXT("ParseMidiNoteDesc", "Parses a note string to MIDI."),
+                    GetDefaultInterface(), // You can replace with your actual VertexInterface
+                    1,
+                    0,
+                    false
+                );
             };
 
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
+            const_cast<FNodeClassMetadata&>(Metadata).Author = TEXT("Charles Matthews");
+            const_cast<FNodeClassMetadata&>(Metadata).PromptIfMissing = PluginNodeMissingPrompt;
+            const_cast<FNodeClassMetadata&>(Metadata).CategoryHierarchy = {
+                METASOUND_LOCTEXT("Custom", "Branches"),
+                METASOUND_LOCTEXT("CustomSub", "MIDI")
+            };
+            const_cast<FNodeClassMetadata&>(Metadata).Keywords = TArray<FText>();
+
             return Metadata;
         }
 

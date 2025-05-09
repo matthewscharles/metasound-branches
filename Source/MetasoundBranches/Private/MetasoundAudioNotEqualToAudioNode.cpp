@@ -17,7 +17,7 @@ namespace Metasound
 	{
 		METASOUND_PARAM(InputSignalA, "In A", "First audio input.");
 		METASOUND_PARAM(InputSignalB, "In B", "Second audio input to compare against.");
-		METASOUND_PARAM(OutputSignal, "Out", "Output: 1.0 where InA != InB, else 0.0.");
+		METASOUND_PARAM(OutputSignal, "Out", "Output: 1.0 where In A != In B, else 0.0.");
 	}
 
 	class FAudioNotEqualToAudioOperator : public TExecutableOperator<FAudioNotEqualToAudioOperator>
@@ -60,7 +60,7 @@ namespace Metasound
 				Metadata.MajorVersion = 1;
 				Metadata.MinorVersion = 0;
 				Metadata.DisplayName = LOCTEXT("AudioNotEqualToAudioNodeDisplayName", "Not Equal (Audio != Audio)");
-				Metadata.Description = LOCTEXT("AudioNotEqualToAudioNodeDesc", "Outputs 1.0 where InA is not equal to InB, otherwise 0.0.");
+				Metadata.Description = LOCTEXT("AudioNotEqualToAudioNodeDesc", "Outputs 1.0 where In A is not equal to In B, otherwise 0.0.");
 				Metadata.Author = TEXT("Charles Matthews");
 				Metadata.PromptIfMissing = PluginNodeMissingPrompt;
 				Metadata.DefaultInterface = DeclareVertexInterface();

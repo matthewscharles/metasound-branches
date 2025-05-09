@@ -17,7 +17,7 @@ namespace Metasound
 	{
 		METASOUND_PARAM(InputSignalA, "In A", "First audio input.");
 		METASOUND_PARAM(InputSignalB, "In B", "Second audio input.");
-		METASOUND_PARAM(OutputSignal, "Out", "Output: 1.0 where InA || InB, else 0.0.");
+		METASOUND_PARAM(OutputSignal, "Out", "Output: 1.0 where In A || In B, else 0.0.");
 	}
 
 	class FAudioOrAudioOperator : public TExecutableOperator<FAudioOrAudioOperator>
