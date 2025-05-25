@@ -7,254 +7,257 @@
 #include "MetasoundPrimitives.h"
 #include "MetasoundParamHelper.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundSlewNode"
+#define LOCTEXT_NAMESPACE "MetasoundSlewConfigurableNode"
 
 using namespace Metasound;
 
-/*────────────────────────  Operator data  ────────────────────────*/
-const FLazyName FSlewOperatorData::OperatorDataTypeName = "SlewOperatorData";
+/* ─────────────────────── Operator-data ────────────────────── */
+const FLazyName FSlewConfigurableOperatorData::OperatorDataTypeName = "SlewConfigurableOperatorData";
 
-/*────────────────────────  Vertex helpers  ────────────────────────*/
-namespace SlewNames
+/* ─────────────────────── Vertex helpers ───────────────────── */
+namespace SlewConfigurableNames
 {
-    METASOUND_PARAM(InSignal , "In"       , "Signal to smooth");
-    METASOUND_PARAM(InRise   , "Rise Time", "Rise time (s)");
-    METASOUND_PARAM(InFall   , "Fall Time", "Fall time (s)");
-    METASOUND_PARAM(OutSignal, "Out"      , "Slewed signal");
+	METASOUND_PARAM(InSignal , "In"       , "Signal to smooth");
+	METASOUND_PARAM(InRise   , "Rise Time", "Rise time (s)");
+	METASOUND_PARAM(InFall   , "Fall Time", "Fall time (s)");
+	METASOUND_PARAM(OutSignal, "Out"      , "Slewed signal");
 }
 
-/*────────────────────────  Interface builder  ─────────────────────*/
-static FVertexInterface BuildInterface(int32 NumPins, ESlewMode Mode)
+/* ─────────────────────── Interface builder ────────────────── */
+static FVertexInterface BuildInterface(int32 NumPins, ESlewConfigurableMode Mode)
 {
-    FInputVertexInterface   Inputs;
-    FOutputVertexInterface  Outputs;
+	FInputVertexInterface  Inputs;
+	FOutputVertexInterface Outputs;
 
-    for (int32 i = 0; i < NumPins; ++i)
-    {
-        const FString Suffix = FString::Printf(TEXT(" %d"), i);
+	for (int32 i = 0; i < NumPins; ++i)
+	{
+		const FString Suffix = FString::Printf(TEXT(" %d"), i);
 
-        if (Mode == ESlewMode::Control)
-        {
-            Inputs .Add(TInputDataVertex<float>
-                {*SlewNames::InSignal + Suffix, FDataVertexMetadata{}} );
-            Outputs.Add(TOutputDataVertex<float>
-                {*SlewNames::OutSignal + Suffix, FDataVertexMetadata{}} );
-        }
-        else
-        {
-            Inputs .Add(TInputDataVertex<FAudioBuffer>
-                {*SlewNames::InSignal + Suffix, FDataVertexMetadata{}} );
-            Outputs.Add(TOutputDataVertex<FAudioBuffer>
-                {*SlewNames::OutSignal + Suffix, FDataVertexMetadata{}} );
-        }
-    }
+		if (Mode == ESlewConfigurableMode::Control)
+		{
+			const FName InName  = FName(* (METASOUND_GET_PARAM_NAME(SlewConfigurableNames::InSignal).ToString()  + Suffix));
+			const FName OutName = FName(* (METASOUND_GET_PARAM_NAME(SlewConfigurableNames::OutSignal).ToString() + Suffix));
 
-    Inputs.Add(TInputDataVertex<FTime>(METASOUND_GET_PARAM_NAME_AND_METADATA(SlewNames::InRise)));
-    Inputs.Add(TInputDataVertex<FTime>(METASOUND_GET_PARAM_NAME_AND_METADATA(SlewNames::InFall)));
+			Inputs .Add(TInputDataVertex<float>      {InName , FDataVertexMetadata{}});
+			Outputs.Add(TOutputDataVertex<float>     {OutName, FDataVertexMetadata{}});
+		}
+		else
+		{
+			const FName InName  = FName(* (METASOUND_GET_PARAM_NAME(SlewConfigurableNames::InSignal).ToString()  + Suffix));
+			const FName OutName = FName(* (METASOUND_GET_PARAM_NAME(SlewConfigurableNames::OutSignal).ToString() + Suffix));
 
-    return FVertexInterface(MoveTemp(Inputs), MoveTemp(Outputs));
+			Inputs .Add(TInputDataVertex<FAudioBuffer>{InName , FDataVertexMetadata{}});
+			Outputs.Add(TOutputDataVertex<FAudioBuffer>{OutName, FDataVertexMetadata{}});
+		}
+	}
+
+	Inputs.Add(TInputDataVertex<FTime>(METASOUND_GET_PARAM_NAME_AND_METADATA(SlewConfigurableNames::InRise)));
+	Inputs.Add(TInputDataVertex<FTime>(METASOUND_GET_PARAM_NAME_AND_METADATA(SlewConfigurableNames::InFall)));
+
+	return FVertexInterface(MoveTemp(Inputs), MoveTemp(Outputs));
 }
 
-/*────────────────────────  Configuration  ─────────────────────────*/
+/* ─────────────────────── Configuration ────────────────────── */
 TInstancedStruct<FMetasoundFrontendClassInterface>
-FMetaSoundSlewNodeConfiguration::OverrideDefaultInterface(const FMetasoundFrontendClass&) const
+FMetaSoundSlewConfigurableNodeConfiguration::OverrideDefaultInterface(const FMetasoundFrontendClass&) const
 {
-    return TInstancedStruct<FMetasoundFrontendClassInterface>::Make(
-        FMetasoundFrontendClassInterface::GenerateClassInterface(
-            BuildInterface(NumPins, SlewMode)));
+	return TInstancedStruct<FMetasoundFrontendClassInterface>::Make(
+		FMetasoundFrontendClassInterface::GenerateClassInterface(
+			BuildInterface(NumPins, SlewMode)));
 }
 
 TSharedPtr<const IOperatorData>
-FMetaSoundSlewNodeConfiguration::GetOperatorData() const
+FMetaSoundSlewConfigurableNodeConfiguration::GetOperatorData() const
 {
-    return MakeShared<FSlewOperatorData>(SlewMode, NumPins);
+	return MakeShared<FSlewConfigurableOperatorData>(SlewMode, NumPins);
 }
 
-/*────────────────────────  Float-rate operator  ───────────────────*/
-class FSlewFloatOperator : public TExecutableOperator<FSlewFloatOperator>
+/* ─────────────────── Float-rate operator ──────────────────── */
+class FSlewConfigurableFloatOperator : public TExecutableOperator<FSlewConfigurableFloatOperator>
 {
 public:
-    FSlewFloatOperator(const FOperatorSettings& Settings,
-                       TArray<TDataReadReference<float>>  InSignals,
-                       TDataReadReference<FTime>          InRise,
-                       TDataReadReference<FTime>          InFall)
-        : Rise(InRise), Fall(InFall), Inputs(MoveTemp(InSignals))
-    {
-        for (int32 i = 0; i < Inputs.Num(); ++i)
-            Outputs.Add(TDataWriteReferenceFactory<float>::CreateExplicitArgs(Settings));
-    }
+	FSlewConfigurableFloatOperator(const FOperatorSettings& Settings,
+	                               TArray<TDataReadReference<float>>  InSignals,
+	                               TDataReadReference<FTime>          InRise,
+	                               TDataReadReference<FTime>          InFall)
+		: Rise(InRise), Fall(InFall), Inputs(MoveTemp(InSignals))
+	{
+		PrevOut.Init(0.f, Inputs.Num());
+		for (int32 i = 0; i < Inputs.Num(); ++i)
+			Outputs.Add(TDataWriteReferenceFactory<float>::CreateExplicitArgs(Settings));
+	}
 
-    /* Bind all pins generated at runtime */
-    void BindInputs (FInputVertexInterfaceData&  Data) override { /* not needed */ }
-    void BindOutputs(FOutputVertexInterfaceData& Data) override { /* not needed */ }
+	void BindInputs (FInputVertexInterfaceData&) override {}
+	void BindOutputs(FOutputVertexInterfaceData&) override {}
 
-    void Execute()
-    {
-        const float RiseAlpha = ComputeAlpha(Rise);
-        const float FallAlpha = ComputeAlpha(Fall);
+	void Execute()
+	{
+		const float RiseAlpha = CalcAlpha(Rise);
+		const float FallAlpha = CalcAlpha(Fall);
 
-        for (int32 c = 0; c < Inputs.Num(); ++c)
-        {
-            float Input  = *Inputs[c];
-            float& Prev  = PrevOut[c];
-            float  Out   = Prev;
+		for (int32 c = 0; c < Inputs.Num(); ++c)
+		{
+			float  In  = *Inputs[c];
+			float& Out = PrevOut[c];
 
-            if (Input > Prev)       Out = RiseAlpha * Prev + (1 - RiseAlpha) * Input;
-            else if (Input < Prev)  Out = FallAlpha * Prev + (1 - FallAlpha) * Input;
+			if      (In > Out) Out = RiseAlpha * Out + (1 - RiseAlpha) * In;
+			else if (In < Out) Out = FallAlpha * Out + (1 - FallAlpha) * In;
 
-            *Outputs[c] = Out;
-            Prev        = Out;
-        }
-    }
-
-    /* Expose outputs */
-    void BindOutputsDynamic(FOutputVertexInterfaceData& Data, ESlewMode Mode, int32 NumPins)
-    {
-        using namespace SlewNames;
-        for (int32 i = 0; i < NumPins; ++i)
-            Data.BindWriteVertex(*FString::Printf(TEXT("%s %d"), METASOUND_GET_PARAM_NAME(OutSignal), i), Outputs[i]);
-    }
+			*Outputs[c] = Out;
+		}
+	}
 
 private:
-    float ComputeAlpha(const FTimeReadRef& T)
-    {
-        const float Seconds = T->GetSeconds();
-        return Seconds > 0.f ? FMath::Exp(-1.f / (Seconds * 1.f /*sampleRate not needed for control*/)) : 0.f;
-    }
+	static float CalcAlpha(const TDataReadReference<FTime>& T)
+	{
+		const float S = T->GetSeconds();
+		return S > 0.f ? FMath::Exp(-1.f / S) : 0.f;
+	}
 
-    TDataReadReference<FTime>              Rise, Fall;
-    TArray<TDataReadReference<float>>      Inputs;
-    TArray<TDataWriteReference<float>>     Outputs;
-    TArray<float>                          PrevOut; /* default-zero */
+	TDataReadReference<FTime>           Rise, Fall;
+	TArray<TDataReadReference<float>>   Inputs;
+	TArray<TDataWriteReference<float>>  Outputs;
+	TArray<float>                       PrevOut;
 };
 
-/*────────────────────────  Audio-rate operator  ───────────────────*/
-class FSlewAudioOperator : public TExecutableOperator<FSlewAudioOperator>
+/* ─────────────────── Audio-rate operator ──────────────────── */
+class FSlewConfigurableAudioOperator : public TExecutableOperator<FSlewConfigurableAudioOperator>
 {
 public:
-    FSlewAudioOperator(const FOperatorSettings& Settings,
-                       TArray<TDataReadReference<FAudioBuffer>> InSignals,
-                       TDataReadReference<FTime>                InRise,
-                       TDataReadReference<FTime>                InFall)
-        : Rise(InRise), Fall(InFall), Inputs(MoveTemp(InSignals))
-    {
-        for (int32 i = 0; i < Inputs.Num(); ++i)
-        {
-            Outputs.Add(FAudioBufferWriteRef::CreateNew(Settings));
-            PrevOut.Add(0.f);
-        }
-        SampleRate = Settings.GetSampleRate();
-    }
+	FSlewConfigurableAudioOperator(const FOperatorSettings& Settings,
+	                               TArray<TDataReadReference<FAudioBuffer>> InSignals,
+	                               TDataReadReference<FTime>                InRise,
+	                               TDataReadReference<FTime>                InFall)
+		: Rise(InRise), Fall(InFall), Inputs(MoveTemp(InSignals)), SampleRate(Settings.GetSampleRate())
+	{
+		for (int32 i = 0; i < Inputs.Num(); ++i)
+		{
+			Outputs.Add(FAudioBufferWriteRef::CreateNew(Settings));
+			PrevOut.Add(0.f);
+		}
+	}
 
-    void Execute()
-    {
-        const float RiseAlpha = ComputeAlpha(Rise);
-        const float FallAlpha = ComputeAlpha(Fall);
+	void BindInputs (FInputVertexInterfaceData&) override {}
+	void BindOutputs(FOutputVertexInterfaceData&) override {}
 
-        for (int32 c = 0; c < Inputs.Num(); ++c)
-        {
-            int32 Num = Inputs[c]->Num();
-            Outputs[c]->SetNumUninitialized(Num);
+	void Execute()
+	{
+		const float RiseAlpha = CalcAlpha(Rise);
+		const float FallAlpha = CalcAlpha(Fall);
 
-            const float* In  = Inputs[c]->GetData();
-            float*       Out = Outputs[c]->GetData();
-            float        Prev = PrevOut[c];
+		for (int32 c = 0; c < Inputs.Num(); ++c)
+		{
+			const int32 Frames = Inputs[c]->Num();
+			Outputs[c]->SetNumUninitialized(Frames);
 
-            for (int32 i = 0; i < Num; ++i)
-            {
-                float Val = In[i];
-                if (Val > Prev)       Prev = RiseAlpha * Prev + (1 - RiseAlpha) * Val;
-                else if (Val < Prev)  Prev = FallAlpha * Prev + (1 - FallAlpha) * Val;
-                Out[i] = Prev;
-            }
-            PrevOut[c] = Prev;
-        }
-    }
+			const float* In  = Inputs[c]->GetData();
+			float*       Out = Outputs[c]->GetData();
+			float&       Ref = PrevOut[c];
+
+			for (int32 i = 0; i < Frames; ++i)
+			{
+				const float V = In[i];
+				if      (V > Ref) Ref = RiseAlpha * Ref + (1 - RiseAlpha) * V;
+				else if (V < Ref) Ref = FallAlpha * Ref + (1 - FallAlpha) * V;
+				Out[i] = Ref;
+			}
+		}
+	}
 
 private:
-    float ComputeAlpha(const FTimeReadRef& T)
-    {
-        const float Seconds = T->GetSeconds();
-        return Seconds > 0.f ? FMath::Exp(-1.f / (Seconds * SampleRate)) : 0.f;
-    }
+	float CalcAlpha(const TDataReadReference<FTime>& T) const
+	{
+		const float S = T->GetSeconds();
+		return S > 0.f ? FMath::Exp(-1.f / (S * SampleRate)) : 0.f;
+	}
 
-    TDataReadReference<FTime>                     Rise, Fall;
-    TArray<TDataReadReference<FAudioBuffer>>      Inputs;
-    TArray<FAudioBufferWriteRef>                  Outputs;
-    TArray<float>                                 PrevOut;
-    int32                                         SampleRate;
+	TDataReadReference<FTime>                     Rise, Fall;
+	TArray<TDataReadReference<FAudioBuffer>>      Inputs;
+	TArray<FAudioBufferWriteRef>                  Outputs;
+	TArray<float>                                 PrevOut;
+	int32                                         SampleRate;
 };
 
-/*────────────────────────  Facade & factory  ──────────────────────*/
-class FSlewNodeConfigurableOperator : public IOperatorFactory
+/* ─────────────────── Operator selector ───────────────────── */
+class FSlewConfigurableOperator
 {
 public:
-    static TUniquePtr<IOperator> Create(const FBuildOperatorParams& P, FBuildResults&)
-    {
-        const FSlewOperatorData* Cfg = CastOperatorData<const FSlewOperatorData>(P.Node.GetOperatorData().Get());
-        const int32 NumPins          = Cfg->NumPins;
-        const ESlewMode Mode         = Cfg->Mode;
+	static const FNodeClassMetadata& GetNodeInfo()
+	{
+		static const FNodeClassMetadata Meta = []()
+		{
+			FNodeClassMetadata M;
+			M.ClassName       = { TEXT("Branches"), TEXT("SlewConfigurable"), TEXT("") };
+			M.MajorVersion    = 1;
+			M.MinorVersion    = 0;
+			M.DisplayName     = LOCTEXT("SlewCfgDisplay", "Slew (Configurable)");
+			M.Description     = LOCTEXT("SlewCfgDesc", "Smooth signal; audio- or control-rate, pin-count selectable.");
+			M.Author          = TEXT("Charles Matthews");
+			M.PromptIfMissing = LOCTEXT("SlewCfgMissing", "Enable MetaSound Branches.");
+			M.DefaultInterface= BuildInterface(1, ESlewConfigurableMode::Audio);
+			M.CategoryHierarchy =
+			{
+				LOCTEXT("Branches", "Branches"),
+				LOCTEXT("Filters" , "Filters")
+			};
+			return M;
+		}();
+		return Meta;
+	}
 
-        TArray<TDataReadReference<FTime>> RiseFall; // two shared refs
-        RiseFall.Add(P.InputData.GetOrCreateDefaultDataReadReference<FTime>(METASOUND_GET_PARAM_NAME(SlewNames::InRise), P.OperatorSettings));
-        RiseFall.Add(P.InputData.GetOrCreateDefaultDataReadReference<FTime>(METASOUND_GET_PARAM_NAME(SlewNames::InFall), P.OperatorSettings));
+	static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& P, FBuildResults&)
+	{
+		const FSlewConfigurableOperatorData* Cfg =
+			CastOperatorData<const FSlewConfigurableOperatorData>(P.Node.GetOperatorData().Get());
 
-        if (Mode == ESlewMode::Control)
-        {
-            TArray<TDataReadReference<float>>  Ins;
-            for (int32 i = 0; i < NumPins; ++i)
-                Ins.Add(P.InputData.GetOrCreateDefaultDataReadReference<float>(
-                    *FString::Printf(TEXT("%s %d"), METASOUND_GET_PARAM_NAME(SlewNames::InSignal), i),
-                    P.OperatorSettings));
+		const int32 Num = Cfg->NumPins;
 
-            return MakeUnique<FSlewFloatOperator>(P.OperatorSettings, MoveTemp(Ins), RiseFall[0], RiseFall[1]);
-        }
-        else
-        {
-            TArray<TDataReadReference<FAudioBuffer>> Ins;
-            for (int32 i = 0; i < NumPins; ++i)
-                Ins.Add(P.InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(
-                    *FString::Printf(TEXT("%s %d"), METASOUND_GET_PARAM_NAME(SlewNames::InSignal), i),
-                    P.OperatorSettings));
+		TDataReadReference<FTime> Rise =
+			P.InputData.GetOrCreateDefaultDataReadReference<FTime>(
+				METASOUND_GET_PARAM_NAME(SlewConfigurableNames::InRise), P.OperatorSettings);
 
-            return MakeUnique<FSlewAudioOperator>(P.OperatorSettings, MoveTemp(Ins), RiseFall[0], RiseFall[1]);
-        }
-    }
+		TDataReadReference<FTime> Fall =
+			P.InputData.GetOrCreateDefaultDataReadReference<FTime>(
+				METASOUND_GET_PARAM_NAME(SlewConfigurableNames::InFall), P.OperatorSettings);
+
+		if (Cfg->Mode == ESlewConfigurableMode::Control)
+		{
+			TArray<TDataReadReference<float>> InRefs;
+			for (int32 i = 0; i < Num; ++i)
+			{
+				const FString Pin = FString::Printf(TEXT("%s %d"),
+					*METASOUND_GET_PARAM_NAME(SlewConfigurableNames::InSignal).ToString(), i);
+
+				InRefs.Add(P.InputData.GetOrCreateDefaultDataReadReference<float>(
+					FName(*Pin), P.OperatorSettings));
+			}
+
+			return MakeUnique<FSlewConfigurableFloatOperator>(
+				P.OperatorSettings, MoveTemp(InRefs), Rise, Fall);
+		}
+		else
+		{
+			TArray<TDataReadReference<FAudioBuffer>> InRefs;
+			for (int32 i = 0; i < Num; ++i)
+			{
+				const FString Pin = FString::Printf(TEXT("%s %d"),
+					*METASOUND_GET_PARAM_NAME(SlewConfigurableNames::InSignal).ToString(), i);
+
+				InRefs.Add(P.InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(
+					FName(*Pin), P.OperatorSettings));
+			}
+
+			return MakeUnique<FSlewConfigurableAudioOperator>(
+				P.OperatorSettings, MoveTemp(InRefs), Rise, Fall);
+		}
+	}
 };
 
-/*────────────────────────  Node metadata  ─────────────────────────*/
-static FNodeClassMetadata BuildMetadata()
-{
-    FNodeClassMetadata M;
-    M.ClassName       = { TEXT("Branches"), TEXT("Slew"), TEXT("") };
-    M.MajorVersion    = 2;          
-    M.MinorVersion    = 0;
-    M.DisplayName     = LOCTEXT("SlewDisplay", "Slew");
-    M.Description     = LOCTEXT("SlewDesc",   "Smooth signal with separate rise/fall; AR or KR.");
-    M.Author          = TEXT("Charles Matthews");
-    M.PromptIfMissing = LOCTEXT("MissingPrompt", "Enable MetaSound Branches.");
-    M.DefaultInterface= BuildInterface(1, ESlewMode::Audio);
-    M.CategoryHierarchy =
-    {
-        LOCTEXT("CatBranches", "Branches"),
-        LOCTEXT("CatFilters" , "Filters")
-    };
-    return M;
-}
+/* ─────────────────── Facade & registration ───────────────── */
+using FSlewConfigurableNode = TNodeFacade<FSlewConfigurableOperator>;
 
-/*────────────────────────  Facade  ────────────────────────────────*/
-class FSlewNodeConfigurable : public FNodeFacade
-{
-public:
-    FSlewNodeConfigurable(const FNodeInitData& Init)
-        : FNodeFacade(Init.InstanceName, Init.InstanceID,
-                      BuildMetadata(),
-                      MakeShared<FSlewNodeConfigurableOperator>())
-    {}
-};
-
-/*────────────────────────  Registration  ─────────────────────────*/
-using FSlewConfigurableNode = FSlewNodeConfigurable;
-METASOUND_REGISTER_NODE_AND_CONFIGURATION(FSlewConfigurableNode, FMetaSoundSlewNodeConfiguration)
+METASOUND_REGISTER_NODE_AND_CONFIGURATION(
+	FSlewConfigurableNode,
+	FMetaSoundSlewConfigurableNodeConfiguration)
 
 #undef LOCTEXT_NAMESPACE

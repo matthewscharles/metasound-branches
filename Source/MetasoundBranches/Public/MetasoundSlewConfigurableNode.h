@@ -11,42 +11,42 @@
 #include "MetasoundSlewConfigurableNode.generated.h"
 
 UENUM()
-enum class ESlewMode : uint8
+enum class ESlewConfigurableMode : uint8
 {
-    Control UMETA(DisplayName = "Float"),
-    Audio   UMETA(DisplayName = "Audio")
+	Control UMETA(DisplayName = "Float"),
+	Audio   UMETA(DisplayName = "Audio")
 };
 
 USTRUCT()
-struct FMetaSoundSlewNodeConfiguration : public FMetaSoundFrontendNodeConfiguration
+struct FMetaSoundSlewConfigurableNodeConfiguration : public FMetaSoundFrontendNodeConfiguration
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
-    FMetaSoundSlewNodeConfiguration()
-        : NumPins(1)
-        , SlewMode(ESlewMode::Audio) 
-    {}
+	FMetaSoundSlewConfigurableNodeConfiguration()
+		: NumPins(1)
+		, SlewMode(ESlewConfigurableMode::Audio)
+	{}
 
-    UPROPERTY(EditAnywhere, Category = "General", meta = (ClampMin = "1", ClampMax = "32"))
-    int32 NumPins;
+	UPROPERTY(EditAnywhere, Category = "General", meta = (ClampMin = "1", ClampMax = "32"))
+	int32 NumPins;
 
-    UPROPERTY(EditAnywhere, Category = "General")
-    ESlewMode SlewMode;
+	UPROPERTY(EditAnywhere, Category = "General")
+	ESlewConfigurableMode SlewMode;
 
-    virtual TInstancedStruct<FMetasoundFrontendClassInterface>
-    OverrideDefaultInterface(const FMetasoundFrontendClass& InClass) const override;
+	virtual TInstancedStruct<FMetasoundFrontendClassInterface>
+	OverrideDefaultInterface(const FMetasoundFrontendClass& InClass) const override;
 
-    virtual TSharedPtr<const Metasound::IOperatorData>
-    GetOperatorData() const override;
+	virtual TSharedPtr<const Metasound::IOperatorData>
+	GetOperatorData() const override;
 };
 
-
-struct FSlewOperatorData : public Metasound::TOperatorData<FSlewOperatorData>
+struct FSlewConfigurableOperatorData : public Metasound::TOperatorData<FSlewConfigurableOperatorData>
 {
-    static const FLazyName OperatorDataTypeName;
-    ESlewMode Mode;
-    int32     NumPins;
+	static const FLazyName OperatorDataTypeName;
+	ESlewConfigurableMode Mode;
+	int32                 NumPins;
 
-    FSlewOperatorData(ESlewMode InMode, int32 InNum)
-        : Mode(InMode), NumPins(InNum) {}
+	FSlewConfigurableOperatorData(ESlewConfigurableMode InMode, int32 InNum)
+		: Mode(InMode), NumPins(InNum)
+	{}
 };
