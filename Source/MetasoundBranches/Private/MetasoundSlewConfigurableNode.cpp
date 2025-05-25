@@ -186,7 +186,7 @@ private:
 };
 
 /*────────────────────────  Facade & factory  ──────────────────────*/
-class FSlewNodeOperator : public IOperatorFactory
+class FSlewNodeConfigurableOperator : public IOperatorFactory
 {
 public:
     static TUniquePtr<IOperator> Create(const FBuildOperatorParams& P, FBuildResults&)
@@ -243,18 +243,18 @@ static FNodeClassMetadata BuildMetadata()
 }
 
 /*────────────────────────  Facade  ────────────────────────────────*/
-class FSlewNode : public FNodeFacade
+class FSlewNodeConfigurable : public FNodeFacade
 {
 public:
-    FSlewNode(const FNodeInitData& Init)
+    FSlewNodeConfigurable(const FNodeInitData& Init)
         : FNodeFacade(Init.InstanceName, Init.InstanceID,
                       BuildMetadata(),
-                      MakeShared<FSlewNodeOperator>())
+                      MakeShared<FSlewNodeConfigurableOperator>())
     {}
 };
 
 /*────────────────────────  Registration  ─────────────────────────*/
-using FSlewConfigurableNode = FSlewNode;
+using FSlewConfigurableNode = FSlewNodeConfigurable;
 METASOUND_REGISTER_NODE_AND_CONFIGURATION(FSlewConfigurableNode, FMetaSoundSlewNodeConfiguration)
 
 #undef LOCTEXT_NAMESPACE
