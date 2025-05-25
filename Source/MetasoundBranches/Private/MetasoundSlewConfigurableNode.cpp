@@ -149,7 +149,6 @@ public:
 		for (int32 c = 0; c < Inputs.Num(); ++c)
 		{
 			const int32 Frames = Inputs[c]->Num();
-			Outputs[c]->SetNumUninitialized(Frames);
 
 			const float* In  = Inputs[c]->GetData();
 			float*       Out = Outputs[c]->GetData();
