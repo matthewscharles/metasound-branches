@@ -5,7 +5,6 @@
 #include "MetasoundFrontendDocument.h"
 #include "MetasoundOperatorData.h"
 #include "MetasoundTime.h"
-#include "MetasoundDataReference.h"
 #include "MetasoundNode.h"
 
 #include "MetasoundSlewConfigurableNode.generated.h"
@@ -27,26 +26,24 @@ struct FMetaSoundSlewConfigurableNodeConfiguration : public FMetaSoundFrontendNo
 		, SlewMode(ESlewConfigurableMode::Audio)
 	{}
 
-	UPROPERTY(EditAnywhere, Category = "General", meta = (ClampMin = "1", ClampMax = "32"))
+	UPROPERTY(EditAnywhere, Category="General", meta=(ClampMin="1", ClampMax="32"))
 	int32 NumPins;
 
-	UPROPERTY(EditAnywhere, Category = "General")
+	UPROPERTY(EditAnywhere, Category="General")
 	ESlewConfigurableMode SlewMode;
 
-	virtual TInstancedStruct<FMetasoundFrontendClassInterface>
+	TInstancedStruct<FMetasoundFrontendClassInterface>
 	OverrideDefaultInterface(const FMetasoundFrontendClass& InClass) const override;
 
-	virtual TSharedPtr<const Metasound::IOperatorData>
+	TSharedPtr<const Metasound::IOperatorData>
 	GetOperatorData() const override;
 };
 
-struct FSlewConfigurableOperatorData : public Metasound::TOperatorData<FSlewConfigurableOperatorData>
+namespace Metasound
 {
-	static const FLazyName OperatorDataTypeName;
-	ESlewConfigurableMode Mode;
-	int32                 NumPins;
-
-	FSlewConfigurableOperatorData(ESlewConfigurableMode InMode, int32 InNum)
-		: Mode(InMode), NumPins(InNum)
-	{}
-};
+namespace SlewConfigurablePrivate
+{
+	// forward so .cpp can define it
+	struct FSlewConfigurableOperatorData;
+} // namespace SlewConfigurablePrivate
+} // namespace Metasound
