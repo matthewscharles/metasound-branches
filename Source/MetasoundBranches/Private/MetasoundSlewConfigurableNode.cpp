@@ -6,7 +6,6 @@
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundPrimitives.h"
 #include "MetasoundParamHelper.h"
-#include "MetasoundAudioBuffer.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundSlewConfigurableNode"
 
