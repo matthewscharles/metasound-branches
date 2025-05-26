@@ -2,315 +2,239 @@
 
 #include "MetasoundBranches/Public/MetasoundShiftRegisterNode.h"
 #include "MetasoundExecutableOperator.h"
-#include "MetasoundPrimitives.h"
-#include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundFacade.h"
+#include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundParamHelper.h"
+#include "MetasoundPrimitives.h"
+#include "MetasoundStandardNodesCategories.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundStandardNodes_ShiftRegister"
+#define LOCTEXT_NAMESPACE "MetasoundShiftRegisterNode"
 
 namespace Metasound
 {
-    namespace ShiftRegisterNodeVertexNames
+namespace ShiftRegisterPrivate
+{
+/* ─────────────────── Params ─────────────────── */
+METASOUND_PARAM(InSignal          , "In"               , "Input float.");
+METASOUND_PARAM(InTrigger         , "Trigger"          , "Advance trigger.");
+METASOUND_PARAM(InReset           , "Reset"            , "Reset trigger.");
+METASOUND_PARAM(InDefault         , "Default"          , "Default value.");
+METASOUND_PARAM(InReverse         , "Reverse"          , "Reverse flag.");
+METASOUND_PARAM(InOutputOnReset   , "Output On Reset"  , "Output defaults immediately.");
+
+METASOUND_PARAM(OutTrigger        , "On Trigger"       , "Fires after shift.");
+METASOUND_PARAM(OutReset          , "On Reset"         , "Fires when reset outputs.");
+METASOUND_PARAM(OutDirChange      , "On Direction Change", "Fires when Reverse toggles.");
+
+/* ─────────────────── Config-data ─────────────── */
+struct FShiftRegisterOpData : public TOperatorData<FShiftRegisterOpData>
+{
+	static const FLazyName OperatorDataTypeName;
+	int32 NumStages;
+	explicit FShiftRegisterOpData(int32 N) : NumStages(N) {}
+};
+const FLazyName FShiftRegisterOpData::OperatorDataTypeName = "ShiftRegisterOpData";
+
+/* ─────────── Build vertex-interface dynamically ─────────── */
+static FVertexInterface MakeInterface(int32 NumStages)
+{
+	FInputVertexInterface  Ins ({
+		TInputDataVertex<float>   (METASOUND_GET_PARAM_NAME_AND_METADATA(InSignal)),
+		TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InTrigger)),
+		TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InReset)),
+		TInputDataVertex<float>   (METASOUND_GET_PARAM_NAME_AND_METADATA(InDefault)),
+		TInputDataVertex<bool>    (METASOUND_GET_PARAM_NAME_AND_METADATA(InReverse)),
+		TInputDataVertex<bool>    (METASOUND_GET_PARAM_NAME_AND_METADATA(InOutputOnReset))
+	});
+
+	FOutputVertexInterface Outs ({
+		TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutTrigger)),
+		TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutReset)),
+		TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutDirChange))
+	});
+
+	for (int32 i = 0; i < NumStages; ++i)
+	{
+		FString Label = FString::Printf(TEXT("Stage %d"), i + 1);
+		FName   Pin   = *Label;
+		Outs.Add(TOutputDataVertex<float>({ Pin, { FText::GetEmpty(), FText::FromString(Label) } }));
+	}
+	return { MoveTemp(Ins), MoveTemp(Outs) };
+}
+
+/* ─────────────────── Operator ────────────────── */
+class FShiftRegisterOp : public TExecutableOperator<FShiftRegisterOp>
+{
+public:
+	FShiftRegisterOp(const FOperatorSettings& S,
+	                 const FBuildOperatorParams& P,
+	                 const FShiftRegisterOpData* Cfg)
+	{
+		using namespace ShiftRegisterPrivate;
+
+		NumStages = Cfg->NumStages;
+
+		Signal  = P.InputData.GetOrCreateDefaultDataReadReference<float>   (METASOUND_GET_PARAM_NAME(InSignal) , P.OperatorSettings);
+		TrigIn  = P.InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InTrigger), P.OperatorSettings);
+		ResetIn = P.InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InReset)  , P.OperatorSettings);
+		Default = P.InputData.GetOrCreateDefaultDataReadReference<float>   (METASOUND_GET_PARAM_NAME(InDefault), P.OperatorSettings);
+		Reverse = P.InputData.GetOrCreateDefaultDataReadReference<bool>    (METASOUND_GET_PARAM_NAME(InReverse), P.OperatorSettings);
+		OutputOnReset = P.InputData.GetOrCreateDefaultDataReadReference<bool>(METASOUND_GET_PARAM_NAME(InOutputOnReset), P.OperatorSettings);
+
+		TrigOut      = FTriggerWriteRef::CreateNew(S);
+		ResetOut     = FTriggerWriteRef::CreateNew(S);
+		DirChangeOut = FTriggerWriteRef::CreateNew(S);
+
+		for (int32 i = 0; i < NumStages; ++i)
+		{
+			StageData.Add(0.f);
+			StageOut.Add(FFloatWriteRef::CreateNew(0.f));
+		}
+		bReverseState = false;
+		bPendingReset = false;
+	}
+
+    static const FNodeClassMetadata& GetNodeInfo()
     {
-        METASOUND_PARAM(InputSignal, "In", "Input float to the shift register.")
-        METASOUND_PARAM(InputTrigger, "Trigger", "Trigger.")
-        METASOUND_PARAM(InputReset, "Reset", "Reset trigger for the shift register.")
-        METASOUND_PARAM(InputDefault, "Default", "Default float for the shift register.")
-        METASOUND_PARAM(InputReverse, "Reverse", "Reverse flag for the shift register.")
-        METASOUND_PARAM(InputOutputOnReset, "Output On Reset", "When true, a reset will immediately output default values.")
-        METASOUND_PARAM(OutputTrigger, "On Trigger", "Output trigger following the shift.")
-        METASOUND_PARAM(OutputReset, "On Reset", "Output trigger when Output On Reset is true.")
-        METASOUND_PARAM(OutputDirectionChange, "On Direction Change", "Output trigger on direction change.")
-        METASOUND_PARAM(OutputSignal1, "Stage 1", "Shifted output at stage 1.")
-        METASOUND_PARAM(OutputSignal2, "Stage 2", "Shifted output at stage 2.")
-        METASOUND_PARAM(OutputSignal3, "Stage 3", "Shifted output at stage 3.")
-        METASOUND_PARAM(OutputSignal4, "Stage 4", "Shifted output at stage 4.")
-        METASOUND_PARAM(OutputSignal5, "Stage 5", "Shifted output at stage 5.")
-        METASOUND_PARAM(OutputSignal6, "Stage 6", "Shifted output at stage 6.")
-        METASOUND_PARAM(OutputSignal7, "Stage 7", "Shifted output at stage 7.")
-        METASOUND_PARAM(OutputSignal8, "Stage 8", "Shifted output at stage 8.")
+        auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
+        {
+            FVertexInterface NodeInterface = DeclareVertexInterface();
+            FNodeClassMetadata Metadata;
+            Metadata.ClassName = { TEXT("UE"), TEXT("Shift Register"), TEXT("Float") };
+            Metadata.MajorVersion = 1;
+            Metadata.MinorVersion = 1;
+            Metadata.DisplayName = METASOUND_LOCTEXT("ShiftRegisterNodeDisplayName", "Shift Register");
+            Metadata.Description = METASOUND_LOCTEXT("ShiftRegisterNodeDesc", "Shift register node with eight stages and additional reset/output options.");
+            Metadata.Author = "Charles Matthews";
+            Metadata.PromptIfMissing = PluginNodeMissingPrompt;
+            Metadata.DefaultInterface = NodeInterface;
+            Metadata.CategoryHierarchy = {
+                METASOUND_LOCTEXT("Custom", "Branches"),
+                METASOUND_LOCTEXT("CustomSub", "Modulation")
+            };
+            Metadata.Keywords = TArray<FText>();
+            return Metadata;
+        };
+        static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
+        return Metadata;
     }
 
-    class FShiftRegisterOperator : public TExecutableOperator<FShiftRegisterOperator>
-    {
-    public:
-        FShiftRegisterOperator(
-            const FOperatorSettings& InSettings,
-            const FFloatReadRef& InInputSignal,
-            const FTriggerReadRef& InInputTrigger,
-            const FTriggerReadRef& InInputReset,
-            const FFloatReadRef& InInputDefault,
-            const TDataReadReference<bool>& InInputReverse,
-            const TDataReadReference<bool>& InInputOutputOnReset)
-            : InputSignal(InInputSignal)
-            , InputTrigger(InInputTrigger)
-            , InputReset(InInputReset)
-            , InputDefault(InInputDefault)
-            , InputReverse(InInputReverse)
-            , InputOutputOnReset(InInputOutputOnReset)
-            , OutputTrigger(FTriggerWriteRef::CreateNew(InSettings))
-            , OutputResetTrigger(FTriggerWriteRef::CreateNew(InSettings))
-            , OutputDirectionChangeTrigger(FTriggerWriteRef::CreateNew(InSettings))
-            , OutputSignal1(FFloatWriteRef::CreateNew(0.0f))
-            , OutputSignal2(FFloatWriteRef::CreateNew(0.0f))
-            , OutputSignal3(FFloatWriteRef::CreateNew(0.0f))
-            , OutputSignal4(FFloatWriteRef::CreateNew(0.0f))
-            , OutputSignal5(FFloatWriteRef::CreateNew(0.0f))
-            , OutputSignal6(FFloatWriteRef::CreateNew(0.0f))
-            , OutputSignal7(FFloatWriteRef::CreateNew(0.0f))
-            , OutputSignal8(FFloatWriteRef::CreateNew(0.0f))
-            , ShiftedValue1(0.0f)
-            , ShiftedValue2(0.0f)
-            , ShiftedValue3(0.0f)
-            , ShiftedValue4(0.0f)
-            , ShiftedValue5(0.0f)
-            , ShiftedValue6(0.0f)
-            , ShiftedValue7(0.0f)
-            , ShiftedValue8(0.0f)
-            , bReverseState(false)
-            , bResetPending(false)
-        {
-        }
+    METASOUND_DISABLE_LEGACY_IO()
+    
+	/* bind dynamically-named outputs */
+	void BindOutputs(FOutputVertexInterfaceData& D) override
+	{
+		using namespace ShiftRegisterPrivate;
+		D.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutTrigger)   , TrigOut);
+		D.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutReset)     , ResetOut);
+		D.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutDirChange) , DirChangeOut);
 
-        static const FVertexInterface& DeclareVertexInterface()
-        {
-            using namespace ShiftRegisterNodeVertexNames;
-            static const FVertexInterface Interface(
-                FInputVertexInterface(
-                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputSignal)),
-                    TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputTrigger)),
-                    TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputReset)),
-                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputDefault)),
-                    TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputReverse)),
-                    TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputOutputOnReset))
-                ),
-                FOutputVertexInterface(
-                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTrigger)),
-                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputReset)),
-                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputDirectionChange)),
-                    TOutputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputSignal1)),
-                    TOutputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputSignal2)),
-                    TOutputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputSignal3)),
-                    TOutputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputSignal4)),
-                    TOutputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputSignal5)),
-                    TOutputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputSignal6)),
-                    TOutputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputSignal7)),
-                    TOutputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputSignal8))
-                )
-            );
-            return Interface;
-        }
+		for (int32 i = 0; i < NumStages; ++i)
+		{
+			FName Pin = *FString::Printf(TEXT("Stage %d"), i + 1);
+			D.BindReadVertex(Pin, StageOut[i]);
+		}
+	}
 
-        static const FNodeClassMetadata& GetNodeInfo()
-        {
-            auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
-            {
-                FVertexInterface NodeInterface = DeclareVertexInterface();
-                FNodeClassMetadata Metadata;
-                Metadata.ClassName = { TEXT("UE"), TEXT("Shift Register"), TEXT("Float") };
-                Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 1;
-                Metadata.DisplayName = METASOUND_LOCTEXT("ShiftRegisterNodeDisplayName", "Shift Register");
-                Metadata.Description = METASOUND_LOCTEXT("ShiftRegisterNodeDesc", "Shift register node with eight stages and additional reset/output options.");
-                Metadata.Author = "Charles Matthews";
-                Metadata.PromptIfMissing = PluginNodeMissingPrompt;
-                Metadata.DefaultInterface = NodeInterface;
-                Metadata.CategoryHierarchy = {
-                    METASOUND_LOCTEXT("Custom", "Branches"),
-                    METASOUND_LOCTEXT("CustomSub", "Modulation")
-                };
-                Metadata.Keywords = TArray<FText>();
-                return Metadata;
-            };
-            static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
-            return Metadata;
-        }
+	void BindInputs (FInputVertexInterfaceData&) override {}
+	void Reset(const IOperator::FResetParams&)   override {}
 
-        METASOUND_DISABLE_LEGACY_IO()
+	void Execute()
+	{
+		TrigOut     ->AdvanceBlock();
+		ResetOut    ->AdvanceBlock();
+		DirChangeOut->AdvanceBlock();
 
-        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
-        {
-            using namespace ShiftRegisterNodeVertexNames;
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), InputSignal);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTrigger), InputTrigger);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputReset), InputReset);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputDefault), InputDefault);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputReverse), InputReverse);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputOutputOnReset), InputOutputOnReset);
-        }
+		/* ---------- handle reset trigger ---------- */
+		ResetIn->ExecuteBlock([](int32, int32){},
+		[&](int32 F, int32)
+		{
+			for (float& v : StageData) v = *Default;
+			if (*OutputOnReset) ResetOut->TriggerFrame(F);
+			else                bPendingReset = true;
+		});
 
-        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
-        {
-            using namespace ShiftRegisterNodeVertexNames;
-            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputTrigger), OutputTrigger);
-            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputReset), OutputResetTrigger);
-            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputDirectionChange), OutputDirectionChangeTrigger);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal1), OutputSignal1);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal2), OutputSignal2);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal3), OutputSignal3);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal4), OutputSignal4);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal5), OutputSignal5);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal6), OutputSignal6);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal7), OutputSignal7);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputSignal8), OutputSignal8);
-        }
+		/* ---------- handle direction change -------- */
+		bool NowRev = *Reverse;
+		if (NowRev != bReverseState)
+		{
+			DirChangeOut->TriggerFrame(0);
+			bReverseState = NowRev;
+		}
 
-        static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
-        {
-            using namespace ShiftRegisterNodeVertexNames;
-            const FInputVertexInterfaceData& InputData = InParams.InputData;
-            TDataReadReference<float> InputSignal = InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputSignal), InParams.OperatorSettings);
-            TDataReadReference<FTrigger> InputTrigger = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTrigger), InParams.OperatorSettings);
-            TDataReadReference<FTrigger> InputReset = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputReset), InParams.OperatorSettings);
-            TDataReadReference<float> InputDefault = InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputDefault), InParams.OperatorSettings);
-            TDataReadReference<bool> InputReverse = InputData.GetOrCreateDefaultDataReadReference<bool>(METASOUND_GET_PARAM_NAME(InputReverse), InParams.OperatorSettings);
-            TDataReadReference<bool> InputOutputOnReset = InputData.GetOrCreateDefaultDataReadReference<bool>(METASOUND_GET_PARAM_NAME(InputOutputOnReset), InParams.OperatorSettings);
-            return MakeUnique<FShiftRegisterOperator>(
-                InParams.OperatorSettings,
-                InputSignal,
-                InputTrigger,
-                InputReset,
-                InputDefault,
-                InputReverse,
-                InputOutputOnReset
-            );
-        }
+		/* ---------- main shift trigger ------------ */
+		TrigIn->ExecuteBlock([](int32, int32){},
+		[&](int32 F, int32)
+		{
+			if (bPendingReset)
+			{
+				ResetOut->TriggerFrame(F);
+				bPendingReset = false;
+			}
 
-        void Execute()
-        {
-            OutputTrigger->AdvanceBlock();
-            OutputResetTrigger->AdvanceBlock();
-            OutputDirectionChangeTrigger->AdvanceBlock();
-        
-            bool bResetOccurred = false;
-            bool bTriggerOccurred = false;
-            int32 ResetFrame = INDEX_NONE;
-        
-            InputReset->ExecuteBlock(
-                [](int32, int32) {},
-                [&](int32 StartFrame, int32 EndFrame)
-                {
-                    bResetOccurred = true;
-                    ResetFrame = StartFrame;
-                    ShiftedValue1 = *InputDefault;
-                    ShiftedValue2 = *InputDefault;
-                    ShiftedValue3 = *InputDefault;
-                    ShiftedValue4 = *InputDefault;
-                    ShiftedValue5 = *InputDefault;
-                    ShiftedValue6 = *InputDefault;
-                    ShiftedValue7 = *InputDefault;
-                    ShiftedValue8 = *InputDefault;
-        
-                    if (*InputOutputOnReset)
-                    {
-                        OutputResetTrigger->TriggerFrame(StartFrame);
-                    }
-                    else
-                    {
-                        bResetPending = true;
-                    }
-                }
-            );
-        
-            InputTrigger->ExecuteBlock(
-                [](int32, int32) {},
-                [&](int32 StartFrame, int32 EndFrame)
-                {
-                    bTriggerOccurred = true;
-                    if (bResetPending)
-                    {
-                        OutputResetTrigger->TriggerFrame(StartFrame);
-                        bResetPending = false;
-                    }
-        
-                    if (*InputReverse)
-                    {
-                        ShiftedValue1 = ShiftedValue2;
-                        ShiftedValue2 = ShiftedValue3;
-                        ShiftedValue3 = ShiftedValue4;
-                        ShiftedValue4 = ShiftedValue5;
-                        ShiftedValue5 = ShiftedValue6;
-                        ShiftedValue6 = ShiftedValue7;
-                        ShiftedValue7 = ShiftedValue8;
-                        ShiftedValue8 = *InputSignal;
-                    }
-                    else
-                    {
-                        ShiftedValue8 = ShiftedValue7;
-                        ShiftedValue7 = ShiftedValue6;
-                        ShiftedValue6 = ShiftedValue5;
-                        ShiftedValue5 = ShiftedValue4;
-                        ShiftedValue4 = ShiftedValue3;
-                        ShiftedValue3 = ShiftedValue2;
-                        ShiftedValue2 = ShiftedValue1;
-                        ShiftedValue1 = *InputSignal;
-                    }
-                    OutputTrigger->TriggerFrame(StartFrame);
-                }
-            );
-        
-            bool CurrentReverse = *InputReverse;
-            if (CurrentReverse != bReverseState)
-            {
-                OutputDirectionChangeTrigger->TriggerFrame(0);
-                bReverseState = CurrentReverse;
-            }
-        
-            if (bTriggerOccurred || (bResetOccurred && *InputOutputOnReset))
-            {
-                *OutputSignal1 = ShiftedValue1;
-                *OutputSignal2 = ShiftedValue2;
-                *OutputSignal3 = ShiftedValue3;
-                *OutputSignal4 = ShiftedValue4;
-                *OutputSignal5 = ShiftedValue5;
-                *OutputSignal6 = ShiftedValue6;
-                *OutputSignal7 = ShiftedValue7;
-                *OutputSignal8 = ShiftedValue8;
-            }
-        }
+			if (bReverseState)
+			{
+				for (int32 i = 0; i < NumStages - 1; ++i) StageData[i] = StageData[i + 1];
+				StageData.Last() = *Signal;
+			}
+			else
+			{
+				for (int32 i = NumStages - 1; i > 0; --i) StageData[i] = StageData[i - 1];
+				StageData[0] = *Signal;
+			}
 
-    private:
-        FFloatReadRef InputSignal;
-        FTriggerReadRef InputTrigger;
-        FTriggerReadRef InputReset;
-        FFloatReadRef InputDefault;
-        TDataReadReference<bool> InputReverse;
-        TDataReadReference<bool> InputOutputOnReset;
-        FTriggerWriteRef OutputTrigger;
-        FTriggerWriteRef OutputResetTrigger;
-        FTriggerWriteRef OutputDirectionChangeTrigger;
-        FFloatWriteRef OutputSignal1;
-        FFloatWriteRef OutputSignal2;
-        FFloatWriteRef OutputSignal3;
-        FFloatWriteRef OutputSignal4;
-        FFloatWriteRef OutputSignal5;
-        FFloatWriteRef OutputSignal6;
-        FFloatWriteRef OutputSignal7;
-        FFloatWriteRef OutputSignal8;
-        float ShiftedValue1;
-        float ShiftedValue2;
-        float ShiftedValue3;
-        float ShiftedValue4;
-        float ShiftedValue5;
-        float ShiftedValue6;
-        float ShiftedValue7;
-        float ShiftedValue8;
-        bool bReverseState;
-        bool bResetPending;
-    };
+			for (int32 i = 0; i < NumStages; ++i) *StageOut[i] = StageData[i];
+			TrigOut->TriggerFrame(F);
+		});
+	}
 
-    class FShiftRegisterNode : public FNodeFacade
-    {
-    public:
-        FShiftRegisterNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FShiftRegisterOperator>())
-        {
-        }
-    };
+private:
+	/* inputs */
+	FFloatReadRef   Signal;
+	FTriggerReadRef TrigIn;
+	FTriggerReadRef ResetIn;
+	FFloatReadRef   Default;
+	TDataReadReference<bool> Reverse;
+	TDataReadReference<bool> OutputOnReset;
 
-    METASOUND_REGISTER_NODE(FShiftRegisterNode);
+	/* outputs */
+	FTriggerWriteRef TrigOut;
+	FTriggerWriteRef ResetOut;
+	FTriggerWriteRef DirChangeOut;
+	TArray<FFloatWriteRef> StageOut;
+
+	/* state */
+	TArray<float> StageData;
+	int32         NumStages;
+	bool          bReverseState;
+	bool          bPendingReset;
+};
+
+/* ───────── Node façade  (generated by macro) ───────── */
+using FShiftRegisterNode = TNodeFacade<FShiftRegisterOp>;
+
+} // ShiftRegisterPrivate
+} // Metasound
+
+/*────────── USTRUCT configuration ─────────*/
+TInstancedStruct<FMetasoundFrontendClassInterface>
+FMetaSoundShiftRegisterNodeConfiguration::OverrideDefaultInterface(const FMetasoundFrontendClass&) const
+{
+	return TInstancedStruct<FMetasoundFrontendClassInterface>::Make(
+		FMetasoundFrontendClassInterface::GenerateClassInterface(
+			Metasound::ShiftRegisterPrivate::MakeInterface(NumStages)));
 }
+
+TSharedPtr<const Metasound::IOperatorData>
+FMetaSoundShiftRegisterNodeConfiguration::GetOperatorData() const
+{
+	return MakeShared<Metasound::ShiftRegisterPrivate::FShiftRegisterOpData>(NumStages);
+}
+
+/*────────── Registration ─────────*/
+METASOUND_REGISTER_NODE_AND_CONFIGURATION(
+	Metasound::ShiftRegisterPrivate::FShiftRegisterNode,
+	FMetaSoundShiftRegisterNodeConfiguration)
 
 #undef LOCTEXT_NAMESPACE

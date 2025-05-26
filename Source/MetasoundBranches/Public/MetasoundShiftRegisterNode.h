@@ -1,15 +1,23 @@
-// Copyright 2025 Charles Matthews. All Rights Reserved.
-
 #pragma once
-
-#include "Metasound.h"
+#include "MetasoundFrontendDocument.h"
+#include "MetasoundOperatorData.h"
 #include "MetasoundNode.h"
+#include "MetasoundShiftRegisterNode.generated.h"
 
-namespace MetasoundBranches
+USTRUCT()
+struct FMetaSoundShiftRegisterNodeConfiguration : public FMetaSoundFrontendNodeConfiguration
 {
-    class FMetasoundShiftRegisterNode : public Metasound::FNode
-    {
-    public:
-        FMetasoundShiftRegisterNode();
-    };
-}
+	GENERATED_BODY()
+
+	FMetaSoundShiftRegisterNodeConfiguration() : NumStages(8) {}
+
+	/** Number of stages (1-32). */
+	UPROPERTY(EditAnywhere, Category="General", meta=(ClampMin="1", ClampMax="32"))
+	int32 NumStages;
+
+	virtual TInstancedStruct<FMetasoundFrontendClassInterface>
+	OverrideDefaultInterface(const FMetasoundFrontendClass& InClass) const override;
+
+	virtual TSharedPtr<const Metasound::IOperatorData>
+	GetOperatorData() const override;
+};
