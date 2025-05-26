@@ -94,7 +94,7 @@ public:
 		}
 	}
 
-	void Reset(const IOperator::FResetParams&) override { }
+	void Reset(const IOperator::FResetParams&) { }
 
 private:
 	static float Alpha(const FTimeReadRef& T)
@@ -151,7 +151,7 @@ public:
 		}
 	}
 
-	void Reset(const IOperator::FResetParams&) override { }
+	void Reset(const IOperator::FResetParams&) { }
 
 private:
 	float Alpha(const FTimeReadRef& T) const
@@ -239,16 +239,16 @@ public:
 	}
 
 	/* IOperator forwards */
-	void BindInputs (FInputVertexInterfaceData& Data) override
+	void BindInputs (FInputVertexInterfaceData& Data)
 	{
 		Impl->BindInputs(Data);
 	}
-	void BindOutputs(FOutputVertexInterfaceData& Data) override
+	void BindOutputs(FOutputVertexInterfaceData& Data) 
 	{
 		Impl->BindOutputs(Data);
 	}
-	void Execute() override { Impl->Execute(); }
-	void Reset  (const IOperator::FResetParams& Params) override
+	void Execute() { Impl->Execute(); }
+	void Reset  (const IOperator::FResetParams& Params)
 	{
 		Impl->Reset(Params);
 	}
