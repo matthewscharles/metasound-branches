@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "MetasoundFrontendNode.h"
 #include "MetasoundFrontendDocument.h"
 #include "MetasoundNode.h"
 #include "MetasoundOperatorData.h"

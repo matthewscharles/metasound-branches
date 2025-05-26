@@ -1,6 +1,6 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundShiftRegisterNode.h"
+#include "MetasoundBranches/Public/MetasoundShiftRegisterNode.h"
 #include "Internationalization/Text.h"
 #include "MetasoundDataFactory.h"
 #include "MetasoundExecutableOperator.h"
