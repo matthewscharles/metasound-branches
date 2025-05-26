@@ -254,24 +254,10 @@ public:
 };
 
 /* ─────────────────── Facade & registration ───────────────── */
-// using FSlewConfigurableNode = TNodeFacade<FSlewConfigurableOperator>;
+using FSlewConfigurableNode = TNodeFacade<FSlewConfigurableOperator>;
 
-// METASOUND_REGISTER_NODE_AND_CONFIGURATION(
-// 	FSlewConfigurableNode,
-// 	FMetaSoundSlewConfigurableNodeConfiguration)
-
-namespace Metasound
-{
-	class FSlewConfigurableNode : public FNodeFacade
-	{
-	public:
-		FSlewConfigurableNode(const FNodeInitData& InitData)
-			: FNodeFacade(InitData, MakeShared<FSlewConfigurableOperator>()) {}
-	};
-}
-
-METASOUND_REGISTER_NODE_AND_CONFIGURATION(FSlewConfigurableNode, FMetaSoundSlewConfigurableNodeConfiguration)
-
-
+METASOUND_REGISTER_NODE_AND_CONFIGURATION(
+	FSlewConfigurableNode,
+	FMetaSoundSlewConfigurableNodeConfiguration)
 
 #undef LOCTEXT_NAMESPACE
