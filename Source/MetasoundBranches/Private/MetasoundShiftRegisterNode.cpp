@@ -112,7 +112,7 @@ namespace Metasound
                 }
             }
 
-            void Execute() override
+            void Execute()
             {
                 TrigOut->AdvanceBlock();
                 ResetOut->AdvanceBlock();
@@ -172,14 +172,27 @@ namespace Metasound
         public:
             FShiftRegisterNode(const FNodeInitData& Init)
                 : FNodeFacade(Init.InstanceName, Init.InstanceID,
-                    TFacadeOperatorClassWithData<FShiftRegisterOp, FShiftRegisterOperatorData>(
-                        MakeInterface(8))) {}
+                    TFacadeOperatorClassWithData<FShiftRegisterOp, FShiftRegisterOperatorData>()) {}
         };
+    }
+
+    TInstancedStruct<FMetasoundFrontendClassInterface>
+    FMetaSoundShiftRegisterNodeConfiguration::OverrideDefaultInterface(const FMetasoundFrontendClass&) const
+    {
+        return TInstancedStruct<FMetasoundFrontendClassInterface>::Make(
+            FMetasoundFrontendClassInterface::GenerateClassInterface(
+                ShiftRegisterPrivate::MakeInterface(NumStages)));
+    }
+
+    TSharedPtr<const Metasound::IOperatorData>
+    FMetaSoundShiftRegisterNodeConfiguration::GetOperatorData() const
+    {
+        return MakeShared<ShiftRegisterPrivate::FShiftRegisterOperatorData>(NumStages);
     }
 
     METASOUND_REGISTER_NODE_AND_CONFIGURATION(
         ShiftRegisterPrivate::FShiftRegisterNode,
-        ShiftRegisterPrivate::FShiftRegisterOperatorData)
+        FMetaSoundShiftRegisterNodeConfiguration)
 }
 
 #undef LOCTEXT_NAMESPACE
