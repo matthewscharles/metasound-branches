@@ -31,5 +31,11 @@
     "Plugins": [{
         "Name": "Metasound",
         "Enabled": true
-    }]
+    },
+    {
+        "Name": "MetasoundExperimental",
+        "Enabled": true
+    }
+    ],
+    
 }
