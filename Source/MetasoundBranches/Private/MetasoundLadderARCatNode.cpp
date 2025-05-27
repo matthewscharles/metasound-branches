@@ -1,5 +1,10 @@
 // Copyright 2025 Charles Matthews.  All Rights Reserved.
 
+#include "MetasoundChannelAgnosticType.h"        // FChannelAgnosticType, FChannelAgnosticTypeReadRef, WriteRef
+#include "TypeFamily/ChannelTypeFamily.h"        // FChannelTypeFamily, FTranscoder
+#include "DSP/MultiMono.h"                       // TStackArrayOfPointers, MakeMultiMonoPointersFromView
+
+
 #include "MetasoundBranches/Public/MetasoundLadderARCatNode.h"
 
 #include "DSP/Filter.h"
@@ -10,6 +15,7 @@
 #include "MetasoundFacade.h"
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundParamHelper.h"
+
 
 #define LOCTEXT_NAMESPACE "MetasoundLadderArCatNode"
 
@@ -170,7 +176,7 @@ namespace Metasound
 		}
 
 		/* ----- Main DSP loop ----- */
-		virtual void Execute() override
+		virtual void Execute()
 		{
 			/* 1) Copy / channel-map input -> output (handles mono-to-5.1, etc.) */
 			if (Transcoder)
