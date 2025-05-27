@@ -2,9 +2,10 @@
 
 #pragma once
 
-#include "MetasoundFrontendNode.h"
 #include "MetasoundFrontendDocument.h"
+#include "MetasoundNode.h"
 #include "MetasoundOperatorData.h"
+#include "MetasoundPrimitives.h"
 #include "MetasoundTrigger.h"
 #include "MetasoundClockDividerNode.generated.h"
 
