@@ -41,11 +41,12 @@ namespace ClockDivPrivate
 	FDataVertexMetadata MakeOutputMeta(int32 Div)
 	{
 #if WITH_EDITOR
-		const FText Tooltip = LOCTEXT("DivTooltip", "Trigger every N clocks.");
-		const FText Name    = FText::AsNumber(Div);
-		return { Tooltip, Name };
+    const FText Tooltip = FText::Format(
+        LOCTEXT("DivTooltipFmt", "Trigger every {0} clocks."), FText::AsNumber(Div));
+    const FText Name    = FText::AsNumber(Div);
+    return { Tooltip, Name };
 #else
-		return {};
+    return {};
 #endif
 	}
 
@@ -141,43 +142,42 @@ public:
 	}
 
 	static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& Params,
-	                                            FBuildResults&)
-	{
-		using namespace ClockDivParam;
-		using namespace ClockDivPrivate;
+                                            FBuildResults&)
+    {
+        using namespace ClockDivParam;
+        using namespace ClockDivPrivate;
 
-		const auto& InData = Params.InputData;
+        const auto& InData = Params.InputData;
 
-		TDataReadReference<FTrigger> InTrig  =
-			InData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTrigger), Params.OperatorSettings);
-		TDataReadReference<FTrigger> InReset =
-			InData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputReset),   Params.OperatorSettings);
+        TDataReadReference<FTrigger> InTrig  =
+            InData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTrigger), Params.OperatorSettings);
+        TDataReadReference<FTrigger> InReset =
+            InData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputReset),   Params.OperatorSettings);
 
-		const FClockDivOperatorData* Cfg =
-			CastOperatorData<const FClockDivOperatorData>(Params.Node.GetOperatorData().Get());
+        const FClockDivOperatorData* Cfg =
+            CastOperatorData<const FClockDivOperatorData>(Params.Node.GetOperatorData().Get());
 
-		int32 Num = Cfg ? Cfg->NumDivisions : 4;
-		int32 Off = Cfg ? Cfg->Offset       : 0;
-		int32 Mul = Cfg ? Cfg->Multiplier   : 1;
+        int32 Num = Cfg ? Cfg->NumDivisions : 4;
+        int32 Off = Cfg ? Cfg->Offset       : 0;
+        int32 Mul = Cfg ? Cfg->Multiplier   : 1;
 
-		TArray<FTriggerWriteRef> Outs;
-		TArray<int32>            DivVals;
-		Outs.Reserve(Num);
-		DivVals.Reserve(Num);
+        TArray<FTriggerWriteRef> Outs;
+        TArray<int32>            DivVals;
+        Outs.Reserve(Num);
+        DivVals.Reserve(Num);
 
-		for (int32 i = 0; i < NumDiv; ++i)
+        for (int32 i = 0; i < Num; ++i)
         {
-            const int32 Div      = DivisionForIndex(i, Offset, Mult);
-            FDataVertexMetadata M = MakeOutputMeta(Div);
-            M.SortOrder = i;                                  // <- add this line
-            Out.Add(TOutputDataVertex<FTrigger>(MakeOutputName(Div), M));
+            const int32 Div = DivisionForIndex(i, Off, Mul);
+            Outs.Add(FTriggerWriteRef::CreateNew(Params.OperatorSettings));
+            DivVals.Add(Div);
         }
 
-		return MakeUnique<FClockDividerOperator>(Params.OperatorSettings,
-		                                         InTrig, InReset,
-		                                         MoveTemp(Outs),
-		                                         MoveTemp(DivVals));
-	}
+        return MakeUnique<FClockDividerOperator>(Params.OperatorSettings,
+                                                InTrig, InReset,
+                                                MoveTemp(Outs),
+                                                MoveTemp(DivVals));
+    }
 
 	void Execute()
 	{

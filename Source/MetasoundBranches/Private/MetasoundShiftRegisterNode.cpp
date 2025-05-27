@@ -42,10 +42,14 @@ namespace ShiftRegisterPrivate
 	FDataVertexMetadata MakeStageMetadata(int32 Index)
 	{
 #if WITH_EDITOR
-		const FText DisplayName = FText::Format(LOCTEXT("StageDisplayName", "Stage {0}"), Index + 1);
-		return { StageTooltip, DisplayName };
+    const int32 Num = Index + 1;
+    const FText DisplayName = FText::Format(
+        LOCTEXT("StageDisplayNameFmt", "Stage {0}"), Num);
+    const FText Tooltip = FText::Format(
+        LOCTEXT("StageTooltipFmt", "Shift-register output at stage {0}."), Num);
+    return { Tooltip, DisplayName };
 #else
-		return {};
+    return {};
 #endif
 	}
 
