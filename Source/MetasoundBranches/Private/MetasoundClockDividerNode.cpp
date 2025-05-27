@@ -1,266 +1,247 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
 #include "MetasoundBranches/Public/MetasoundClockDividerNode.h"
-#include "MetasoundExecutableOperator.h"     
-#include "MetasoundPrimitives.h"             
-#include "MetasoundNodeRegistrationMacro.h"  
-#include "MetasoundFacade.h"                
-#include "MetasoundParamHelper.h"            
+#include "Internationalization/Text.h"
+#include "MetasoundDataFactory.h"
+#include "MetasoundExecutableOperator.h"
+#include "MetasoundFacade.h"
+#include "MetasoundNodeRegistrationMacro.h"
+#include "MetasoundParamHelper.h"
+#include "MetasoundPrimitives.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundStandardNodes_ClockDividerNode"
+#define LOCTEXT_NAMESPACE "MetasoundBranches_ClockDivider"
 
 namespace Metasound
 {
-    namespace ClockDividerNodeVertexNames
-    {
-        METASOUND_PARAM(InputTrigger, "Trigger", "Input trigger to the clock divider.");
-        METASOUND_PARAM(InputReset, "Reset", "Reset the clock divider.");
+/* ------------------------------------------------------------------ */
+/*  Parameter names                                                   */
+/* ------------------------------------------------------------------ */
+namespace ClockDivParam
+{
+	METASOUND_PARAM(InputTrigger,  "Trigger", "Clock input.")
+	METASOUND_PARAM(InputReset,    "Reset",   "Reset counter.")
+}
 
-        METASOUND_PARAM(OutputTrigger1, "1", "Output trigger for division 1.");
-        METASOUND_PARAM(OutputTrigger2, "2", "Output trigger for division 2.");
-        METASOUND_PARAM(OutputTrigger3, "3", "Output trigger for division 3.");
-        METASOUND_PARAM(OutputTrigger4, "4", "Output trigger for division 4.");
-        METASOUND_PARAM(OutputTrigger5, "5", "Output trigger for division 5.");
-        METASOUND_PARAM(OutputTrigger6, "6", "Output trigger for division 6.");
-        METASOUND_PARAM(OutputTrigger7, "7", "Output trigger for division 7.");
-        METASOUND_PARAM(OutputTrigger8, "8", "Output trigger for division 8.");
-    }
+/* ------------------------------------------------------------------ */
+/*  Vertex helpers                                                    */
+/* ------------------------------------------------------------------ */
+namespace ClockDivPrivate
+{
+	inline int32 DivisionForIndex(int32 Idx, int32 Offset, int32 Mult)
+	{
+		return (Idx + 1 + Offset) * Mult;
+	}
 
-    class FClockDividerOperator : public TExecutableOperator<FClockDividerOperator>
-    {
-    public:
-        FClockDividerOperator(
-            const FOperatorSettings& InSettings,
-            const FTriggerReadRef& InInputTrigger,
-            const FTriggerReadRef& InInputReset)
-            : InputTrigger(InInputTrigger)
-            , InputReset(InInputReset)
-            , OutputTrigger1(FTriggerWriteRef::CreateNew(InSettings))
-            , OutputTrigger2(FTriggerWriteRef::CreateNew(InSettings))
-            , OutputTrigger3(FTriggerWriteRef::CreateNew(InSettings))
-            , OutputTrigger4(FTriggerWriteRef::CreateNew(InSettings))
-            , OutputTrigger5(FTriggerWriteRef::CreateNew(InSettings))
-            , OutputTrigger6(FTriggerWriteRef::CreateNew(InSettings))
-            , OutputTrigger7(FTriggerWriteRef::CreateNew(InSettings))
-            , OutputTrigger8(FTriggerWriteRef::CreateNew(InSettings))
-            , Counter(0)
-        {
-        }
+	FName MakeOutputName(int32 Div)
+	{
+		return FName(*FString::FromInt(Div));
+	}
 
-        static const FVertexInterface& DeclareVertexInterface()
-        {
-            using namespace ClockDividerNodeVertexNames;
+	FDataVertexMetadata MakeOutputMeta(int32 Div)
+	{
+#if WITH_EDITOR
+		const FText Tooltip = LOCTEXT("DivTooltip", "Trigger every N clocks.");
+		const FText Name    = FText::AsNumber(Div);
+		return { Tooltip, Name };
+#else
+		return {};
+#endif
+	}
 
-            static const FVertexInterface Interface(
-                FInputVertexInterface(
-                    TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputTrigger)),
-                    TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputReset))
-                ),
-                FOutputVertexInterface(
-                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTrigger1)),
-                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTrigger2)),
-                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTrigger3)),
-                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTrigger4)),
-                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTrigger5)),
-                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTrigger6)),
-                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTrigger7)),
-                    TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTrigger8))
-                )
-            );
+	FVertexInterface GetVertexInterface(int32 NumDiv, int32 Offset, int32 Mult)
+	{
+		using namespace ClockDivParam;
 
-            return Interface;
-        }
+		FInputVertexInterface  In;
+		FOutputVertexInterface Out;
 
-        static const FNodeClassMetadata& GetNodeInfo()
-        {
-            auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
-                {
-                    FVertexInterface NodeInterface = DeclareVertexInterface();
+		In.Add(TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputTrigger)));
+		In.Add(TInputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputReset)));
 
-                    FNodeClassMetadata Metadata;
+		for (int32 i = 0; i < NumDiv; ++i)
+		{
+			const int32 Div = DivisionForIndex(i, Offset, Mult);
+			Out.Add(TOutputDataVertex<FTrigger>(MakeOutputName(Div), MakeOutputMeta(Div)));
+		}
+		return { MoveTemp(In), MoveTemp(Out) };
+	}
 
-                    Metadata.ClassName = { TEXT("UE"), TEXT("Clock Divider"), TEXT("Trigger") };
-                    Metadata.MajorVersion = 1;
-                    Metadata.MinorVersion = 1;
-                    Metadata.DisplayName = METASOUND_LOCTEXT("ClockDividerNodeDisplayName", "Clock Divider");
-                    Metadata.Description = METASOUND_LOCTEXT("ClockDividerNodeDesc", "Divides an input trigger into multiple outputs.");
-                    Metadata.Author = "Charles Matthews";
-                    Metadata.PromptIfMissing = PluginNodeMissingPrompt;
-                    Metadata.DefaultInterface = NodeInterface;
-                    Metadata.CategoryHierarchy = {
-                        METASOUND_LOCTEXT("Custom", "Branches"),
-                        METASOUND_LOCTEXT("CustomSub", "Triggers")
-                    };
-                    Metadata.Keywords = TArray<FText>();
+	/* Operator-data passed from node config */
+	class FClockDivOperatorData : public TOperatorData<FClockDivOperatorData>
+	{
+	public:
+		static const FLazyName OperatorDataTypeName;
+		int32 NumDivisions;
+		int32 Offset;
+		int32 Multiplier;
+		FClockDivOperatorData(int32 N, int32 O, int32 M)
+			: NumDivisions(N), Offset(O), Multiplier(M) {}
+	};
+	const FLazyName FClockDivOperatorData::OperatorDataTypeName = "ClockDividerOpData";
+}
 
-                    return Metadata;
-                };
+/* ------------------------------------------------------------------ */
+/*  Operator                                                          */
+/* ------------------------------------------------------------------ */
+class FClockDividerOperator : public TExecutableOperator<FClockDividerOperator>
+{
+public:
+	FClockDividerOperator(const FOperatorSettings& Settings,
+	                      const FTriggerReadRef& InTrig,
+	                      const FTriggerReadRef& InReset,
+	                      TArray<FTriggerWriteRef> OutPins,
+	                      TArray<int32>            DivValues)
+		: Trigger(InTrig)
+		, Reset  (InReset)
+		, Outputs(MoveTemp(OutPins))
+		, Divs   (MoveTemp(DivValues))
+		, Counter(0)
+	{
+	}
 
-            static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
-            return Metadata;
-        }
-        
-        METASOUND_DISABLE_LEGACY_IO()
-        
-        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
-        {
-            using namespace ClockDividerNodeVertexNames;
+	virtual void BindInputs(FInputVertexInterfaceData& Data) override
+	{
+		using namespace ClockDivParam;
+		Data.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTrigger), Trigger);
+		Data.BindReadVertex(METASOUND_GET_PARAM_NAME(InputReset),   Reset);
+	}
 
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputTrigger), InputTrigger);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputReset), InputReset);
-        }
-        
-        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
-        {
-            using namespace ClockDividerNodeVertexNames;
+	virtual void BindOutputs(FOutputVertexInterfaceData& Data) override
+	{
+		for (int32 i = 0; i < Outputs.Num(); ++i)
+		{
+			Data.BindWriteVertex(ClockDivPrivate::MakeOutputName(Divs[i]), Outputs[i]);
+		}
+	}
 
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger1), OutputTrigger1);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger2), OutputTrigger2);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger3), OutputTrigger3);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger4), OutputTrigger4);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger5), OutputTrigger5);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger6), OutputTrigger6);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger7), OutputTrigger7);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(OutputTrigger8), OutputTrigger8);
-        }
+	METASOUND_DISABLE_LEGACY_IO()
 
-        static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
-        {
-            using namespace ClockDividerNodeVertexNames;
+	static const FNodeClassMetadata& GetNodeInfo()
+	{
+		static const FNodeClassMetadata M = []()
+		{
+			FNodeClassMetadata D;
+			D.ClassName        = { TEXT("UE"), TEXT("Clock Divider"), TEXT("Trigger") };
+			D.MajorVersion     = 1;
+			D.MinorVersion     = 0;
+			D.DisplayName      = LOCTEXT("ClockDivDisplay", "Clock Divider");
+			D.Description      = LOCTEXT("ClockDivDesc", "Configurable N-way trigger divider.");
+			D.Author           = TEXT("Charles Matthews");
+			D.PromptIfMissing  = PluginNodeMissingPrompt;
+			D.DefaultInterface = ClockDivPrivate::GetVertexInterface(4,0,1);
+			D.CategoryHierarchy =
+			{
+				LOCTEXT("Branches","Branches"),
+				LOCTEXT("Trigger","Triggers")
+			};
+			return D;
+		}();
+		return M;
+	}
 
-            const FInputVertexInterfaceData& InputData = InParams.InputData;
-            const Metasound::FInputVertexInterface& InputInterface = DeclareVertexInterface().GetInputInterface();
+	static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& Params,
+	                                            FBuildResults&)
+	{
+		using namespace ClockDivParam;
+		using namespace ClockDivPrivate;
 
-            TDataReadReference<FTrigger> InputTrigger = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTrigger), InParams.OperatorSettings);
-            TDataReadReference<FTrigger> InputReset = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputReset), InParams.OperatorSettings);
+		const auto& InData = Params.InputData;
 
-            return MakeUnique<FClockDividerOperator>(
-                InParams.OperatorSettings,
-                InputTrigger,
-                InputReset
-            );
-        }
+		TDataReadReference<FTrigger> InTrig  =
+			InData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTrigger), Params.OperatorSettings);
+		TDataReadReference<FTrigger> InReset =
+			InData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputReset),   Params.OperatorSettings);
 
-        void Execute()
-        {
-            // Handle reset
-            InputReset->ExecuteBlock(
-                // Pre-trigger lambda
-                [](int32 StartFrame, int32 EndFrame)
-                {
-                    // No action needed before triggers
-                },
+		const FClockDivOperatorData* Cfg =
+			CastOperatorData<const FClockDivOperatorData>(Params.Node.GetOperatorData().Get());
 
-                // On-trigger lambda
-                [&](int32 StartFrame, int32 EndFrame)
-                {
-                    Counter = 0;
-                }
-            );
+		int32 Num = Cfg ? Cfg->NumDivisions : 4;
+		int32 Off = Cfg ? Cfg->Offset       : 0;
+		int32 Mul = Cfg ? Cfg->Multiplier   : 1;
 
-            // Initialize output triggers
-            OutputTrigger1->AdvanceBlock();
-            OutputTrigger2->AdvanceBlock();
-            OutputTrigger3->AdvanceBlock();
-            OutputTrigger4->AdvanceBlock();
-            OutputTrigger5->AdvanceBlock();
-            OutputTrigger6->AdvanceBlock();
-            OutputTrigger7->AdvanceBlock();
-            OutputTrigger8->AdvanceBlock();
+		TArray<FTriggerWriteRef> Outs;
+		TArray<int32>            DivVals;
+		Outs.Reserve(Num);
+		DivVals.Reserve(Num);
 
-            // Handle input trigger
-            InputTrigger->ExecuteBlock(
-                // Pre-trigger lambda
-                [](int32 StartFrame, int32 EndFrame)
-                {
-                    // No action needed before triggers
-                },
+		for (int32 i = 0; i < Num; ++i)
+		{
+			int32 Div = DivisionForIndex(i, Off, Mul);
+			Outs.Emplace(FTriggerWriteRef::CreateNew(Params.OperatorSettings));
+			DivVals.Add(Div);
+		}
 
-                // On-trigger lambda
-                [&](int32 StartFrame, int32 EndFrame)
-                {
-                    Counter = (Counter + 1) % 8;
+		return MakeUnique<FClockDividerOperator>(Params.OperatorSettings,
+		                                         InTrig, InReset,
+		                                         MoveTemp(Outs),
+		                                         MoveTemp(DivVals));
+	}
 
-                    switch (Counter)
-                    {
-                        case 0:
-                            OutputTrigger1->TriggerFrame(StartFrame);  
-                            break;
+	void Execute()
+	{
+		for (FTriggerWriteRef& Out : Outputs)
+		{
+			Out->AdvanceBlock();
+		}
 
-                        case 1:
-                            OutputTrigger1->TriggerFrame(StartFrame);  
-                            OutputTrigger2->TriggerFrame(StartFrame);
-                            break;
+		Reset->ExecuteBlock([](int32, int32) {},
+			[&](int32, int32) { Counter = 0; });
 
-                        case 2:
-                            OutputTrigger1->TriggerFrame(StartFrame); 
-                            OutputTrigger3->TriggerFrame(StartFrame);
-                            break;
+		Trigger->ExecuteBlock([](int32, int32) {},
+			[&](int32 Start, int32)
+			{
+				++Counter;
+				for (int32 i = 0; i < Divs.Num(); ++i)
+				{
+					if (Counter % Divs[i] == 0)
+					{
+						Outputs[i]->TriggerFrame(Start);
+					}
+				}
+			});
+	}
 
-                        case 3:
-                            OutputTrigger1->TriggerFrame(StartFrame);  
-                            OutputTrigger2->TriggerFrame(StartFrame);
-                            OutputTrigger4->TriggerFrame(StartFrame);
-                            break;
+private:
+	FTriggerReadRef        Trigger;
+	FTriggerReadRef        Reset;
+	TArray<FTriggerWriteRef> Outputs;
+	TArray<int32>            Divs;
+	int32                    Counter;
+};
 
-                        case 4:
-                            OutputTrigger1->TriggerFrame(StartFrame);  
-                            OutputTrigger5->TriggerFrame(StartFrame);
-                            break;
+/* ------------------------------------------------------------------ */
+/*  Facade & registration                                             */
+/* ------------------------------------------------------------------ */
+using FClockDividerNode = TNodeFacade<FClockDividerOperator>;
+METASOUND_REGISTER_NODE_AND_CONFIGURATION(FClockDividerNode, FMetaSoundClockDividerNodeConfiguration);
 
-                        case 5:
-                            OutputTrigger1->TriggerFrame(StartFrame);  
-                            OutputTrigger2->TriggerFrame(StartFrame);
-                            OutputTrigger3->TriggerFrame(StartFrame);
-                            OutputTrigger6->TriggerFrame(StartFrame);
-                            break;
+} // namespace Metasound
 
-                        case 6:
-                            OutputTrigger1->TriggerFrame(StartFrame);
-                            OutputTrigger7->TriggerFrame(StartFrame);
-                            break;
+/* ------------------------------------------------------------------ */
+/*  Config implementation                                             */
+/* ------------------------------------------------------------------ */
+FMetaSoundClockDividerNodeConfiguration::FMetaSoundClockDividerNodeConfiguration()
+	: NumDivisions(8)
+	, Offset(0)
+	, Multiplier(1)
+{
+}
 
-                        case 7:
-                            OutputTrigger1->TriggerFrame(StartFrame);
-                            OutputTrigger2->TriggerFrame(StartFrame);
-                            OutputTrigger4->TriggerFrame(StartFrame);
-                            OutputTrigger8->TriggerFrame(StartFrame);
-                            break;
+TInstancedStruct<FMetasoundFrontendClassInterface>
+FMetaSoundClockDividerNodeConfiguration::OverrideDefaultInterface(const FMetasoundFrontendClass&) const
+{
+	using namespace Metasound::ClockDivPrivate;
+	return TInstancedStruct<FMetasoundFrontendClassInterface>::Make(
+		FMetasoundFrontendClassInterface::GenerateClassInterface(
+			GetVertexInterface(NumDivisions, Offset, Multiplier)));
+}
 
-                        default:
-                            break;
-                    }
-                }
-            );
-        }
-
-    private:
-        FTriggerReadRef InputTrigger;
-        FTriggerReadRef InputReset;
-
-        FTriggerWriteRef OutputTrigger1;
-        FTriggerWriteRef OutputTrigger2;
-        FTriggerWriteRef OutputTrigger3;
-        FTriggerWriteRef OutputTrigger4;
-        FTriggerWriteRef OutputTrigger5;
-        FTriggerWriteRef OutputTrigger6;
-        FTriggerWriteRef OutputTrigger7;
-        FTriggerWriteRef OutputTrigger8;
-
-        int32 Counter;
-    };
-
-    class FClockDividerNode : public FNodeFacade
-    {
-    public:
-        FClockDividerNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FClockDividerOperator>())
-        {
-        }
-    };
-
-    METASOUND_REGISTER_NODE(FClockDividerNode);
+TSharedPtr<const Metasound::IOperatorData>
+FMetaSoundClockDividerNodeConfiguration::GetOperatorData() const
+{
+	using namespace Metasound::ClockDivPrivate;
+	return MakeShared<FClockDivOperatorData>(NumDivisions, Offset, Multiplier);
 }
 
 #undef LOCTEXT_NAMESPACE
