@@ -200,7 +200,7 @@ namespace Metasound
 
 			for (int32 ch = 0; ch < Filters.Num(); ++ch)
 			{
-				TArrayView<float> Chan = OutputCat->GetChannel(ch);
+				TArrayView<float> Chan = OutputCAT->GetChannel(ch);
 				FLadder& L  = Filters[ch];
 
 				for (int32 i = 0; i < NumFrames; ++i)
