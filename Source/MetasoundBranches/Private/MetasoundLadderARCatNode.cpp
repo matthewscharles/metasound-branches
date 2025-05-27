@@ -131,8 +131,13 @@ namespace Metasound
 
 			/* Output CAT (same concrete channel type as input) --------*/
 			const Audio::FChannelTypeFamily& ChannelType = InCAT->GetType();
-			auto OutCAT = FChannelAgnosticTypeWriteRef::CreateNew(ChannelType, InParams.OperatorSettings);
+			// auto OutCAT = FChannelAgnosticTypeWriteRef::CreateNew(ChannelType, InParams.OperatorSettings);
 
+            auto OutCAT = FChannelAgnosticTypeWriteRef::CreateNew(
+                InParams.OperatorSettings,
+                ChannelType.GetName()
+            );
+            
 			/* Per-channel filter bank --------------------------------*/
 			const int32 NumCh = ChannelType.NumChannels();
 			TArray<FLadder> Filters;
