@@ -34,12 +34,13 @@ namespace ClockDivPrivate
 		return FName(*FString::FromInt(Div));
 	}
 
-	FDataVertexMetadata MakeOutputMeta(int32 Div)
+	FDataVertexMetadata MakeOutputMeta(int32 Div, int32 SortIdx)
 	{
 #if WITH_EDITOR
 		FDataVertexMetadata M;
 		M.Tooltip     = FText::Format(LOCTEXT("DivTooltipFmt", "Trigger every {0} clocks."), FText::AsNumber(Div));
 		M.DisplayName = FText::AsNumber(Div);
+		M.SortOrder   = SortIdx;          // ensures UI order
 		return M;
 #else
 		return {};
@@ -58,7 +59,7 @@ namespace ClockDivPrivate
 		for (int32 i = 0; i < NumDiv; ++i)
 		{
 			const int32 Div = DivisionForIndex(i, Offset, Mult);
-			Out.Add(TOutputDataVertex<FTrigger>(MakeOutputName(Div), MakeOutputMeta(Div)));
+			Out.Add(TOutputDataVertex<FTrigger>(MakeOutputName(Div), MakeOutputMeta(Div, i)));
 		}
 		return { MoveTemp(In), MoveTemp(Out) };
 	}
