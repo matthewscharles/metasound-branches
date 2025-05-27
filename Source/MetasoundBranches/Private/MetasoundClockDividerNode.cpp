@@ -44,7 +44,7 @@ namespace ClockDivPrivate
     const FText Tooltip = FText::Format(
         LOCTEXT("DivTooltipFmt", "Trigger every {0} clocks."), FText::AsNumber(Div));
     const FText DisplayName = FText::Format(
-        LOCTEXT("DivDisplayNameFmt", "Stage {0}"), Num);
+        LOCTEXT("DivDisplayNameFmt", "Div {0}"), Num);
     return { Tooltip, DisplayName };
 #else
     return {};
