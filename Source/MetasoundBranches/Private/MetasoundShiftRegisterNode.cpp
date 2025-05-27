@@ -30,17 +30,14 @@ namespace ShiftRegisterParam
 
 namespace ShiftRegisterPrivate
 {
-	const FLazyName StageBaseName{ "Stage" };
 #if WITH_EDITOR
 	const FText StageTooltip = LOCTEXT("Stage_Tooltip", "Shift-register output.");
 #endif
 
 	FName MakeStageVertexName(int32 Index)
-	{
-		FName N = StageBaseName;
-		N.SetNumber(Index + 1);
-		return N;
-	}
+    {
+        return FName(*FString::Printf(TEXT("Stage %d"), Index + 1));
+    }
 
 	FDataVertexMetadata MakeStageMetadata(int32 Index)
 	{
