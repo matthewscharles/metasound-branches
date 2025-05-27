@@ -165,12 +165,13 @@ public:
 		Outs.Reserve(Num);
 		DivVals.Reserve(Num);
 
-		for (int32 i = 0; i < Num; ++i)
-		{
-			int32 Div = DivisionForIndex(i, Off, Mul);
-			Outs.Emplace(FTriggerWriteRef::CreateNew(Params.OperatorSettings));
-			DivVals.Add(Div);
-		}
+		for (int32 i = 0; i < NumDiv; ++i)
+        {
+            const int32 Div      = DivisionForIndex(i, Offset, Mult);
+            FDataVertexMetadata M = MakeOutputMeta(Div);
+            M.SortOrder = i;                                  // <- add this line
+            Out.Add(TOutputDataVertex<FTrigger>(MakeOutputName(Div), M));
+        }
 
 		return MakeUnique<FClockDividerOperator>(Params.OperatorSettings,
 		                                         InTrig, InReset,
