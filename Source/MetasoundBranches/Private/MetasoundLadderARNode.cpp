@@ -246,8 +246,6 @@ METASOUND_REGISTER_NODE_AND_CONFIGURATION(FLadderArNode, FMetaSoundLadderARNodeC
 /* ------------------------------------------------------------------ */
 /*  Configuration implementation                                      */
 /* ------------------------------------------------------------------ */
-FMetaSoundLadderARNodeConfiguration::FMetaSoundLadderARNodeConfiguration()
-	: NumChannels(2) {}
 
 TInstancedStruct<FMetasoundFrontendClassInterface>
 FMetaSoundLadderARNodeConfiguration::OverrideDefaultInterface(const FMetasoundFrontendClass&) const
