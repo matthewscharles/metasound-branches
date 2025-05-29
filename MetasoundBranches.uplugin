@@ -35,7 +35,12 @@
     {
         "Name": "MetasoundExperimental",
         "Enabled": true
+    },
+     {
+        "Name": "AudioExperimentalRuntime",
+        "Enabled": true
     }
     ],
+    
     
 }
