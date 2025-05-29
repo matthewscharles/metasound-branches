@@ -2,14 +2,28 @@
 
 #pragma once
 
-#include "Metasound.h"
+#include "MetasoundFrontendDocument.h"
+#include "MetasoundOperatorData.h"
 #include "MetasoundNode.h"
+#include "UObject/ObjectMacros.h"
+#include "MetasoundLadderARNode.generated.h"
 
-namespace MetasoundBranches
+USTRUCT()
+struct FMetaSoundLadderARNodeConfiguration : public FMetaSoundFrontendNodeConfiguration
 {
-    class FMetasoundLadderARNode : public Metasound::FNode
-    {
-    public:
-        FMetasoundLadderARNode();
-    };
-}
+	GENERATED_BODY()
+
+	FMetaSoundLadderARNodeConfiguration()
+		: NumChannels(1)
+	{
+	}
+
+	UPROPERTY(EditAnywhere, Category="General", meta=(ClampMin="1", ClampMax="32"))
+	int32 NumChannels;
+
+	virtual TInstancedStruct<FMetasoundFrontendClassInterface>
+	OverrideDefaultInterface(const FMetasoundFrontendClass& InClass) const override;
+
+	virtual TSharedPtr<const Metasound::IOperatorData>
+	GetOperatorData() const override;
+};

@@ -1,210 +1,266 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
 #include "MetasoundBranches/Public/MetasoundLadderARNode.h"
+#include "Internationalization/Text.h"
+#include "MetasoundDataFactory.h"
 #include "MetasoundExecutableOperator.h"
-#include "MetasoundPrimitives.h"
-#include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundFacade.h"
+#include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundParamHelper.h"
-#include "Math/UnrealMathUtility.h"
+#include "MetasoundPrimitives.h"
+#include "MetasoundStandardNodesCategories.h"
 #include "DSP/Filter.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundLadderARNode"
+#define LOCTEXT_NAMESPACE "MetasoundBranches_LadderAR"
 
 namespace Metasound
 {
-    namespace LadderArVertexNames
-    {
-        METASOUND_PARAM(InputSignal,        "In",         "Audio input to the ladder filter.");
-        METASOUND_PARAM(InputCutoff,        "Cutoff",     "Base cutoff frequency.");
-        METASOUND_PARAM(InputResonance,     "Resonance",  "Base resonance.");
-        METASOUND_PARAM(InputCutoffMod,     "Cutoff Modulation", "Audio-rate modulation signal for cutoff frequency.");
-        METASOUND_PARAM(InputResonanceMod,  "Resonance Modulation",    "Audio-rate modulation signal for resonance.");
-        METASOUND_PARAM(OutputSignal,       "Out",        "Filtered audio output.");
-    }
+/* ------------------------------------------------------------------ */
+/*  Parameter names                                                   */
+/* ------------------------------------------------------------------ */
+namespace LadderArParam
+{
+	METASOUND_PARAM(InputCutoff,        "Cutoff",        "Base cutoff frequency.")
+	METASOUND_PARAM(InputResonance,     "Resonance",     "Base resonance.")
+	METASOUND_PARAM(InputCutoffMod,     "Cutoff Mod",    "Audio-rate cutoff modulation.")
+	METASOUND_PARAM(InputResonanceMod,  "Resonance Mod", "Audio-rate resonance modulation.")
+}
 
-    class FLadderArOperator : public TExecutableOperator<FLadderArOperator>
-    {
-    public:
-        FLadderArOperator(
-            const FOperatorSettings& InSettings,
-            const FAudioBufferReadRef& InAudioInput,
-            const FFloatReadRef& InCutoff,
-            const FFloatReadRef& InResonance,
-            const FAudioBufferReadRef& InCutoffMod,
-            const FAudioBufferReadRef& InResonanceMod
-        )
-            : AudioInput(InAudioInput)
-            , BaseCutoff(InCutoff)
-            , BaseResonance(InResonance)
-            , CutoffMod(InCutoffMod)
-            , ResonanceMod(InResonanceMod)
-            , AudioOutput(FAudioBufferWriteRef::CreateNew(InSettings))
-            , BlockSize(InSettings.GetNumFramesPerBlock())
-            , SampleRate(InSettings.GetSampleRate())
-            , MaxCutoffFrequency(0.5f * SampleRate)
-        {
-            LadderFilter.Init(SampleRate, 1);
-            check(AudioOutput->Num() == BlockSize);
-        }
+/* ------------------------------------------------------------------ */
+/*  Vertex-building helpers                                           */
+/* ------------------------------------------------------------------ */
+namespace LadderArPrivate
+{
+	/* Make channel pin names “In0”, “In1”, … and “Out0”, … */
+	inline FName MakeInName (int32 Idx) { FName N = "In";  N.SetNumber(Idx); return N; }
+	inline FName MakeOutName(int32 Idx) { FName N = "Out"; N.SetNumber(Idx); return N; }
 
-        static const FVertexInterface& DeclareVertexInterface()
-        {
-            using namespace LadderArVertexNames;
+#if WITH_EDITOR
+	const FText InTooltip  = LOCTEXT("InChanTip",  "Audio input channel.");
+	const FText OutTooltip = LOCTEXT("OutChanTip", "Filtered output channel.");
+#endif
 
-            static const FVertexInterface Interface(
-                FInputVertexInterface(
-                    TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputSignal)),
-                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputCutoff)),
-                    TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputResonance)),
-                    TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputCutoffMod)),
-                    TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputResonanceMod))
-                ),
-                FOutputVertexInterface(
-                    TOutputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputSignal))
-                )
-            );
+	FVertexInterface GetVertexInterface(int32 NumCh)
+	{
+		using namespace LadderArParam;
 
-            return Interface;
-        }
+		FInputVertexInterface  In;
+		FOutputVertexInterface Out;
 
-        static const FNodeClassMetadata& GetNodeInfo()
-        {
-            auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
-            {
-                FNodeClassMetadata Metadata;
-                Metadata.ClassName = { TEXT("UE"), TEXT("Ladder (AR)"), TEXT("Audio") };
-                Metadata.MajorVersion = 1;
-                Metadata.MinorVersion = 0;
-                Metadata.DisplayName = LOCTEXT("LadderArDisplayName", "Ladder (AR)");
-                Metadata.Description = LOCTEXT("LadderArDesc", "Ladder filter with audio-rate modulation for cutoff and resonance.");
-                Metadata.Author = TEXT("Charles Matthews");
-                Metadata.PromptIfMissing = PluginNodeMissingPrompt;
-                Metadata.DefaultInterface = DeclareVertexInterface();
-                Metadata.CategoryHierarchy = {
-                    METASOUND_LOCTEXT("Custom", "Branches"),
-                    METASOUND_LOCTEXT("CustomSub", "Filters")
-                };
-                return Metadata;
-            };
+		In.Add(TInputDataVertex<float>      (METASOUND_GET_PARAM_NAME_AND_METADATA(InputCutoff)));
+		In.Add(TInputDataVertex<float>      (METASOUND_GET_PARAM_NAME_AND_METADATA(InputResonance)));
+		In.Add(TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputCutoffMod)));
+		In.Add(TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputResonanceMod)));
 
-            static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
-            return Metadata;
-        }
+		for (int32 i = 0; i < NumCh; ++i)
+		{
+#if WITH_EDITOR
+			const FText DispIn  = FText::Format(LOCTEXT("InDisp",  "In {0}"),  i);
+			const FText DispOut = FText::Format(LOCTEXT("OutDisp", "Out {0}"), i);
+			In .Add(TInputDataVertex <FAudioBuffer>(MakeInName (i), { InTooltip,  DispIn  }));
+			Out.Add(TOutputDataVertex<FAudioBuffer>(MakeOutName(i), { OutTooltip, DispOut }));
+#else
+			In .Add(TInputDataVertex <FAudioBuffer>(MakeInName (i), {}));
+			Out.Add(TOutputDataVertex<FAudioBuffer>(MakeOutName(i), {}));
+#endif
+		}
 
-        static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
-        {
-            using namespace LadderArVertexNames;
+		return { MoveTemp(In), MoveTemp(Out) };
+	}
 
-            const FInputVertexInterfaceData& InputData = InParams.InputData;
+	/* Operator-data passed from config to operator */
+	class FLadderOpData : public TOperatorData<FLadderOpData>
+	{
+	public:
+		static const FLazyName OperatorDataTypeName;
+		int32 NumChannels;
+		explicit FLadderOpData(int32 N) : NumChannels(N) {}
+	};
+	const FLazyName FLadderOpData::OperatorDataTypeName = "LadderAR_OpData";
+}
 
-            TDataReadReference<FAudioBuffer> InputSignal = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(
-                METASOUND_GET_PARAM_NAME(InputSignal), InParams.OperatorSettings);
+/* ------------------------------------------------------------------ */
+/*  Operator                                                          */
+/* ------------------------------------------------------------------ */
+class FLadderArOperator : public TExecutableOperator<FLadderArOperator>
+{
+public:
+	FLadderArOperator(const FOperatorSettings&     Settings,
+	                  TArray<FAudioBufferReadRef>  InCh,
+	                  const FFloatReadRef&         InCutoff,
+	                  const FFloatReadRef&         InResonance,
+	                  const FAudioBufferReadRef&   InCutoffMod,
+	                  const FAudioBufferReadRef&   InResMod)
+		: Inputs      (MoveTemp(InCh))
+		, Cutoff      (InCutoff)
+		, Resonance   (InResonance)
+		, CutoffMod   (InCutoffMod)
+		, ResMod      (InResMod)
+		, SampleRate  (Settings.GetSampleRate())
+		, BlockSize   (Settings.GetNumFramesPerBlock())
+		, MaxCutoffHz (0.5f * SampleRate)
+	{
+		for (int32 i = 0; i < Inputs.Num(); ++i)
+		{
+			Outputs.Add(FAudioBufferWriteRef::CreateNew(Settings));
+			Filters.Add(Audio::FLadderFilter());
+			Filters.Last().Init(SampleRate, 1);
+		}
+	}
 
-            TDataReadReference<float> BaseCutoff = InputData.GetOrCreateDefaultDataReadReference<float>(
-                METASOUND_GET_PARAM_NAME(InputCutoff), InParams.OperatorSettings);
+	/* ---------------- Bind ---------------- */
+	void BindInputs(FInputVertexInterfaceData& D) override
+	{
+		using namespace LadderArParam;
+		using namespace LadderArPrivate;
 
-            TDataReadReference<float> BaseResonance = InputData.GetOrCreateDefaultDataReadReference<float>(
-                METASOUND_GET_PARAM_NAME(InputResonance), InParams.OperatorSettings);
+		D.BindReadVertex(METASOUND_GET_PARAM_NAME(InputCutoff),       Cutoff);
+		D.BindReadVertex(METASOUND_GET_PARAM_NAME(InputResonance),    Resonance);
+		D.BindReadVertex(METASOUND_GET_PARAM_NAME(InputCutoffMod),    CutoffMod);
+		D.BindReadVertex(METASOUND_GET_PARAM_NAME(InputResonanceMod), ResMod);
 
-            TDataReadReference<FAudioBuffer> CutoffMod = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(
-                METASOUND_GET_PARAM_NAME(InputCutoffMod), InParams.OperatorSettings);
+		for (int32 i = 0; i < Inputs.Num(); ++i)
+		{
+			D.BindReadVertex(MakeInName(i), Inputs[i]);
+		}
+	}
 
-            TDataReadReference<FAudioBuffer> ResMod = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(
-                METASOUND_GET_PARAM_NAME(InputResonanceMod), InParams.OperatorSettings);
+	void BindOutputs(FOutputVertexInterfaceData& D) override
+	{
+		using namespace LadderArPrivate;
+		for (int32 i = 0; i < Outputs.Num(); ++i)
+		{
+			D.BindWriteVertex(MakeOutName(i), Outputs[i]);
+		}
+	}
 
-            return MakeUnique<FLadderArOperator>(
-                InParams.OperatorSettings,
-                InputSignal,
-                BaseCutoff,
-                BaseResonance,
-                CutoffMod,
-                ResMod
-            );
-        }
-        
-        METASOUND_DISABLE_LEGACY_IO()
-        
-        virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
-        {
-            using namespace LadderArVertexNames;
+	METASOUND_DISABLE_LEGACY_IO()
 
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputSignal), AudioInput);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputCutoff), BaseCutoff);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputResonance), BaseResonance);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputCutoffMod), CutoffMod);
-            InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputResonanceMod), ResonanceMod);
-        }
-        
-        virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
-        {
-            using namespace LadderArVertexNames;
+	/* ---------------- Factory ------------- */
+	static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& P,
+	                                            FBuildResults&)
+	{
+		using namespace LadderArParam;
+		using namespace LadderArPrivate;
 
-            InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputSignal), AudioOutput);
-        }
+		const auto& InData = P.InputData;
 
-        virtual void Execute()
-        {
-            const float* InAudio        = AudioInput->GetData();
-            const float* CutoffModData  = CutoffMod->GetData();
-            const float* ResModData     = ResonanceMod->GetData();
-            float* OutAudio             = AudioOutput->GetData();
+		auto Cutoff     = InData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputCutoff),       P.OperatorSettings);
+		auto Resonance  = InData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputResonance),    P.OperatorSettings);
+		auto CutoffMod  = InData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputCutoffMod), P.OperatorSettings);
+		auto ResMod     = InData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputResonanceMod), P.OperatorSettings);
 
-            const int32 NumFrames = AudioInput->Num();
+		const auto* Cfg = CastOperatorData<const FLadderOpData>(P.Node.GetOperatorData().Get());
+		const int32 NumCh = Cfg ? Cfg->NumChannels : 2;
 
-            for (int32 i = 0; i < NumFrames; ++i)
-            {
-                float CutoffVal = (*BaseCutoff) + CutoffModData[i];
-                CutoffVal = FMath::Clamp(CutoffVal, 0.0f, MaxCutoffFrequency);
+		TArray<FAudioBufferReadRef> InCh;
+		InCh.Reserve(NumCh);
 
-                float ResonanceVal = (*BaseResonance) + ResModData[i];
-                ResonanceVal = FMath::Clamp(ResonanceVal, 1.0f, 10.0f);
+		for (int32 i = 0; i < NumCh; ++i)
+		{
+			InCh.Add(InData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(MakeInName(i), P.OperatorSettings));
+		}
 
-                LadderFilter.SetFrequency(CutoffVal);
-                LadderFilter.SetQ(ResonanceVal);
-                LadderFilter.Update();
+		return MakeUnique<FLadderArOperator>(P.OperatorSettings,
+		                                     MoveTemp(InCh),
+		                                     Cutoff, Resonance,
+		                                     CutoffMod, ResMod);
+	}
 
-                float SingleInSample = InAudio[i];
-                float SingleOutSample = 0.0f;
+	/* ---------------- Execute ------------- */
+	void Execute()
+	{
+		const float* CutoffM = CutoffMod->GetData();
+		const float* ResM    = ResMod->GetData();
 
-                LadderFilter.ProcessAudio(&SingleInSample, 1 /* NumSamples */, &SingleOutSample);
+		for (int32 ch = 0; ch < Inputs.Num(); ++ch)
+		{
+			const float* In  = Inputs [ch]->GetData();
+			      float* Out = Outputs[ch]->GetData();
+			      auto&  Flt = Filters[ch];
 
-                OutAudio[i] = SingleOutSample;
-            }
-        }
+			for (int32 i = 0; i < BlockSize; ++i)
+			{
+				float Fc = *Cutoff    + CutoffM[i];
+				float Q  = *Resonance + ResM[i];
 
-    private:
-        // Inputs
-        FAudioBufferReadRef  AudioInput;
-        FFloatReadRef        BaseCutoff;
-        FFloatReadRef        BaseResonance;
-        FAudioBufferReadRef  CutoffMod;
-        FAudioBufferReadRef  ResonanceMod;
+				Fc = FMath::Clamp(Fc, 0.0f, MaxCutoffHz);
+				Q  = FMath::Clamp(Q , 1.0f, 10.0f);
 
-        // Output
-        FAudioBufferWriteRef AudioOutput;
+				Flt.SetFrequency(Fc);
+				Flt.SetQ(Q);
+				Flt.Update();
 
-        const int32 BlockSize;
-        const float SampleRate;
-        const float MaxCutoffFrequency;
-        Audio::FLadderFilter LadderFilter;
-    };
+				float x = In[i];
+				Flt.ProcessAudio(&x, 1, &Out[i]);
+			}
+		}
+	}
 
-    class FLadderArNode : public FNodeFacade
-    {
-    public:
-        FLadderArNode(const FNodeInitData& InitData)
-            : FNodeFacade(
-                InitData.InstanceName,
-                InitData.InstanceID,
-                TFacadeOperatorClass<FLadderArOperator>()
-              )
-        {
-        }
-    };
+private:
+	TArray<FAudioBufferReadRef>  Inputs;
+	TArray<FAudioBufferWriteRef> Outputs;
+	TArray<Audio::FLadderFilter> Filters;
 
-    METASOUND_REGISTER_NODE(FLadderArNode);
+	FFloatReadRef         Cutoff;
+	FFloatReadRef         Resonance;
+	FAudioBufferReadRef   CutoffMod;
+	FAudioBufferReadRef   ResMod;
+
+	const float SampleRate;
+	const int32 BlockSize;
+	const float MaxCutoffHz;
+};
+
+/* ------------------------------------------------------------------ */
+/*  Metadata + registration                                           */
+/* ------------------------------------------------------------------ */
+static const FNodeClassMetadata& GetLadderNodeInfo()
+{
+	using namespace LadderArPrivate;
+
+	static const FNodeClassMetadata Meta = []()
+	{
+		FNodeClassMetadata M;
+		M.ClassName        = { TEXT("UE"), TEXT("Ladder (AR)"), TEXT("Audio") };
+		M.MajorVersion     = 2;
+		M.MinorVersion     = 0;
+		M.DisplayName      = LOCTEXT("LadderARDisplay", "Ladder (AR)");
+		M.Description      = LOCTEXT("LadderARDesc", "Multi-channel ladder filter with audio-rate cutoff and resonance modulation.");
+		M.Author           = TEXT("Charles Matthews");
+		M.PromptIfMissing  = PluginNodeMissingPrompt;
+		M.DefaultInterface = GetVertexInterface(2);  // preview as stereo
+		M.CategoryHierarchy = { LOCTEXT("BranchesCat","Branches"), LOCTEXT("FilterCat","Filters") };
+		return M;
+	}();
+	return Meta;
+}
+
+using FLadderArNode = TNodeFacade<FLadderArOperator>;
+METASOUND_REGISTER_NODE_AND_CONFIGURATION(FLadderArNode, FMetaSoundLadderARNodeConfiguration);
+
+} // namespace Metasound
+
+/* ------------------------------------------------------------------ */
+/*  Configuration implementation                                      */
+/* ------------------------------------------------------------------ */
+FMetaSoundLadderARNodeConfiguration::FMetaSoundLadderARNodeConfiguration()
+	: NumChannels(2) {}
+
+TInstancedStruct<FMetasoundFrontendClassInterface>
+FMetaSoundLadderARNodeConfiguration::OverrideDefaultInterface(const FMetasoundFrontendClass&) const
+{
+	using namespace Metasound::LadderArPrivate;
+	return TInstancedStruct<FMetasoundFrontendClassInterface>::Make(
+		FMetasoundFrontendClassInterface::GenerateClassInterface(GetVertexInterface(NumChannels)));
+}
+
+TSharedPtr<const Metasound::IOperatorData>
+FMetaSoundLadderARNodeConfiguration::GetOperatorData() const
+{
+	using namespace Metasound::LadderArPrivate;
+	return MakeShared<FLadderOpData>(NumChannels);
 }
 
 #undef LOCTEXT_NAMESPACE
