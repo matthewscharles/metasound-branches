@@ -10,7 +10,6 @@
 #include "MetasoundPrimitives.h"
 #include "MetasoundStandardNodesCategories.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
-#include "MetasoundAudioBuffer.h" 
 
 #define LOCTEXT_NAMESPACE "MetasoundBranches_ShiftRegister"
 
