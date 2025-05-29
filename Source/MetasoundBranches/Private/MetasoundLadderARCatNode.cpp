@@ -1,11 +1,10 @@
 // Copyright 2025 Charles Matthews.  All Rights Reserved.
+#include "MetasoundBranches/Public/MetasoundLadderARCatNode.h"
 
 #include "MetasoundChannelAgnosticType.h"        // FChannelAgnosticType, FChannelAgnosticTypeReadRef, WriteRef
 #include "TypeFamily/ChannelTypeFamily.h"        // FChannelTypeFamily, FTranscoder
 #include "DSP/MultiMono.h"                       // TStackArrayOfPointers, MakeMultiMonoPointersFromView
 
-
-#include "MetasoundBranches/Public/MetasoundLadderARCatNode.h"
 
 #include "DSP/Filter.h"
 #include "Math/UnrealMathUtility.h"
