@@ -138,6 +138,31 @@ public:
 
 	METASOUND_DISABLE_LEGACY_IO()
 
+    
+    /* ------------------------------------------------------------------ */
+    /*  Metadata + registration                                           */
+    /* ------------------------------------------------------------------ */
+    static const FNodeClassMetadata& GetLadderNodeInfo()
+    {
+        using namespace LadderArPrivate;
+
+        static const FNodeClassMetadata Meta = []()
+        {
+            FNodeClassMetadata M;
+            M.ClassName        = { TEXT("UE"), TEXT("Ladder (AR)"), TEXT("Audio") };
+            M.MajorVersion     = 2;
+            M.MinorVersion     = 0;
+            M.DisplayName      = LOCTEXT("LadderARDisplay", "Ladder (AR)");
+            M.Description      = LOCTEXT("LadderARDesc", "Multi-channel ladder filter with audio-rate cutoff and resonance modulation.");
+            M.Author           = TEXT("Charles Matthews");
+            M.PromptIfMissing  = PluginNodeMissingPrompt;
+            M.DefaultInterface = GetVertexInterface(2);  // preview as stereo
+            M.CategoryHierarchy = { LOCTEXT("BranchesCat","Branches"), LOCTEXT("FilterCat","Filters") };
+            return M;
+        }();
+        return Meta;
+    }
+    
 	/* ---------------- Factory ------------- */
 	static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& P,
 	                                            FBuildResults&)
@@ -214,29 +239,6 @@ private:
 	const float MaxCutoffHz;
 };
 
-/* ------------------------------------------------------------------ */
-/*  Metadata + registration                                           */
-/* ------------------------------------------------------------------ */
-static const FNodeClassMetadata& GetLadderNodeInfo()
-{
-	using namespace LadderArPrivate;
-
-	static const FNodeClassMetadata Meta = []()
-	{
-		FNodeClassMetadata M;
-		M.ClassName        = { TEXT("UE"), TEXT("Ladder (AR)"), TEXT("Audio") };
-		M.MajorVersion     = 2;
-		M.MinorVersion     = 0;
-		M.DisplayName      = LOCTEXT("LadderARDisplay", "Ladder (AR)");
-		M.Description      = LOCTEXT("LadderARDesc", "Multi-channel ladder filter with audio-rate cutoff and resonance modulation.");
-		M.Author           = TEXT("Charles Matthews");
-		M.PromptIfMissing  = PluginNodeMissingPrompt;
-		M.DefaultInterface = GetVertexInterface(2);  // preview as stereo
-		M.CategoryHierarchy = { LOCTEXT("BranchesCat","Branches"), LOCTEXT("FilterCat","Filters") };
-		return M;
-	}();
-	return Meta;
-}
 
 using FLadderArNode = TNodeFacade<FLadderArOperator>;
 METASOUND_REGISTER_NODE_AND_CONFIGURATION(FLadderArNode, FMetaSoundLadderARNodeConfiguration);
