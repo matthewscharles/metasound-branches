@@ -1,7 +1,6 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
 #include "MetasoundBranches/Public/MetasoundShiftRegisterNode.h"
-#include "MetasoundAudioBuffer.h" 
 #include "Internationalization/Text.h"
 #include "MetasoundDataFactory.h"
 #include "MetasoundExecutableOperator.h"
@@ -11,6 +10,7 @@
 #include "MetasoundPrimitives.h"
 #include "MetasoundStandardNodesCategories.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
+#include "MetasoundAudioBuffer.h" 
 
 #define LOCTEXT_NAMESPACE "MetasoundBranches_ShiftRegister"
 
