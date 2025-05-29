@@ -11,6 +11,7 @@
 #include "MetasoundStandardNodesCategories.h"
 #include "DSP/Filter.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
+#include "MetasoundAudioBuffer.h" 
 
 #define LOCTEXT_NAMESPACE "MetasoundBranches_LadderAR"
 
