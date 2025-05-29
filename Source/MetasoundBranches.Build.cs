@@ -20,8 +20,8 @@ public class MetasoundBranches : ModuleRules
                 "SlateCore",
                 "Projects",
                 // NB: this would disqualify the plugin for FAB, hopefully the CAT material will make it into the 5.6 release
-                "MetasoundExperimentalRuntime",
-                "AudioExperimentalRuntime"
+                "AudioExperimentalRuntime",
+                "MetasoundExperimentalRuntime"
             }
         );
 
