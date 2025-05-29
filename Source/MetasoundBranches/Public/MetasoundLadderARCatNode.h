@@ -8,6 +8,8 @@
 #include "MetasoundParamHelper.h"
 #include "DSP/Filter.h"
 
+#include "Templates/SharedPointer.h"
+
 #include "MetasoundLadderArCatNode.generated.h"
 
 
