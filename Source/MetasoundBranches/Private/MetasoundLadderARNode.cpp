@@ -142,7 +142,7 @@ public:
     /* ------------------------------------------------------------------ */
     /*  Metadata + registration                                           */
     /* ------------------------------------------------------------------ */
-    static const FNodeClassMetadata& GetLadderNodeInfo()
+    static const FNodeClassMetadata& GetNodeInfo()
     {
         using namespace LadderArPrivate;
 
