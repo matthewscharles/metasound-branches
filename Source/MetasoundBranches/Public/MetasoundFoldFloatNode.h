@@ -5,7 +5,7 @@
 #include "Metasound.h"
 #include "MetasoundNode.h"
 
-namespace MetasoundBranches
+namespace Metasound::MetasoundBranches
 {
     class FMetasoundFoldFloatNode : public Metasound::FNode
     {
