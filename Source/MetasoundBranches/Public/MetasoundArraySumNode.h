@@ -23,7 +23,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundFrontend"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace ArraySumNodeVertexNames
     {

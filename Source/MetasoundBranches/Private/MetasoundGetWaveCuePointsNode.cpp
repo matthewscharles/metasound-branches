@@ -12,7 +12,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundGetWaveCuePoints"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
 	namespace WaveCuePointsNodeVertexNames
 	{

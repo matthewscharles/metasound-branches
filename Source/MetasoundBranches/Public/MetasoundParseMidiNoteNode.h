@@ -20,7 +20,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_ParseMidiNote"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace ParseMidiNoteVertexNames
     {

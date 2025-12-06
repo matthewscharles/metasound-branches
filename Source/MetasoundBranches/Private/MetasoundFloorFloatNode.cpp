@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundFloorFloatNode"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace FloorFloatNodeVertexNames
     {

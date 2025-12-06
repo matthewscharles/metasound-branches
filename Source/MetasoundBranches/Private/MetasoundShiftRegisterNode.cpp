@@ -13,7 +13,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundBranches_ShiftRegister"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
 namespace ShiftRegisterParam
 {

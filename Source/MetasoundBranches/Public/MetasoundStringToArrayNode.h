@@ -19,7 +19,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_StringToArray"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
 	namespace StringToArrayNodeVertexNames
 	{

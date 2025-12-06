@@ -11,7 +11,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_BalanceNode"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace BalanceNodeVertexNames
     {

@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_StereoInverter"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace StereoInverterNodeVertexNames
     {

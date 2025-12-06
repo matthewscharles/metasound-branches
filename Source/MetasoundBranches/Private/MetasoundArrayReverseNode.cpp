@@ -5,7 +5,7 @@
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundDataTypeRegistrationMacro.h"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     template class TArrayReverseOperator<TArray<float>>;
     template class TArrayReverseNode<TArray<float>>;

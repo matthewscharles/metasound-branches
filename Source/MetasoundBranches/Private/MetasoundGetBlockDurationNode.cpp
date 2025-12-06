@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundGetBlockDurationNode"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace GetBlockDurationNodeVertexNames
     {

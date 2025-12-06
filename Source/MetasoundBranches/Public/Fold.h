@@ -3,7 +3,7 @@
 #pragma once
 
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     inline float PerformFold(float InSample, float Low, float High)
     {

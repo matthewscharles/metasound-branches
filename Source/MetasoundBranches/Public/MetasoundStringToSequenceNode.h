@@ -25,7 +25,7 @@ struct FBracketGroup
 	TArray<T> Values;
 };
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
 	namespace StringToSequenceNodeVertexNames
 	{

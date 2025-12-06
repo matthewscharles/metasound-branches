@@ -11,7 +11,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_TriggerLimiter"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace TriggerLimiterNames
     {

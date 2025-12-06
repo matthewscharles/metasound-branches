@@ -1,7 +1,7 @@
 #include "MetasoundBranches/Public/MetasoundParseMidiNoteNode.h"
 #include "MetasoundNodeRegistrationMacro.h"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     template class TParseMidiNoteOperator<int32>;
     template class TParseMidiNoteNode<int32>;

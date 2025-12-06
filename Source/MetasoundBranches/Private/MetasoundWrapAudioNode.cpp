@@ -12,7 +12,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundWrapAudioNode"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace WrapAudioNodeVertexNames
     {

@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_TuningFromArrayNode"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace TuningFromArrayNodeVertexNames
     {

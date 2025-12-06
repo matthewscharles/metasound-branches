@@ -14,7 +14,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundFoldFloatNode"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace FoldFloatNodeVertexNames
     {

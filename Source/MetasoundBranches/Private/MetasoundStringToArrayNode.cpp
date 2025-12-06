@@ -3,7 +3,7 @@
 #include "MetasoundBranches/Public/MetasoundStringToArrayNode.h"
 #include "MetasoundNodeRegistrationMacro.h"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     template class TArraySplitOperator<int32>;
     template class TArraySplitNode<int32>;

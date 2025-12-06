@@ -11,7 +11,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_Edge"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace EdgeNames
     {

@@ -11,7 +11,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_ZeroCrossing"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace ZeroCrossingVertexNames
     {

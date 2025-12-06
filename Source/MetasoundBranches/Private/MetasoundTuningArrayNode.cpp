@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_TuningArrayNode"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     using FArrayType = TArray<float>;
     using FArrayDataWriteReference = TDataWriteReference<FArrayType>;

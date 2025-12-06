@@ -4,7 +4,7 @@
 #include "MetasoundTime.h"
 #include "MetasoundNodeRegistrationMacro.h"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     template class TArraySumOperator<TArray<float>>;
     template class TArraySumNode<TArray<float>>;

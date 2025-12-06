@@ -3,7 +3,7 @@
 #include "MetasoundBranches/Public/MetasoundMakeArrayNode.h"
 #include "MetasoundNodeRegistrationMacro.h"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     template class TArrayMakeOperator<int32>;
     template class TArrayMakeNode<int32>;

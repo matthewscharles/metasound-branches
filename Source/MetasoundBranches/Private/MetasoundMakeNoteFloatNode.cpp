@@ -13,7 +13,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundMakeNoteFloatNode"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace MakeNoteFloatNodeVertexNames
     {

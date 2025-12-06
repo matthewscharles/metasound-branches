@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     struct FVoiceState
     {

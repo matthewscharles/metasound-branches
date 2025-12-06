@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_EdoNode"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace EdoNodeVertexNames
     {

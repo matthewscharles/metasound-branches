@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundSmoothStepFloatNode"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace SmoothStepFloatNodeVertexNames
     {

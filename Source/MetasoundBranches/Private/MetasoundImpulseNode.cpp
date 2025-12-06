@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_ImpulseNode"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace ImpulseNodeVertexNames
     {

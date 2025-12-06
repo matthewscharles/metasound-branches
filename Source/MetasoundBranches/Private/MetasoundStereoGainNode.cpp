@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_StereoGain"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace StereoGainNodeVertexNames
     {
