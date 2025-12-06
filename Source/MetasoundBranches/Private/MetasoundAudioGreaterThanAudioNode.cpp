@@ -11,7 +11,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundAudioGreaterThanAudioNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
 	namespace AudioGreaterThanAudioNodeVertexNames
 	{

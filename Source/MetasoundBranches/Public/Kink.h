@@ -2,7 +2,7 @@
 
 #pragma once
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     inline float KinkProcess(float x, float s)
     {

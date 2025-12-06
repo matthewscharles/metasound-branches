@@ -14,7 +14,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundWrapFloatNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace WrapFloatNodeVertexNames
     {

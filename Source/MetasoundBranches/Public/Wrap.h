@@ -4,7 +4,7 @@
 
 #include "Math/UnrealMathUtility.h"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     
     inline float PerformWrap(float InSample, float Low, float High)

@@ -12,7 +12,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundFoldAudioNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace FoldAudioNodeVertexNames
     {

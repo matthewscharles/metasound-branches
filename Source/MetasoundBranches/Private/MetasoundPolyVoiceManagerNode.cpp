@@ -17,7 +17,7 @@
 
 #define LOCTEXT_NAMESPACE "MPolyVoiceManagerNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace PolyVoiceManagerNames
     {

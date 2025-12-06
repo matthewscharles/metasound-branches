@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundSlewNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace SlewNodeVertexNames
     {

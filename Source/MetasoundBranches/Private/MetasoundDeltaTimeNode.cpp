@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundDeltaTimeNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace DeltaTimeNodeVertexNames
     {

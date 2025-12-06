@@ -11,7 +11,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundAudioNotEqualToAudioNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
 	namespace AudioNotEqualToAudioNodeVertexNames
 	{

@@ -12,7 +12,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundKinkNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace KinkNodeVertexNames
     {

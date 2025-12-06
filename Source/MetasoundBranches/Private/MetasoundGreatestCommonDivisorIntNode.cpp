@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundGreatestCommonDivisorIntNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace GCDIntNodeVertexNames
     {

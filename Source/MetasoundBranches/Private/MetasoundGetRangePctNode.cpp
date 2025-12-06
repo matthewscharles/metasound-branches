@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundGetRangePctNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace GetRangePctNodeVertexNames
     {

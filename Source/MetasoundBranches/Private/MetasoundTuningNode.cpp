@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_TuningNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace TuningNodeVertexNames
     {

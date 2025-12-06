@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     constexpr int PitchIndex(char NoteChar)
     {

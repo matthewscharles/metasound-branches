@@ -13,7 +13,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_SineFMOscillatorNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace SineFMOscillatorNodeVertexNames
     {

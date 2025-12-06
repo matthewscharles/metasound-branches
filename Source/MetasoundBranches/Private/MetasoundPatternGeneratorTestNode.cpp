@@ -12,7 +12,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_PatternGeneratorTestNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace PatternGeneratorTestNodeVertexNames
     {

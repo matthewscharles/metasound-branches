@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundGetCurrentFrameNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace GetCurrentFrameNodeVertexNames
     {

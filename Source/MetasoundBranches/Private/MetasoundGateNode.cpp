@@ -11,7 +11,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundGateNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
 	namespace GateNodeVertexNames
 	{

@@ -12,7 +12,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundBranches_ClockDivider"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
 /* ------------------------------------------------------------------ */
 namespace ClockDivParam
@@ -193,7 +193,7 @@ private:
 using FClockDividerNode = TNodeFacade<FClockDividerOperator>;
 METASOUND_REGISTER_NODE_AND_CONFIGURATION(FClockDividerNode, FMetaSoundClockDividerNodeConfiguration);
 
-} // namespace Metasound::MetasoundBranches
+} // namespace Metasound
 
 /* ------------------------------------------------------------------ */
 FMetaSoundClockDividerNodeConfiguration::FMetaSoundClockDividerNodeConfiguration()

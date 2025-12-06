@@ -3,7 +3,7 @@
 #include "MetasoundBranches/Public/MetasoundStringToSequenceNode.h"
 #include "MetasoundNodeRegistrationMacro.h"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     template class TStringToSequenceOperator<int32>;
     template class TStringToSequenceNode<int32>;

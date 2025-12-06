@@ -13,7 +13,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_DustNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
 	namespace DustNodeVertexNames
 	{

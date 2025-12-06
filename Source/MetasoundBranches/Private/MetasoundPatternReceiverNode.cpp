@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_PatternReceiverNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace PatternReceiverNodeVertexNames
     {

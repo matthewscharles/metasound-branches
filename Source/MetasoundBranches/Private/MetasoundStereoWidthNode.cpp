@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_StereoWidthNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace WidthNodeVertexNames
     {

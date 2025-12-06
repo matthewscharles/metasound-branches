@@ -5,7 +5,7 @@
 #include "MetasoundNodeRegistrationMacro.h"
 #include "MetasoundDataTypeRegistrationMacro.h"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     template class TArrayRouteOperator<TArray<float>>;
     template class TArrayRouteNode<TArray<float>>;

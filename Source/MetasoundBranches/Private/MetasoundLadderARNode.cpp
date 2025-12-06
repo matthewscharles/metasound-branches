@@ -15,7 +15,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundBranches_LadderAR"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
 /* ------------------------------------------------------------------ */
 /*  Parameter names                                                   */
@@ -243,7 +243,7 @@ private:
 using FLadderArNode = TNodeFacade<FLadderArOperator>;
 METASOUND_REGISTER_NODE_AND_CONFIGURATION(FLadderArNode, FMetaSoundLadderARNodeConfiguration);
 
-} // namespace Metasound::MetasoundBranches
+} // namespace Metasound
 
 /* ------------------------------------------------------------------ */
 /*  Configuration implementation                                      */

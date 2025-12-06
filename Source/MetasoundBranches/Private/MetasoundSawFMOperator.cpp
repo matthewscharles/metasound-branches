@@ -13,7 +13,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_SawFMOperatorNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace SawFMOperatorNodeVertexNames
     {

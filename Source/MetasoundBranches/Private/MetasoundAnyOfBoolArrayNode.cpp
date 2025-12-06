@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_AnyOfBoolArray"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace AnyOfBoolArrayVertexNames
     {

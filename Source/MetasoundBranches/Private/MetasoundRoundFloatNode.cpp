@@ -10,7 +10,7 @@
 
 #define LOCTEXT_NAMESPACE "MetasoundRoundFloatNode"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace RoundFloatNodeVertexNames
     {

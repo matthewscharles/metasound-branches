@@ -4,7 +4,7 @@
 
 #include "MetasoundTime.h"
 
-namespace Metasound::MetasoundBranches
+namespace Metasound
 {
     namespace MetasoundArrayNodesPrivate
     {
