@@ -147,7 +147,7 @@ public:
 			M.MinorVersion     = 1;
 			M.DisplayName      = LOCTEXT("ShiftRegisterDisplay", "Shift Register");
 			M.Description      = LOCTEXT("ShiftRegisterDesc",
-				"A configurable N-stage shift register (float) with clock, reset, default and reverse options.");
+				"A configurable N-stage shift register combined with sample and hold (float) with clock, reset, default and reverse options.");
 			M.Author           = TEXT("Charles Matthews");
 			M.PromptIfMissing  = PluginNodeMissingPrompt;
 			M.DefaultInterface = ShiftRegisterPrivate::GetVertexInterface(8);
