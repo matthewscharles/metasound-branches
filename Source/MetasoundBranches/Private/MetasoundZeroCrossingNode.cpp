@@ -45,6 +45,13 @@ namespace Metasound::MetasoundBranches
             return Interface;
         }
 
+        const FNodeClassMetadata& FZeroCrossingOperator::GetNodeInfo()
+        {
+            static const FNodeClassMetadata Metadata = FZeroCrossingNode::CreateNodeClassMetadata();
+            return Metadata;
+        }
+
+        
         METASOUND_DISABLE_LEGACY_IO()
 
         virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
@@ -74,7 +81,7 @@ namespace Metasound::MetasoundBranches
             return MakeUnique<FZeroCrossingOperator>(InputSignal, InParams.OperatorSettings);
         }
 
-        virtual void Reset(const IOperator::FResetParams& InParams) override
+        virtual void Reset(const IOperator::FResetParams& InParams)
         {
             OutputTriggerZeroCrossing->Reset();
 
@@ -152,7 +159,7 @@ namespace Metasound::MetasoundBranches
 
         return Metadata;
     }
-
+    
     FZeroCrossingNode::FZeroCrossingNode(FNodeData InNodeData,
                                          TSharedRef<const FNodeClassMetadata> InClassMetadata)
         : FNodeFacade(InNodeData,
