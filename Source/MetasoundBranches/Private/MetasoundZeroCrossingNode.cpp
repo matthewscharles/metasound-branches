@@ -1,17 +1,17 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
 #include "MetasoundBranches/Public/MetasoundZeroCrossingNode.h"
+
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundPrimitives.h"
 #include "MetasoundNodeRegistrationMacro.h"
-#include "MetasoundFacade.h"
 #include "MetasoundParamHelper.h"
 #include "MetasoundTrigger.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "MetasoundStandardNodes_ZeroCrossing"
 
-namespace Metasound
+namespace Metasound::MetasoundBranches
 {
     namespace ZeroCrossingVertexNames
     {
@@ -22,9 +22,8 @@ namespace Metasound
     class FZeroCrossingOperator : public TExecutableOperator<FZeroCrossingOperator>
     {
     public:
-        FZeroCrossingOperator(
-            const FAudioBufferReadRef& InSignal,
-            const FOperatorSettings& InSettings)
+        FZeroCrossingOperator(const FAudioBufferReadRef& InSignal,
+                              const FOperatorSettings& InSettings)
             : InputSignal(InSignal)
             , OutputTriggerZeroCrossing(FTriggerWriteRef::CreateNew(InSettings))
         {
@@ -46,35 +45,6 @@ namespace Metasound
             return Interface;
         }
 
-        static const FNodeClassMetadata& GetNodeInfo()
-        {
-            auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
-            {
-                FVertexInterface NodeInterface = DeclareVertexInterface();
-
-                FNodeClassMetadata Metadata;
-
-                Metadata.ClassName = { TEXT("UE"), TEXT("Zero Crossing"), TEXT("Trigger") };
-                Metadata.MajorVersion = 2;
-                Metadata.MinorVersion = 0;
-                Metadata.DisplayName = METASOUND_LOCTEXT("ZeroCrossingNodeDisplayName", "Zero Crossing");
-                Metadata.Description = METASOUND_LOCTEXT("ZeroCrossingNodeDesc", "Detect zero crossings in an input audio signal.");
-                Metadata.Author = "Charles Matthews";
-                Metadata.PromptIfMissing = PluginNodeMissingPrompt;
-                Metadata.DefaultInterface = DeclareVertexInterface();
-                Metadata.CategoryHierarchy = {
-                    METASOUND_LOCTEXT("Custom", "Branches"),
-                    METASOUND_LOCTEXT("CustomSub", "Envelopes")
-                };
-                Metadata.Keywords = TArray<FText>();
-
-                return Metadata;
-            };
-
-            static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
-            return Metadata;
-        }
-
         METASOUND_DISABLE_LEGACY_IO()
 
         virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
@@ -89,19 +59,22 @@ namespace Metasound
             InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputTriggerZeroCrossing), OutputTriggerZeroCrossing);
         }
 
-        static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
+        static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams,
+                                                    FBuildResults& OutErrors)
         {
             using namespace ZeroCrossingVertexNames;
 
             const FInputVertexInterfaceData& InputData = InParams.InputData;
 
-            TDataReadReference<FAudioBuffer> InputSignal = InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(
-                METASOUND_GET_PARAM_NAME(InputSignal), InParams.OperatorSettings);
+            TDataReadReference<FAudioBuffer> InputSignal =
+                InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(
+                    METASOUND_GET_PARAM_NAME(InputSignal),
+                    InParams.OperatorSettings);
 
             return MakeUnique<FZeroCrossingOperator>(InputSignal, InParams.OperatorSettings);
         }
 
-        virtual void Reset(const IOperator::FResetParams& InParams)
+        virtual void Reset(const IOperator::FResetParams& InParams) override
         {
             OutputTriggerZeroCrossing->Reset();
 
@@ -120,20 +93,22 @@ namespace Metasound
             OutputTriggerZeroCrossing->AdvanceBlock();
 
             const float* SignalData = InputSignal->GetData();
-            int32 NumFrames = InputSignal->Num();
+            const int32 NumFrames = InputSignal->Num();
 
             for (int32 i = 0; i < NumFrames; ++i)
             {
-                float CurrentSignal = SignalData[i];
+                const float CurrentSignal = SignalData[i];
 
-                bool PreviousNonPositive = (PreviousSignalValue <= 0.0f);
-                bool CurrentPositive = (CurrentSignal > 0.0f);
-                bool PreviousNonNegative = (PreviousSignalValue >= 0.0f);
-                bool CurrentNegative = (CurrentSignal < 0.0f);
+                const bool PreviousNonPositive = (PreviousSignalValue <= 0.0f);
+                const bool CurrentPositive     = (CurrentSignal > 0.0f);
+                const bool PreviousNonNegative = (PreviousSignalValue >= 0.0f);
+                const bool CurrentNegative     = (CurrentSignal < 0.0f);
 
-                bool Crossing = (PreviousNonPositive && CurrentPositive) || (PreviousNonNegative && CurrentNegative);
+                const bool bCrossing =
+                    (PreviousNonPositive && CurrentPositive) ||
+                    (PreviousNonNegative && CurrentNegative);
 
-                if (Crossing)
+                if (bCrossing)
                 {
                     OutputTriggerZeroCrossing->TriggerFrame(i);
                 }
@@ -144,20 +119,49 @@ namespace Metasound
 
     private:
         FAudioBufferReadRef InputSignal;
-        FTriggerWriteRef OutputTriggerZeroCrossing;
+        FTriggerWriteRef    OutputTriggerZeroCrossing;
 
         float PreviousSignalValue = 0.0f;
     };
 
-    class FZeroCrossingNode : public FNodeFacade
+    FNodeClassMetadata FZeroCrossingNode::CreateNodeClassMetadata()
     {
-    public:
-        FZeroCrossingNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FZeroCrossingOperator>())
-        {
-        }
-    };
+        using namespace ZeroCrossingVertexNames;
 
+        FNodeClassMetadata Metadata;
+
+        Metadata.ClassName = { TEXT("UE"), TEXT("Zero Crossing"), TEXT("Trigger") };
+        Metadata.MajorVersion = 2;
+        Metadata.MinorVersion = 0;
+
+        Metadata.DisplayName =
+            METASOUND_LOCTEXT("ZeroCrossingNodeDisplayName", "Zero Crossing");
+        Metadata.Description =
+            METASOUND_LOCTEXT("ZeroCrossingNodeDesc", "Detect zero crossings in an input audio signal.");
+        Metadata.Author = TEXT("Charles Matthews");
+        Metadata.PromptIfMissing = PluginNodeMissingPrompt;
+
+        Metadata.DefaultInterface = FZeroCrossingOperator::DeclareVertexInterface();
+
+        Metadata.CategoryHierarchy = {
+            METASOUND_LOCTEXT("Custom",   "Branches"),
+            METASOUND_LOCTEXT("CustomSub", "Envelopes")
+        };
+
+        Metadata.Keywords = TArray<FText>();
+
+        return Metadata;
+    }
+
+    FZeroCrossingNode::FZeroCrossingNode(FNodeData InNodeData,
+                                         TSharedRef<const FNodeClassMetadata> InClassMetadata)
+        : FNodeFacade(InNodeData,
+                      InClassMetadata,
+                      TFacadeOperatorClass<FZeroCrossingOperator>())
+    {
+    }
+
+    // Registration under the same namespace
     METASOUND_REGISTER_NODE(FZeroCrossingNode);
 }
 

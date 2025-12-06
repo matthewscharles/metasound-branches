@@ -3,13 +3,16 @@
 #pragma once
 
 #include "Metasound.h"
-#include "MetasoundNode.h"
+#include "MetasoundFacade.h"
 
 namespace Metasound::MetasoundBranches
 {
-    class FMetasoundZeroCrossingTriggerNode : public Metasound::FNode
+    class FZeroCrossingNode : public FNodeFacade
     {
     public:
-        FMetasoundZeroCrossingTriggerNode();
+        static FNodeClassMetadata CreateNodeClassMetadata();
+
+        FZeroCrossingNode(FNodeData InNodeData,
+                          TSharedRef<const FNodeClassMetadata> InClassMetadata);
     };
 }
