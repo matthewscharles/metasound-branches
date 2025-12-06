@@ -5,8 +5,10 @@
 #include "Styling/SlateStyle.h"
 #include "Styling/SlateStyleRegistry.h"
 #include "Interfaces/IPluginManager.h"
+
 #include "MetasoundFrontendRegistries.h"
 #include "MetasoundDataTypeRegistrationMacro.h"
+#include "MetasoundFrontendModuleRegistrationMacros.h"
 
 #define LOCTEXT_NAMESPACE "FMetasoundBranchesModule"
 
@@ -55,8 +57,6 @@ void FMetasoundBranchesModule::StartupModule()
         UE_LOG(LogTemp, Error, TEXT("MetaSoundStyle not found in style registry, cannot register image brushes for Branches module."));
     }
 
-    using namespace Metasound;
-    FMetasoundFrontendRegistryContainer::Get()->RegisterPendingNodes();
 }
 
 void FMetasoundBranchesModule::ShutdownModule()
@@ -65,4 +65,6 @@ void FMetasoundBranchesModule::ShutdownModule()
 
 #undef LOCTEXT_NAMESPACE
 
-IMPLEMENT_MODULE(FMetasoundBranchesModule, MetasoundBranches);
+IMPLEMENT_MODULE(FMetasoundBranchesModule, MetasoundBranches)
+
+METASOUND_REGISTER_ITEMS_IN_MODULE(FMetasoundBranchesModule);
