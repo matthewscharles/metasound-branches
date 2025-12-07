@@ -1,12 +1,15 @@
 // Copyright Charles Matthews 2025. All Rights Reserved.
 
 #include "MetasoundBranches/Public/MetasoundBranches.h"
+
 #include "Modules/ModuleManager.h"
 #include "Styling/SlateStyle.h"
 #include "Styling/SlateStyleRegistry.h"
 #include "Interfaces/IPluginManager.h"
-#include "MetasoundFrontendRegistries.h"
+
 #include "MetasoundDataTypeRegistrationMacro.h"
+#include "MetasoundFrontendRegistries.h"
+#include "MetasoundFrontendModuleRegistrationMacros.h"
 
 #define LOCTEXT_NAMESPACE "FMetasoundBranchesModule"
 
@@ -56,13 +59,16 @@ void FMetasoundBranchesModule::StartupModule()
     }
 
     using namespace Metasound;
-    FMetasoundFrontendRegistryContainer::Get()->RegisterPendingNodes();
+
+    METASOUND_REGISTER_ITEMS_IN_MODULE
 }
 
 void FMetasoundBranchesModule::ShutdownModule()
 {
+    METASOUND_UNREGISTER_ITEMS_IN_MODULE
 }
 
 #undef LOCTEXT_NAMESPACE
 
+METASOUND_IMPLEMENT_MODULE_REGISTRATION_LIST
 IMPLEMENT_MODULE(FMetasoundBranchesModule, MetasoundBranches);
