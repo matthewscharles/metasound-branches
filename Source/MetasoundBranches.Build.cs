@@ -18,7 +18,8 @@ public class MetasoundBranches : ModuleRules
                 "MetasoundGraphCore",
                 "Slate",
                 "SlateCore",
-                "Projects"
+                "Projects",
+                "MetasoundExperimentalRuntime"
             }
         );
 
