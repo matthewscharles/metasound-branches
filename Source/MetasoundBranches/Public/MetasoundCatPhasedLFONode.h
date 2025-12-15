@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "MetasoundCatCastingNode.h" // MetasoundCatCastingOptionsHelper.GetCastingOptions
 #include "MetasoundFrontendDocument.h"
 #include "Templates/SharedPointer.h"
 
@@ -15,7 +14,11 @@ struct FMetaSoundCatPhasedLFONodeConfiguration : public FMetaSoundFrontendNodeCo
 
 	FMetaSoundCatPhasedLFONodeConfiguration() = default;
 
-	UPROPERTY(EditAnywhere, Category = General, meta = (GetOptions="MetasoundCatCastingOptionsHelper.GetCastingOptions"))
+	UPROPERTY(
+		EditAnywhere,
+		Category = General,
+		meta = (GetOptions="CatFormatOptionsHelper.GetCatFormatOptions")
+	)
 	FName ToType = TEXT("Stereo");
 
 	virtual TInstancedStruct<FMetasoundFrontendClassInterface>
@@ -24,3 +27,6 @@ struct FMetaSoundCatPhasedLFONodeConfiguration : public FMetaSoundFrontendNodeCo
 	virtual TSharedPtr<const Metasound::IOperatorData>
 	GetOperatorData() const override;
 };
+
+#pragma once
+
