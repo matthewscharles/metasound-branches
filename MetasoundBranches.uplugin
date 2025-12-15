@@ -32,9 +32,6 @@
         "Name": "Metasound",
         "Enabled": true
     },
-    {
-        "Name: "MetasoundExperimentalRuntime",
-        "Enabled": true
-    }
+    { "Name": "MetasoundExperimental", "Enabled": true }
     ]
 }
