@@ -24,7 +24,9 @@
             "LoadingPhase": "Default",
             "PlatformAllowList":["Win64", "Mac"],
             "AdditionalDependencies": [
-                "MetasoundEditor"
+                "MetasoundEditor",
+                "MetasoundExperimentalRuntime",
+                "AudioExperimentalRuntime"
             ]    
     }],
     "Content": true,
