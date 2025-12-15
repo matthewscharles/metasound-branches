@@ -21,6 +21,7 @@ public class MetasoundBranches : ModuleRules
                 "Projects",
                 "AudioExtensions",
                 "SignalProcessing",
+                "AudioExperimentalRuntime",
                 "MetasoundExperimentalRuntime",
                 "CoreUObject",
                 "Engine",
