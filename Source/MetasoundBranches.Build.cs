@@ -19,17 +19,18 @@ public class MetasoundBranches : ModuleRules
                 "Slate",
                 "SlateCore",
                 "Projects",
-                "MetasoundExperimentalRuntime"
+                "AudioExtensions",
+                "SignalProcessing",
+                "MetasoundExperimentalRuntime",
+                "CoreUObject",
+                "Engine",
             }
         );
 
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
-                "CoreUObject",
-                "Engine",
-                "AudioExtensions",
-                "SignalProcessing"
+
             }
         );
     }
