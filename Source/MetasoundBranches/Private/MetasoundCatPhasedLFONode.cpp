@@ -1,6 +1,6 @@
 // Copyright 2025 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundCatPhasedLFONode.h"
+#include "MetasoundBranches/Public/MetasoundCatPhasedLFONode.h"
 
 #include "MetasoundChannelAgnosticType.h"
 #include "MetasoundExecutableOperator.h"
