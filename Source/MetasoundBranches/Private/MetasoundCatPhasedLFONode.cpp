@@ -154,7 +154,7 @@ namespace Metasound
 			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputReset), ResetOut);
 		}
 
-		void Reset(const IOperator::FResetParams&) override
+		void Reset(const IOperator::FResetParams&)
 		{
 			BasePhase01 = 0.0f;
 			ResetOut->Reset();
