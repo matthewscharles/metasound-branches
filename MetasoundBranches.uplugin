@@ -2,7 +2,7 @@
     "FileVersion": 3,
     "version": 1,
     "VersionName": "1.1",
-    "EngineVersion" : "5.7.0",
+    "EngineVersion" : "5.8.0",
     "FriendlyName": "MetaSound Branches",
     "Description": "A variety of additional nodes for MetaSounds.",
     "Category": "Audio",
