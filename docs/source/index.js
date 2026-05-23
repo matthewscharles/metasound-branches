@@ -92,7 +92,7 @@ data.forEach(node => {
     <br><br>
     <hr>
     <br><br>
-    <a href="https://github.com/matthewscharles/">Charles Matthews 2025</a>
+    <a href="https://github.com/matthewscharles/">Charles Matthews 2026</a>
   </main>
   <button class="menu-toggle" aria-label="Toggle Menu">☰</button>
 </body>
