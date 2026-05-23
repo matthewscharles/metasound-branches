@@ -1,6 +1,14 @@
 const fs = require('fs');
 const path = require('path');
 
+/*
+  Docs generator
+  - Source of truth for published node pages is docs/source/nodes.json.
+  - This script generates:
+    1) Per-node HTML pages in docs/
+    2) nodes.md summary table in docs/
+*/
+
 const inputFile = path.join(__dirname, 'nodes.json');
 const outputDir = path.join(__dirname, '../');
 

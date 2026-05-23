@@ -1,6 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 
+/*
+  Metadata extractor (experimental)
+  - Scans Source/ for MetaSound node metadata and writes docs/source/node_data.json.
+
+  - This parser relies on simple regex and will miss nodes when metadata uses variable aliases 
+    other than `Metadata` (for example `M` or `Meta`) or when declaration styles vary.
+  - Update regex patterns before trusting extracted output!! :)
+*/
+
 const ROOT_DIR = path.resolve(__dirname, '../../Source');
 const TARGET_EXTENSIONS = ['.cpp', '.h'];
 const OUTPUT_FILE = path.resolve(__dirname, 'node_data.json');
