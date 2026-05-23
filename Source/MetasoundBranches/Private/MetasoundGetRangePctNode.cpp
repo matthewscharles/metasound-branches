@@ -129,8 +129,12 @@ namespace Metasound
     class FGetRangePctNode : public FNodeFacade
     {
     public:
-        FGetRangePctNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FGetRangePctOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FGetRangePctOperator::GetNodeInfo();
+        }
+        FGetRangePctNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FGetRangePctOperator::GetNodeInfo()), TFacadeOperatorClass<FGetRangePctOperator>())
         {
         }
     };

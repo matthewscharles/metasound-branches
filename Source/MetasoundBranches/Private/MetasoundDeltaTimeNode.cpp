@@ -153,8 +153,12 @@ namespace Metasound
     class FDeltaTimeNode : public FNodeFacade
     {
     public:
-        FDeltaTimeNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FDeltaTimeOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FDeltaTimeOperator::GetNodeInfo();
+        }
+        FDeltaTimeNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FDeltaTimeOperator::GetNodeInfo()), TFacadeOperatorClass<FDeltaTimeOperator>())
         {
         }
     };

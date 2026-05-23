@@ -139,8 +139,12 @@ namespace Metasound
     class FKinkNode : public FNodeFacade
     {
     public:
-        FKinkNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FKinkOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FKinkOperator::GetNodeInfo();
+        }
+        FKinkNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FKinkOperator::GetNodeInfo()), TFacadeOperatorClass<FKinkOperator>())
         {
         }
     };

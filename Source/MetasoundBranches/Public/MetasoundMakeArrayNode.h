@@ -253,8 +253,12 @@ namespace Metasound
 	class TArrayMakeNode : public FNodeFacade
 	{
 	public:
-		TArrayMakeNode(const FNodeInitData& InInitData)
-			: FNodeFacade(InInitData.InstanceName, InInitData.InstanceID, TFacadeOperatorClass<TArrayMakeOperator<ElementType>>())
+				static FNodeClassMetadata CreateNodeClassMetadata()
+		{
+		    return TArrayMakeOperator<ElementType>::GetNodeInfo();
+		}
+		TArrayMakeNode(FNodeData InInitData)
+			: FNodeFacade(InInitData, MakeShared<const FNodeClassMetadata>(TArrayMakeOperator<ElementType>::GetNodeInfo()), TFacadeOperatorClass<TArrayMakeOperator<ElementType>>())
 		{
 		}
 		virtual ~TArrayMakeNode() = default;

@@ -141,8 +141,12 @@ namespace Metasound
 	class FAudioAndAudioNode : public FNodeFacade
 	{
 	public:
-		FAudioAndAudioNode(const FNodeInitData& InitData)
-			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FAudioAndAudioOperator>())
+				static FNodeClassMetadata CreateNodeClassMetadata()
+		{
+		    return FAudioAndAudioOperator::GetNodeInfo();
+		}
+		FAudioAndAudioNode(FNodeData InitData)
+			: FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FAudioAndAudioOperator::GetNodeInfo()), TFacadeOperatorClass<FAudioAndAudioOperator>())
 		{}
 	};
 

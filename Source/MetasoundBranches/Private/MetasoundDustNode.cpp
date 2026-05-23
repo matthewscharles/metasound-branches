@@ -221,8 +221,12 @@ namespace Metasound
 	class FDustNode : public FNodeFacade
 	{
 	public:
-		FDustNode(const FNodeInitData& InitData)
-			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FDustOperator>())
+				static FNodeClassMetadata CreateNodeClassMetadata()
+		{
+		    return FDustOperator::GetNodeInfo();
+		}
+		FDustNode(FNodeData InitData)
+			: FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FDustOperator::GetNodeInfo()), TFacadeOperatorClass<FDustOperator>())
 		{
 		}
 	};

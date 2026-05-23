@@ -181,8 +181,12 @@ namespace Metasound
     class FStereoInverterNode : public FNodeFacade
     {
     public:
-        FStereoInverterNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FStereoInverterOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FStereoInverterOperator::GetNodeInfo();
+        }
+        FStereoInverterNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FStereoInverterOperator::GetNodeInfo()), TFacadeOperatorClass<FStereoInverterOperator>())
         {
         }
     };

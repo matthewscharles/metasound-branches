@@ -211,8 +211,12 @@ METASOUND_DISABLE_LEGACY_IO()
 	class TArraySplitNode : public FNodeFacade
 	{
 	public:
-		TArraySplitNode(const FNodeInitData& InInitData)
-			: FNodeFacade(InInitData.InstanceName, InInitData.InstanceID, TFacadeOperatorClass<TArraySplitOperator<ElementType>>())
+				static FNodeClassMetadata CreateNodeClassMetadata()
+		{
+		    return TArraySplitOperator<ElementType>::GetNodeInfo();
+		}
+		TArraySplitNode(FNodeData InInitData)
+			: FNodeFacade(InInitData, MakeShared<const FNodeClassMetadata>(TArraySplitOperator<ElementType>::GetNodeInfo()), TFacadeOperatorClass<TArraySplitOperator<ElementType>>())
 		{
 		}
 

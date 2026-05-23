@@ -153,8 +153,12 @@ namespace Metasound
     class TParseMidiNoteNode : public FNodeFacade
     {
     public:
-        TParseMidiNoteNode(const FNodeInitData& InInitData)
-            : FNodeFacade(InInitData.InstanceName, InInitData.InstanceID, TFacadeOperatorClass<TParseMidiNoteOperator<ElementType>>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return TParseMidiNoteOperator<ElementType>::GetNodeInfo();
+        }
+        TParseMidiNoteNode(FNodeData InInitData)
+            : FNodeFacade(InInitData, MakeShared<const FNodeClassMetadata>(TParseMidiNoteOperator<ElementType>::GetNodeInfo()), TFacadeOperatorClass<TParseMidiNoteOperator<ElementType>>())
         {
         }
         virtual ~TParseMidiNoteNode() = default;

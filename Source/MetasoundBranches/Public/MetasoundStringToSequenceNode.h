@@ -502,12 +502,12 @@ namespace Metasound
 	class TStringToSequenceNode : public FNodeFacade
 	{
 	public:
-		TStringToSequenceNode(const FNodeInitData& InInitData)
-			: FNodeFacade(
-				InInitData.InstanceName,
-				InInitData.InstanceID,
-				TFacadeOperatorClass<TStringToSequenceOperator<ElementType>>()
-			)
+				static FNodeClassMetadata CreateNodeClassMetadata()
+		{
+		    return TStringToSequenceOperator<ElementType>::GetNodeInfo();
+		}
+		TStringToSequenceNode(FNodeData InInitData)
+			: FNodeFacade(InInitData, MakeShared<const FNodeClassMetadata>(TStringToSequenceOperator<ElementType>::GetNodeInfo()), TFacadeOperatorClass<TStringToSequenceOperator<ElementType>>())
 		{
 		}
 

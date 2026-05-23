@@ -169,8 +169,12 @@ namespace Metasound
     class FImpulseNode : public FNodeFacade
     {
     public:
-        FImpulseNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FImpulseOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FImpulseOperator::GetNodeInfo();
+        }
+        FImpulseNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FImpulseOperator::GetNodeInfo()), TFacadeOperatorClass<FImpulseOperator>())
         {
         }
     };

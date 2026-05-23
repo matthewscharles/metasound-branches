@@ -162,8 +162,12 @@ namespace Metasound
     class FTriggerLimiterNode : public FNodeFacade
     {
     public:
-        FTriggerLimiterNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FTriggerLimiterOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FTriggerLimiterOperator::GetNodeInfo();
+        }
+        FTriggerLimiterNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FTriggerLimiterOperator::GetNodeInfo()), TFacadeOperatorClass<FTriggerLimiterOperator>())
         {
         }
     };

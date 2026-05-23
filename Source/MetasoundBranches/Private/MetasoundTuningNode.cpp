@@ -284,8 +284,12 @@ namespace Metasound
     class FTuningNode : public FNodeFacade
     {
     public:
-        FTuningNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FTuningNodeOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FTuningNodeOperator::GetNodeInfo();
+        }
+        FTuningNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FTuningNodeOperator::GetNodeInfo()), TFacadeOperatorClass<FTuningNodeOperator>())
         {
         }
     };

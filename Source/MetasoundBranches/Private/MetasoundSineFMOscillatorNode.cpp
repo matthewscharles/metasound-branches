@@ -162,8 +162,12 @@ namespace Metasound
     class FSineFMOscillatorNode : public FNodeFacade
     {
     public:
-        FSineFMOscillatorNode(const FNodeInitData& InInitData)
-            : FNodeFacade(InInitData.InstanceName, InInitData.InstanceID, TFacadeOperatorClass<FSineFMOscillatorOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FSineFMOscillatorOperator::GetNodeInfo();
+        }
+        FSineFMOscillatorNode(FNodeData InInitData)
+            : FNodeFacade(InInitData, MakeShared<const FNodeClassMetadata>(FSineFMOscillatorOperator::GetNodeInfo()), TFacadeOperatorClass<FSineFMOscillatorOperator>())
         {
         }
     };

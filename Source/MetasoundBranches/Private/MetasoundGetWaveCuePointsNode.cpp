@@ -149,8 +149,12 @@ namespace Metasound
 	class FGetWaveCuePointsNode : public FNodeFacade
 	{
 	public:
-		FGetWaveCuePointsNode(const FNodeInitData& InInitData)
-			: FNodeFacade(InInitData.InstanceName, InInitData.InstanceID, TFacadeOperatorClass<FGetWaveCuePointsOperator>())
+				static FNodeClassMetadata CreateNodeClassMetadata()
+		{
+		    return FGetWaveCuePointsOperator::GetNodeInfo();
+		}
+		FGetWaveCuePointsNode(FNodeData InInitData)
+			: FNodeFacade(InInitData, MakeShared<const FNodeClassMetadata>(FGetWaveCuePointsOperator::GetNodeInfo()), TFacadeOperatorClass<FGetWaveCuePointsOperator>())
 		{
 		}
 	};

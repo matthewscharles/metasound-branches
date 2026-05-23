@@ -168,8 +168,12 @@ namespace Metasound
     class FWidthNode : public FNodeFacade
     {
     public:
-        FWidthNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FWidthOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FWidthOperator::GetNodeInfo();
+        }
+        FWidthNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FWidthOperator::GetNodeInfo()), TFacadeOperatorClass<FWidthOperator>())
         {
         }
     };

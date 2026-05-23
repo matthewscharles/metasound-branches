@@ -128,8 +128,12 @@ namespace Metasound
     class FSmoothStepFloatNode : public FNodeFacade
     {
     public:
-        FSmoothStepFloatNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FSmoothStepFloatOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FSmoothStepFloatOperator::GetNodeInfo();
+        }
+        FSmoothStepFloatNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FSmoothStepFloatOperator::GetNodeInfo()), TFacadeOperatorClass<FSmoothStepFloatOperator>())
         {
         }
     };

@@ -218,12 +218,12 @@ namespace Metasound
     class TArrayRouteNode : public FNodeFacade
     {
     public:
-        TArrayRouteNode(const FNodeInitData& InInitData)
-            : FNodeFacade(
-                InInitData.InstanceName,
-                InInitData.InstanceID,
-                TFacadeOperatorClass<TArrayRouteOperator<ArrayType>>()
-              )
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return TArrayRouteOperator<ArrayType>::GetNodeInfo();
+        }
+        TArrayRouteNode(FNodeData InInitData)
+            : FNodeFacade(InInitData, MakeShared<const FNodeClassMetadata>(TArrayRouteOperator<ArrayType>::GetNodeInfo()), TFacadeOperatorClass<TArrayRouteOperator<ArrayType>>())
         {
         }
 

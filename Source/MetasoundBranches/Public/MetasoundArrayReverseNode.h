@@ -166,12 +166,12 @@ namespace Metasound
     class TArrayReverseNode : public FNodeFacade
     {
     public:
-        TArrayReverseNode(const FNodeInitData& InInitData)
-            : FNodeFacade(
-                  InInitData.InstanceName,
-                  InInitData.InstanceID,
-                  TFacadeOperatorClass<TArrayReverseOperator<ArrayType>>()
-              )
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return TArrayReverseOperator<ArrayType>::GetNodeInfo();
+        }
+        TArrayReverseNode(FNodeData InInitData)
+            : FNodeFacade(InInitData, MakeShared<const FNodeClassMetadata>(TArrayReverseOperator<ArrayType>::GetNodeInfo()), TFacadeOperatorClass<TArrayReverseOperator<ArrayType>>())
         {
         }
         virtual ~TArrayReverseNode() = default;

@@ -133,8 +133,12 @@ namespace Metasound
     class FFoldFloatNode : public FNodeFacade
     {
     public:
-        FFoldFloatNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FFoldFloatOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FFoldFloatOperator::GetNodeInfo();
+        }
+        FFoldFloatNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FFoldFloatOperator::GetNodeInfo()), TFacadeOperatorClass<FFoldFloatOperator>())
         {
         }
     };

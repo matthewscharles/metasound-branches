@@ -184,8 +184,12 @@ namespace Metasound
     class FSawFMOperatorNode : public FNodeFacade
     {
     public:
-        FSawFMOperatorNode(const FNodeInitData& InInitData)
-            : FNodeFacade(InInitData.InstanceName, InInitData.InstanceID, TFacadeOperatorClass<FSawFMOperatorOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FSawFMOperatorOperator::GetNodeInfo();
+        }
+        FSawFMOperatorNode(FNodeData InInitData)
+            : FNodeFacade(InInitData, MakeShared<const FNodeClassMetadata>(FSawFMOperatorOperator::GetNodeInfo()), TFacadeOperatorClass<FSawFMOperatorOperator>())
         {
         }
     };

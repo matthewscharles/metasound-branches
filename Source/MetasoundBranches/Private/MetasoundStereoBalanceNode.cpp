@@ -176,8 +176,12 @@ namespace Metasound
     class FBalanceNode : public FNodeFacade
     {
     public:
-        FBalanceNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FBalanceOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FBalanceOperator::GetNodeInfo();
+        }
+        FBalanceNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FBalanceOperator::GetNodeInfo()), TFacadeOperatorClass<FBalanceOperator>())
         {
         }
     };

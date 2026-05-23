@@ -244,8 +244,12 @@ namespace Metasound
     class FMakeNoteFloatNode : public FNodeFacade
     {
     public:
-        FMakeNoteFloatNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FMakeNoteFloatOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FMakeNoteFloatOperator::GetNodeInfo();
+        }
+        FMakeNoteFloatNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FMakeNoteFloatOperator::GetNodeInfo()), TFacadeOperatorClass<FMakeNoteFloatOperator>())
         {
         }
     };

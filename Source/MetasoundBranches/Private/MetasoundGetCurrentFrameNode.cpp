@@ -105,8 +105,12 @@ namespace Metasound
     class FGetCurrentFrameNode : public FNodeFacade
     {
     public:
-        FGetCurrentFrameNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FGetCurrentFrameOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FGetCurrentFrameOperator::GetNodeInfo();
+        }
+        FGetCurrentFrameNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FGetCurrentFrameOperator::GetNodeInfo()), TFacadeOperatorClass<FGetCurrentFrameOperator>())
         {
         }
     };

@@ -164,11 +164,12 @@ namespace Metasound
     class FBreakNoteFloatNode : public FNodeFacade
     {
     public:
-        FBreakNoteFloatNode(const FNodeInitData& InitData)
-            : FNodeFacade(
-                InitData.InstanceName,
-                InitData.InstanceID,
-                TFacadeOperatorClass<FBreakNoteFloatOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FBreakNoteFloatOperator::GetNodeInfo();
+        }
+        FBreakNoteFloatNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FBreakNoteFloatOperator::GetNodeInfo()), TFacadeOperatorClass<FBreakNoteFloatOperator>())
         {
         }
     };

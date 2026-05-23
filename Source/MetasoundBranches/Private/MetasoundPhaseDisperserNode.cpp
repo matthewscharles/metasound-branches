@@ -190,8 +190,12 @@ namespace Metasound
     class FPhaseDisperserNode : public FNodeFacade
     {
     public:
-        FPhaseDisperserNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FPhaseDisperserOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FPhaseDisperserOperator::GetNodeInfo();
+        }
+        FPhaseDisperserNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FPhaseDisperserOperator::GetNodeInfo()), TFacadeOperatorClass<FPhaseDisperserOperator>())
         {
         }
     };

@@ -119,8 +119,12 @@ namespace Metasound
     class FGreatestCommonDivisorIntNode : public FNodeFacade
     {
     public:
-        FGreatestCommonDivisorIntNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FGreatestCommonDivisorIntOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FGreatestCommonDivisorIntOperator::GetNodeInfo();
+        }
+        FGreatestCommonDivisorIntNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FGreatestCommonDivisorIntOperator::GetNodeInfo()), TFacadeOperatorClass<FGreatestCommonDivisorIntOperator>())
         {
         }
     };

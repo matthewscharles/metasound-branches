@@ -158,8 +158,12 @@ namespace Metasound
     class FStereoGainNode : public FNodeFacade
     {
     public:
-        FStereoGainNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FStereoGainOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FStereoGainOperator::GetNodeInfo();
+        }
+        FStereoGainNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FStereoGainOperator::GetNodeInfo()), TFacadeOperatorClass<FStereoGainOperator>())
         {
         }
     };

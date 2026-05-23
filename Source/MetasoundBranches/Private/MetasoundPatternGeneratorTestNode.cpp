@@ -162,8 +162,12 @@ namespace Metasound
     class FPatternGeneratorTestNode : public FNodeFacade
     {
     public:
-        FPatternGeneratorTestNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FPatternGeneratorTestOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FPatternGeneratorTestOperator::GetNodeInfo();
+        }
+        FPatternGeneratorTestNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FPatternGeneratorTestOperator::GetNodeInfo()), TFacadeOperatorClass<FPatternGeneratorTestOperator>())
         {
         }
     };

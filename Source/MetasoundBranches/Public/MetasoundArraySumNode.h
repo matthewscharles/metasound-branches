@@ -161,8 +161,12 @@ namespace Metasound
     class TArraySumNode : public FNodeFacade
     {
     public:
-        TArraySumNode(const FNodeInitData& InInitData)
-            : FNodeFacade(InInitData.InstanceName, InInitData.InstanceID, TFacadeOperatorClass<TArraySumOperator<ArrayType>>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return TArraySumOperator<ArrayType>::GetNodeInfo();
+        }
+        TArraySumNode(FNodeData InInitData)
+            : FNodeFacade(InInitData, MakeShared<const FNodeClassMetadata>(TArraySumOperator<ArrayType>::GetNodeInfo()), TFacadeOperatorClass<TArraySumOperator<ArrayType>>())
         {
         }
         virtual ~TArraySumNode() = default;

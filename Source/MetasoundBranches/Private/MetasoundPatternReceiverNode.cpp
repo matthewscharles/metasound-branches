@@ -136,8 +136,12 @@ namespace Metasound
     class FPatternReceiverNode : public FNodeFacade
     {
     public:
-        FPatternReceiverNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FPatternReceiverOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FPatternReceiverOperator::GetNodeInfo();
+        }
+        FPatternReceiverNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FPatternReceiverOperator::GetNodeInfo()), TFacadeOperatorClass<FPatternReceiverOperator>())
         {
         }
     };

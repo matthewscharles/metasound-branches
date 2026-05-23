@@ -133,8 +133,12 @@ namespace Metasound
     class FAnyOfBoolArrayNode : public FNodeFacade
     {
     public:
-        FAnyOfBoolArrayNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FAnyOfBoolArrayOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FAnyOfBoolArrayOperator::GetNodeInfo();
+        }
+        FAnyOfBoolArrayNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FAnyOfBoolArrayOperator::GetNodeInfo()), TFacadeOperatorClass<FAnyOfBoolArrayOperator>())
         {
         }
     };

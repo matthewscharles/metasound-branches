@@ -385,11 +385,12 @@ namespace Metasound
     class FPolyVoiceManagerNode : public FNodeFacade
     {
     public:
-        FPolyVoiceManagerNode(const FNodeInitData& InitData)
-            : FNodeFacade(
-                  InitData.InstanceName,
-                  InitData.InstanceID,
-                  TFacadeOperatorClass<FPolyVoiceManagerOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FPolyVoiceManagerOperator::GetNodeInfo();
+        }
+        FPolyVoiceManagerNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FPolyVoiceManagerOperator::GetNodeInfo()), TFacadeOperatorClass<FPolyVoiceManagerOperator>())
         {
         }
     };

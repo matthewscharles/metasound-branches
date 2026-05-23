@@ -152,8 +152,12 @@ namespace Metasound
     class FZeroCrossingNode : public FNodeFacade
     {
     public:
-        FZeroCrossingNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FZeroCrossingOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FZeroCrossingOperator::GetNodeInfo();
+        }
+        FZeroCrossingNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FZeroCrossingOperator::GetNodeInfo()), TFacadeOperatorClass<FZeroCrossingOperator>())
         {
         }
     };

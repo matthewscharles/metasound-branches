@@ -161,8 +161,12 @@ namespace Metasound
     class FEdgeNode : public FNodeFacade
     {
     public:
-        FEdgeNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FEdgeOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FEdgeOperator::GetNodeInfo();
+        }
+        FEdgeNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FEdgeOperator::GetNodeInfo()), TFacadeOperatorClass<FEdgeOperator>())
         {
         }
     };

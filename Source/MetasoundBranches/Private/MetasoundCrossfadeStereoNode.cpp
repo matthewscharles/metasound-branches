@@ -182,8 +182,12 @@ namespace Metasound
     class FCrossfadeStereoNode : public FNodeFacade
     {
     public:
-        FCrossfadeStereoNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FCrossfadeStereoOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FCrossfadeStereoOperator::GetNodeInfo();
+        }
+        FCrossfadeStereoNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FCrossfadeStereoOperator::GetNodeInfo()), TFacadeOperatorClass<FCrossfadeStereoOperator>())
         {
         }
     };

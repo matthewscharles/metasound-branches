@@ -127,8 +127,12 @@ namespace Metasound
 	class FGateNode : public FNodeFacade
 	{
 	public:
-		FGateNode(const FNodeInitData& InitData)
-			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FGateOperator>())
+				static FNodeClassMetadata CreateNodeClassMetadata()
+		{
+		    return FGateOperator::GetNodeInfo();
+		}
+		FGateNode(FNodeData InitData)
+			: FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FGateOperator::GetNodeInfo()), TFacadeOperatorClass<FGateOperator>())
 		{}
 	};
 

@@ -139,8 +139,12 @@ namespace Metasound
 	class FAudioGreaterThanFloatNode : public FNodeFacade
 	{
 	public:
-		FAudioGreaterThanFloatNode(const FNodeInitData& InitData)
-			: FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FAudioGreaterThanFloatOperator>())
+				static FNodeClassMetadata CreateNodeClassMetadata()
+		{
+		    return FAudioGreaterThanFloatOperator::GetNodeInfo();
+		}
+		FAudioGreaterThanFloatNode(FNodeData InitData)
+			: FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FAudioGreaterThanFloatOperator::GetNodeInfo()), TFacadeOperatorClass<FAudioGreaterThanFloatOperator>())
 		{}
 	};
 

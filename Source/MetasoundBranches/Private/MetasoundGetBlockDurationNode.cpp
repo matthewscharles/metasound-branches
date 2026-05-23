@@ -95,8 +95,12 @@ namespace Metasound
     class FGetBlockDurationNode : public FNodeFacade
     {
     public:
-        FGetBlockDurationNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FGetBlockDurationOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FGetBlockDurationOperator::GetNodeInfo();
+        }
+        FGetBlockDurationNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FGetBlockDurationOperator::GetNodeInfo()), TFacadeOperatorClass<FGetBlockDurationOperator>())
         {
         }
     };

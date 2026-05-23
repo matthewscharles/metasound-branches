@@ -185,8 +185,12 @@ namespace Metasound
     class FSlewNode : public FNodeFacade
     {
     public:
-        FSlewNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FSlewOperator>())
+                static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FSlewOperator::GetNodeInfo();
+        }
+        FSlewNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FSlewOperator::GetNodeInfo()), TFacadeOperatorClass<FSlewOperator>())
         {
         }
     };
