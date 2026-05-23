@@ -84,7 +84,7 @@ namespace Metasound
 		{
 			using namespace WaveCuePointsNodeVertexNames;
 			const FInputVertexInterfaceData& InputData = InParams.InputData;
-			TDataReadReference<FWaveAsset> InWaveAsset = InputData.GetOrConstructDataReadReference<FWaveAsset>(METASOUND_GET_PARAM_NAME(ParamWaveAsset));
+			TDataReadReference<FWaveAsset> InWaveAsset = InputData.GetOrCreateDefaultDataReadReference<FWaveAsset>(METASOUND_GET_PARAM_NAME(ParamWaveAsset), InParams.OperatorSettings);
 			FTriggerReadRef InTriggerGetCuePoints = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(ParamTriggerGetCuePoints), InParams.OperatorSettings);
 			return MakeUnique<FGetWaveCuePointsOperator>(InParams.OperatorSettings, InWaveAsset, InTriggerGetCuePoints);
 		}
