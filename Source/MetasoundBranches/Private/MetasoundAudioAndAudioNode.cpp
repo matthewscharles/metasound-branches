@@ -82,6 +82,8 @@ namespace Metasound
 				DisplayStyle.bShowOutputNames = false;
 				Metadata.DisplayStyle = DisplayStyle;
 
+				METASOUND_BRANCHES_APPLY_NODE_STYLE(Metadata);
+
 				return Metadata;
 			};
 

@@ -56,6 +56,7 @@ namespace Metasound
                     METASOUND_LOCTEXT("CustomSub", "Time")
                 };
                 Metadata.Keywords = TArray<FText>();
+                METASOUND_BRANCHES_APPLY_NODE_STYLE(Metadata);
                 return Metadata;
             };
 

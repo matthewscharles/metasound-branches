@@ -121,6 +121,7 @@ public:
 			M.DisplayName      = LOCTEXT("ClockDivDisplay", "Clock Divider");
 			M.Description      = LOCTEXT("ClockDivDesc", "Configurable N-way trigger divider.");
 			M.Author           = TEXT("Charles Matthews");
+			METASOUND_BRANCHES_APPLY_NODE_STYLE(M);
 			M.PromptIfMissing  = PluginNodeMissingPrompt;
 			M.DefaultInterface = ClockDivPrivate::GetVertexInterface(4,0,1);
 			M.CategoryHierarchy = { LOCTEXT("BranchesCat","Branches"), LOCTEXT("TriggerCat","Triggers") };

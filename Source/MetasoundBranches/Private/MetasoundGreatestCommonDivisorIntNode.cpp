@@ -71,6 +71,8 @@ namespace Metasound
                     METASOUND_LOCTEXT("GCDKeyword1", "Euclidean")
                 };
 
+                METASOUND_BRANCHES_APPLY_NODE_STYLE(Metadata);
+
                 return Metadata;
             };
 

@@ -10,6 +10,7 @@
 #include "MetasoundDataTypeRegistrationMacro.h"
 #include "MetasoundFrontendRegistries.h"
 #include "MetasoundFrontendModuleRegistrationMacros.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "FMetasoundBranchesModule"
 
@@ -25,8 +26,17 @@ void FMetasoundBranchesModule::StartupModule()
         {
             const FString PluginContentDir = Plugin->GetBaseDir();
             const FString FullIconPath = PluginContentDir / TEXT("Resources/Icons");
+            const FString PluginIcon128Path = PluginContentDir / TEXT("Resources/Icon128.png");
 
             MutableStyle->SetContentRoot(FullIconPath);
+
+            MutableStyle->Set(TEXT(METASOUND_BRANCHES_ICON_KEY),
+                new FSlateImageBrush(PluginIcon128Path, FVector2D(16.f, 16.f)));
+
+            MutableStyle->Set(TEXT(METASOUND_BRANCHES_COLOR_KEY_AUDIO), FLinearColor(0.22f, 0.08f, 0.30f, 1.0f));
+            MutableStyle->Set(TEXT(METASOUND_BRANCHES_COLOR_KEY_FLOAT), FLinearColor(0.09f, 0.25f, 0.14f, 1.0f));
+            MutableStyle->Set(TEXT(METASOUND_BRANCHES_COLOR_KEY_TRIGGER), FLinearColor(0.18f, 0.18f, 0.18f, 1.0f));
+            MutableStyle->Set(TEXT(METASOUND_BRANCHES_COLOR_KEY_INT), FLinearColor(0.08f, 0.14f, 0.28f, 1.0f));
 
             MutableStyle->Set(TEXT("MetasoundEditor.Graph.Node.Custom.And"),
                 new FSlateImageBrush(MutableStyle->RootToContentDir(TEXT("node_math_and_40x.png")), FVector2D(40.f, 40.f)));

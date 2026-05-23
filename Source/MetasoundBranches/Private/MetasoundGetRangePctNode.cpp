@@ -78,6 +78,8 @@ namespace Metasound
 					METASOUND_LOCTEXT("RangePctKeyword3", "GetRangePct")
                 };
 
+                METASOUND_BRANCHES_APPLY_NODE_STYLE(Metadata);
+
                 return Metadata;
             };
 

@@ -69,6 +69,8 @@ namespace Metasound
 					METASOUND_LOCTEXT("GreaterThanKeyword2", "Ceiling")
 				};
                 
+                METASOUND_BRANCHES_APPLY_NODE_STYLE(Metadata);
+                
                 return Metadata;
             };
 

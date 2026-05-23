@@ -104,6 +104,8 @@ namespace Metasound
                 };
                 Metadata.Keywords = TArray<FText>(); // Keywords for searching
                 
+                METASOUND_BRANCHES_APPLY_NODE_STYLE(Metadata);
+                
                 return Metadata;
             };
 
