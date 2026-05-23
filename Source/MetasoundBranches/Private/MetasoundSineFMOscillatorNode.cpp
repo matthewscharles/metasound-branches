@@ -1,4 +1,4 @@
-// Copyright 2025 Charles Matthews. All Rights Reserved.
+// Copyright 2026 Charles Matthews. All Rights Reserved.
 
 #include "MetasoundBranches/Public/MetasoundSineFMOscillatorNode.h"
 #include "MetasoundExecutableOperator.h"
