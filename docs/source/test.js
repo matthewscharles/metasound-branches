@@ -16,13 +16,16 @@ const OUTPUT_FILE = path.resolve(__dirname, 'node_data.json');
 
 const METASOUND_PARAM_REGEX = /METASOUND_PARAM\s*\(\s*(\w+)\s*,\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)\s*;/g;
 const IO_VERTEX_REGEX = /\bT(Input|Output)DataVertex\s*<\s*([\w:]+)\s*>\s*\(\s*METASOUND_GET_PARAM_NAME_AND_METADATA\s*\(\s*(\w+)\s*\)\s*\)/g;
-const CLASS_NAME_REGEX = /Metadata\.ClassName\s*=\s*\{\s*([^\}]+)\};/;
-const MAJOR_VERSION_REGEX = /Metadata\.MajorVersion\s*=\s*(\d+)\s*;/;
-const MINOR_VERSION_REGEX = /Metadata\.MinorVersion\s*=\s*(\d+)\s*;/;
-const AUTHOR_REGEX = /Metadata\.Author\s*=\s*"([^"]+)"\s*;/;
-const DISPLAY_NAME_REGEX = /Metadata\.DisplayName\s*=\s*(?:\w*LOCTEXT\w*)\s*\(\s*"[^"]+"\s*,\s*"([^"]+)"\);/;
-const DESCRIPTION_REGEX = /Metadata\.Description\s*=\s*(?:\w*LOCTEXT\w*)\s*\(\s*"[^"]+"\s*,\s*"([^"]+)"\);/;
-const CATEGORY_REGEX = /Metadata\.CategoryHierarchy\s*=\s*\{\s*([^\}]+)\};/;
+// Support common metadata variable aliases used across files.
+const META_VAR = '(?:Metadata|Meta|M)';
+
+const CLASS_NAME_REGEX = new RegExp(`${META_VAR}\\.ClassName\\s*=\\s*\\{\\s*([\\s\\S]*?)\\s*\\}\\s*;`);
+const MAJOR_VERSION_REGEX = new RegExp(`${META_VAR}\\.MajorVersion\\s*=\\s*(\\d+)\\s*;`);
+const MINOR_VERSION_REGEX = new RegExp(`${META_VAR}\\.MinorVersion\\s*=\\s*(\\d+)\\s*;`);
+const AUTHOR_REGEX = new RegExp(`${META_VAR}\\.Author\\s*=\\s*(?:TEXT\\s*\\(\\s*"([^"]+)"\\s*\\)|"([^"]+)")\\s*;`);
+const DISPLAY_NAME_REGEX = new RegExp(`${META_VAR}\\.DisplayName\\s*=\\s*(?:\\w*LOCTEXT\\w*)\\s*\\(\\s*"[^"]+"\\s*,\\s*"([^"]+)"\\s*\\)\\s*;`);
+const DESCRIPTION_REGEX = new RegExp(`${META_VAR}\\.Description\\s*=\\s*(?:\\w*LOCTEXT\\w*)\\s*\\(\\s*"[^"]+"\\s*,\\s*"([^"]+)"\\s*\\)\\s*;`);
+const CATEGORY_REGEX = new RegExp(`${META_VAR}\\.CategoryHierarchy\\s*=\\s*\\{\\s*([\\s\\S]*?)\\s*\\}\\s*;`);
 
 function getAllMatches(regex, content) {
   let matches = [];
@@ -86,7 +89,7 @@ function parseSource(filePath) {
   if (minorMatch) nodeData.minorVersion = minorMatch[1];
 
   let authorMatch = AUTHOR_REGEX.exec(content);
-  if (authorMatch) nodeData.author = authorMatch[1];
+  if (authorMatch) nodeData.author = authorMatch[1] || authorMatch[2];
 
   let displayNameMatch = DISPLAY_NAME_REGEX.exec(content);
   if (displayNameMatch) nodeData.name = displayNameMatch[1];
