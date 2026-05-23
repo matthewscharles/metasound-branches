@@ -70,3 +70,9 @@
 | 04/13 | - Finish rolling out audio versions of comparison nodes with icons, test on Windows |
 | 05/02 | - Add Floor and Round for Float |
 | 05/03 | - Add experimental nodes wrapping FMath: GetRangePct, SmoothStep, Greatest Common Divisor.<br>- Add AnyOf and AllOf (without using Algo). |
+
+# 2026
+
+| Date   | Activities                                                          |
+|--------|
+| 05/22 | - Update for UE5.8 |

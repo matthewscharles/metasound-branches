@@ -186,7 +186,7 @@
   {
     "name": "Shift Register",
     "category": "Modulation",
-    "description": "Shift register node with eight stages and additional reset/output options.",
+    "description": "Shift register combined with sample and hold, with eight stages and additional reset/output options.",
     "image": "ShiftRegister.svg",
     "inputs": [
       { "name": "In", "description": "Input float to the shift register.", "type": "Float" },
