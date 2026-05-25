@@ -1,4 +1,4 @@
-// Copyright 2025 Charles Matthews. All Rights Reserved.
+// Copyright 2026 Charles Matthews. All Rights Reserved.
 
 #include "MetasoundBranches/Public/MetasoundScaleDegreeToNoteNode.h"
 #include "MetasoundExecutableOperator.h"
@@ -141,7 +141,12 @@ namespace Metasound
                     }
 
                     int32 StepIndex = Degree % NumSteps;
-                    int32 Octave = Degree / NumSteps;
+                    if (StepIndex < 0)
+                    {
+                        StepIndex += NumSteps;
+                    }
+
+                    int32 Octave = (Degree - StepIndex) / NumSteps;
 
                     float Semitone = Scale[StepIndex] + (12.0f * static_cast<float>(Octave));
                     *OutputNote = Semitone + *Offset;
@@ -160,8 +165,13 @@ namespace Metasound
     class FScaleDegreeToNoteNode : public FNodeFacade
     {
     public:
-        FScaleDegreeToNoteNode(const FNodeInitData& InitData)
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FScaleDegreeToNoteNodeOperator>())
+        static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FScaleDegreeToNoteNodeOperator::GetNodeInfo();
+        }
+
+        FScaleDegreeToNoteNode(FNodeData InitData)
+            : FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FScaleDegreeToNoteNodeOperator::GetNodeInfo()), TFacadeOperatorClass<FScaleDegreeToNoteNodeOperator>())
         {
         }
     };
