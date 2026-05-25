@@ -28,7 +28,8 @@ public class MetasoundBranches : ModuleRules
                 "CoreUObject",
                 "Engine",
                 "AudioExtensions",
-                "SignalProcessing"
+                "SignalProcessing",
+                "AudioChannelAgnosticCore"
             }
         );
     }
