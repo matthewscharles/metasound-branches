@@ -1,6 +1,8 @@
 // Copyright 2026 Charles Matthews. All Rights Reserved.
 
 #include "MetasoundBranches/Public/MetasoundDustNode.h"
+#include "MetasoundAudioBuffer.h"
+#include "MetasoundDataFactory.h"
 #include "MetasoundExecutableOperator.h"
 #include "MetasoundPrimitives.h"
 #include "MetasoundNodeRegistrationMacro.h"
@@ -28,6 +30,123 @@ namespace Metasound
 		METASOUND_PARAM(OutputTrigger,            "Trigger Out",         "Generated trigger.")
 	}
 
+	namespace DustPrivate
+	{
+		FName MakeImpulseOutputName(int32 ChannelIndex)
+		{
+			if (ChannelIndex == 0)
+			{
+				return METASOUND_GET_PARAM_NAME(DustNodeVertexNames::OutputImpulse);
+			}
+			return FName(*FString::Printf(TEXT("Impulse Out %d"), ChannelIndex));
+		}
+
+		FName MakeTriggerOutputName(int32 ChannelIndex)
+		{
+			if (ChannelIndex == 0)
+			{
+				return METASOUND_GET_PARAM_NAME(DustNodeVertexNames::OutputTrigger);
+			}
+			return FName(*FString::Printf(TEXT("Trigger Out %d"), ChannelIndex));
+		}
+
+		FDataVertexMetadata MakeImpulseOutputMeta(int32 ChannelIndex)
+		{
+#if WITH_EDITOR
+			if (ChannelIndex == 0)
+			{
+				return { LOCTEXT("DustImpulseOutTooltip", "Generated impulse."), LOCTEXT("DustImpulseOutDisplay", "Impulse Out") };
+			}
+			const int32 Num = ChannelIndex;
+			const FText DisplayName = FText::Format(LOCTEXT("DustImpulseChannelDisplayFmt", "Impulse Out {0}"), Num);
+			const FText Tooltip = FText::Format(LOCTEXT("DustImpulseChannelTooltipFmt", "Generated impulse output for channel {0}."), Num);
+			return { Tooltip, DisplayName };
+#else
+			return {};
+#endif
+		}
+
+		FDataVertexMetadata MakeTriggerOutputMeta(int32 ChannelIndex)
+		{
+#if WITH_EDITOR
+			if (ChannelIndex == 0)
+			{
+				return { LOCTEXT("DustTriggerOutTooltip", "Generated trigger."), LOCTEXT("DustTriggerOutDisplay", "Trigger Out") };
+			}
+			const int32 Num = ChannelIndex;
+			const FText DisplayName = FText::Format(LOCTEXT("DustTriggerChannelDisplayFmt", "Trigger Out {0}"), Num);
+			const FText Tooltip = FText::Format(LOCTEXT("DustTriggerChannelTooltipFmt", "Generated trigger output for channel {0}."), Num);
+			return { Tooltip, DisplayName };
+#else
+			return {};
+#endif
+		}
+
+		FVertexInterface GetVertexInterface(int32 NumChannels, bool bPerChannelTriggerPins, bool bPerChannelAudioPins)
+		{
+			using namespace DustNodeVertexNames;
+
+			const int32 ClampedNumChannels = FMath::Clamp(NumChannels, 1, 32);
+
+			FInputVertexInterface Input(
+				TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputEnabled), true),
+				TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputBiPolar), true),
+				TInputDataVertex<int32>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputSeed), -1),
+				TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputDensityOffset), 0.f),
+				TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputDensityAudio)),
+				TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputAmpVarOffset), 1.f),
+				TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputAmpVarAudio))
+			);
+
+			FOutputVertexInterface Output;
+
+			if (bPerChannelAudioPins)
+			{
+				for (int32 ChannelIndex = 0; ChannelIndex < ClampedNumChannels; ++ChannelIndex)
+				{
+					Output.Add(TOutputDataVertex<FAudioBuffer>(MakeImpulseOutputName(ChannelIndex), MakeImpulseOutputMeta(ChannelIndex)));
+				}
+			}
+			else
+			{
+				Output.Add(TOutputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputImpulse)));
+			}
+
+			if (bPerChannelTriggerPins)
+			{
+				for (int32 ChannelIndex = 0; ChannelIndex < ClampedNumChannels; ++ChannelIndex)
+				{
+					Output.Add(TOutputDataVertex<FTrigger>(MakeTriggerOutputName(ChannelIndex), MakeTriggerOutputMeta(ChannelIndex)));
+				}
+			}
+			else
+			{
+				Output.Add(TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTrigger)));
+			}
+
+			return { MoveTemp(Input), MoveTemp(Output) };
+		}
+
+		class FDustOperatorData : public TOperatorData<FDustOperatorData>
+		{
+		public:
+			static const FLazyName OperatorDataTypeName;
+
+			FDustOperatorData(int32 InNumChannels, bool bInCreateTriggerPinsPerChannel, bool bInCreateAudioPinsPerChannel)
+				: NumChannels(InNumChannels)
+				, bCreateTriggerPinsPerChannel(bInCreateTriggerPinsPerChannel)
+				, bCreateAudioPinsPerChannel(bInCreateAudioPinsPerChannel)
+			{
+			}
+
+			int32 NumChannels;
+			bool bCreateTriggerPinsPerChannel;
+			bool bCreateAudioPinsPerChannel;
+		};
+
+		const FLazyName FDustOperatorData::OperatorDataTypeName = "DustOperatorData";
+	}
+
 	class FDustOperator : public TExecutableOperator<FDustOperator>
 	{
 	public:
@@ -39,7 +158,12 @@ namespace Metasound
 			const FFloatReadRef& InDensityOffset,
 			const FAudioBufferReadRef& InDensityAudio,
 			const FFloatReadRef& InAmpVarOffset,
-			const FAudioBufferReadRef& InAmpVarAudio
+			const FAudioBufferReadRef& InAmpVarAudio,
+			TArray<FAudioBufferWriteRef> InOutputImpulses,
+			TArray<FTriggerWriteRef> InOutputTriggers,
+			TArray<FName> InOutputImpulseNames,
+			TArray<FName> InOutputTriggerNames,
+			int32 InNumChannels
 		)
 			: Enabled(InEnabled)
 			, BiPolar(InBiPolar)
@@ -48,33 +172,22 @@ namespace Metasound
 			, DensityAudio(InDensityAudio)
 			, AmpVarOffset(InAmpVarOffset)
 			, AmpVarAudio(InAmpVarAudio)
-			, OutputImpulse(FAudioBufferWriteRef::CreateNew(InSettings))
-			, OutputTrigger(FTriggerWriteRef::CreateNew(InSettings))
+			, OutputImpulses(MoveTemp(InOutputImpulses))
+			, OutputTriggers(MoveTemp(InOutputTriggers))
+			, OutputImpulseNames(MoveTemp(InOutputImpulseNames))
+			, OutputTriggerNames(MoveTemp(InOutputTriggerNames))
 			, RNGStream((*InSeed == -1) ? FDateTime::UtcNow().GetTicks() : *InSeed)
 			, SampleRate((float)InSettings.GetSampleRate())
 			, SignalIsPositive(true)
 			, LastSeed((*InSeed == -1) ? FDateTime::UtcNow().GetTicks() : *InSeed)
+			, NumChannels(FMath::Max(1, InNumChannels))
+			, NextChannelIndex(0)
 		{
 		}
 
 		static const FVertexInterface& DeclareVertexInterface()
 		{
-			using namespace DustNodeVertexNames;
-			static const FVertexInterface Interface(
-				FInputVertexInterface(
-					TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputEnabled), true),
-					TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputBiPolar), true),
-					TInputDataVertex<int32>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputSeed), -1),
-					TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputDensityOffset), 0.f),
-					TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputDensityAudio)),
-					TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputAmpVarOffset), 1.f),
-					TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputAmpVarAudio))
-				),
-				FOutputVertexInterface(
-					TOutputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputImpulse)),
-					TOutputDataVertex<FTrigger>(METASOUND_GET_PARAM_NAME_AND_METADATA(OutputTrigger))
-				)
-			);
+			static const FVertexInterface Interface = DustPrivate::GetVertexInterface(1, false, false);
 			return Interface;
 		}
 
@@ -85,7 +198,7 @@ namespace Metasound
 				FNodeClassMetadata Metadata;
 				Metadata.ClassName = { TEXT("UE"), TEXT("Dust (Audio)"), TEXT("Audio") };
 				Metadata.MajorVersion = 1;
-				Metadata.MinorVersion = 1;
+				Metadata.MinorVersion = 2;
 				Metadata.DisplayName = LOCTEXT("DustNodeDisplayName", "Dust (Audio)");
 				Metadata.Description = LOCTEXT("DustNodeDesc", "Generates randomly timed impulses (uni or bi-polar) alongside triggers, with optional audio rate modulation.");
 				Metadata.Author = TEXT("Charles Matthews");
@@ -107,7 +220,15 @@ namespace Metasound
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
 		{
 			using namespace DustNodeVertexNames;
+			using namespace DustPrivate;
 			const FInputVertexInterfaceData& InputData = InParams.InputData;
+			const FVertexInterface& Interface = InParams.Node.GetVertexInterface();
+
+			const FDustOperatorData* ConfigData = CastOperatorData<const FDustOperatorData>(InParams.Node.GetOperatorData().Get());
+			const int32 ConfigNumChannels = ConfigData ? FMath::Clamp(ConfigData->NumChannels, 1, 32) : 1;
+			const bool bCreateTriggerPinsPerChannel = ConfigData ? ConfigData->bCreateTriggerPinsPerChannel : false;
+			const bool bCreateAudioPinsPerChannel = ConfigData ? ConfigData->bCreateAudioPinsPerChannel : false;
+
 			TDataReadReference<bool> InEnabled =
 				InputData.GetOrCreateDefaultDataReadReference<bool>(METASOUND_GET_PARAM_NAME(InputEnabled), InParams.OperatorSettings);
 			TDataReadReference<bool> InBiPolar =
@@ -122,6 +243,48 @@ namespace Metasound
 				InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputAmpVarOffset), InParams.OperatorSettings);
 			TDataReadReference<FAudioBuffer> InAmpVarAudio =
 				InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputAmpVarAudio), InParams.OperatorSettings);
+
+			TArray<FAudioBufferWriteRef> OutputImpulses;
+			TArray<FTriggerWriteRef> OutputTriggers;
+			TArray<FName> OutputImpulseNames;
+			TArray<FName> OutputTriggerNames;
+
+			if (bCreateAudioPinsPerChannel)
+			{
+				for (int32 ChannelIndex = 0; ChannelIndex < ConfigNumChannels; ++ChannelIndex)
+				{
+					const FName OutputName = MakeImpulseOutputName(ChannelIndex);
+					if (Interface.ContainsOutputVertex(OutputName))
+					{
+						OutputImpulses.Add(FAudioBufferWriteRef::CreateNew(InParams.OperatorSettings));
+						OutputImpulseNames.Add(OutputName);
+					}
+				}
+			}
+			if (OutputImpulses.Num() == 0)
+			{
+				OutputImpulses.Add(FAudioBufferWriteRef::CreateNew(InParams.OperatorSettings));
+				OutputImpulseNames.Add(METASOUND_GET_PARAM_NAME(OutputImpulse));
+			}
+
+			if (bCreateTriggerPinsPerChannel)
+			{
+				for (int32 ChannelIndex = 0; ChannelIndex < ConfigNumChannels; ++ChannelIndex)
+				{
+					const FName OutputName = MakeTriggerOutputName(ChannelIndex);
+					if (Interface.ContainsOutputVertex(OutputName))
+					{
+						OutputTriggers.Add(FTriggerWriteRef::CreateNew(InParams.OperatorSettings));
+						OutputTriggerNames.Add(OutputName);
+					}
+				}
+			}
+			if (OutputTriggers.Num() == 0)
+			{
+				OutputTriggers.Add(FTriggerWriteRef::CreateNew(InParams.OperatorSettings));
+				OutputTriggerNames.Add(METASOUND_GET_PARAM_NAME(OutputTrigger));
+			}
+
 			return MakeUnique<FDustOperator>(
 				InParams.OperatorSettings,
 				InEnabled,
@@ -130,7 +293,12 @@ namespace Metasound
 				InDensityOffset,
 				InDensityAudio,
 				InAmpVarOffset,
-				InAmpVarAudio
+				InAmpVarAudio,
+				MoveTemp(OutputImpulses),
+				MoveTemp(OutputTriggers),
+				MoveTemp(OutputImpulseNames),
+				MoveTemp(OutputTriggerNames),
+				ConfigNumChannels
 			);
 		}
 
@@ -148,15 +316,32 @@ namespace Metasound
 
 		void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace DustNodeVertexNames;
-			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputTrigger), OutputTrigger);
-			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputImpulse), OutputImpulse);
+			for (int32 Index = 0; Index < OutputTriggers.Num(); ++Index)
+			{
+				InOutVertexData.BindWriteVertex(OutputTriggerNames[Index], OutputTriggers[Index]);
+			}
+			for (int32 Index = 0; Index < OutputImpulses.Num(); ++Index)
+			{
+				InOutVertexData.BindWriteVertex(OutputImpulseNames[Index], OutputImpulses[Index]);
+			}
 		}
 
         void Execute()
         {
-            OutputTrigger->AdvanceBlock();
-            float* AudioOut = OutputImpulse->GetData();
+			for (FTriggerWriteRef& OutputTrigger : OutputTriggers)
+			{
+				OutputTrigger->AdvanceBlock();
+			}
+
+			TArray<float*> AudioOutChannels;
+			AudioOutChannels.Reserve(OutputImpulses.Num());
+			for (FAudioBufferWriteRef& OutputImpulse : OutputImpulses)
+			{
+				float* AudioData = OutputImpulse->GetData();
+				FMemory::Memset(AudioData, 0, sizeof(float) * OutputImpulse->Num());
+				AudioOutChannels.Add(AudioData);
+			}
+
             const float* DensityIn = DensityAudio->GetData();
             const float* AmpVarIn = AmpVarAudio->GetData();
             int32 NumFrames = DensityAudio->Num();
@@ -171,7 +356,6 @@ namespace Metasound
         
             if (!*Enabled)
             {
-                FMemory::Memset(AudioOut, 0, sizeof(float) * NumFrames);
                 return;
             }
         
@@ -192,13 +376,18 @@ namespace Metasound
                         a = SignalIsPositive ? a : -a;
                         SignalIsPositive = !SignalIsPositive;
                     }
-        
-                    AudioOut[i] = a;
-                    OutputTrigger->TriggerFrame(i);
-                }
-                else
-                {
-                    AudioOut[i] = 0.f;
+
+					const int32 SelectedChannel = (NumChannels > 1) ? NextChannelIndex : 0;
+					if (NumChannels > 1)
+					{
+						NextChannelIndex = (NextChannelIndex + 1) % NumChannels;
+					}
+
+					const int32 AudioOutputIndex = (AudioOutChannels.Num() > 1) ? FMath::Clamp(SelectedChannel, 0, AudioOutChannels.Num() - 1) : 0;
+					const int32 TriggerOutputIndex = (OutputTriggers.Num() > 1) ? FMath::Clamp(SelectedChannel, 0, OutputTriggers.Num() - 1) : 0;
+
+					AudioOutChannels[AudioOutputIndex][i] = a;
+					OutputTriggers[TriggerOutputIndex]->TriggerFrame(i);
                 }
             }
         }
@@ -211,28 +400,43 @@ namespace Metasound
 		FAudioBufferReadRef DensityAudio;
 		FFloatReadRef AmpVarOffset;
 		FAudioBufferReadRef AmpVarAudio;
-		FAudioBufferWriteRef OutputImpulse;
-		FTriggerWriteRef OutputTrigger;
+		TArray<FAudioBufferWriteRef> OutputImpulses;
+		TArray<FTriggerWriteRef> OutputTriggers;
+		TArray<FName> OutputImpulseNames;
+		TArray<FName> OutputTriggerNames;
 		FRandomStream RNGStream;
 		float SampleRate;
 		bool SignalIsPositive;
 		int32 LastSeed;
+		int32 NumChannels;
+		int32 NextChannelIndex;
 	};
 
-	class FDustNode : public FNodeFacade
-	{
-	public:
-				static FNodeClassMetadata CreateNodeClassMetadata()
-		{
-		    return FDustOperator::GetNodeInfo();
-		}
-		FDustNode(FNodeData InitData)
-			: FNodeFacade(InitData, MakeShared<const FNodeClassMetadata>(FDustOperator::GetNodeInfo()), TFacadeOperatorClass<FDustOperator>())
-		{
-		}
-	};
+	using FDustNode = TNodeFacade<FDustOperator>;
+	METASOUND_REGISTER_NODE_AND_CONFIGURATION(FDustNode, FMetaSoundDustNodeConfiguration);
+}
 
-	METASOUND_REGISTER_NODE(FDustNode);
+FMetaSoundDustNodeConfiguration::FMetaSoundDustNodeConfiguration()
+	: NumChannels(1)
+	, bCreateTriggerPinsPerChannel(false)
+	, bCreateAudioPinsPerChannel(false)
+{
+}
+
+TInstancedStruct<FMetasoundFrontendClassInterface>
+FMetaSoundDustNodeConfiguration::OverrideDefaultInterface(const FMetasoundFrontendClass&) const
+{
+	using namespace Metasound::DustPrivate;
+	return TInstancedStruct<FMetasoundFrontendClassInterface>::Make(
+		FMetasoundFrontendClassInterface::GenerateClassInterface(
+			GetVertexInterface(NumChannels, bCreateTriggerPinsPerChannel, bCreateAudioPinsPerChannel)));
+}
+
+TSharedPtr<const Metasound::IOperatorData>
+FMetaSoundDustNodeConfiguration::GetOperatorData() const
+{
+	using namespace Metasound::DustPrivate;
+	return MakeShared<FDustOperatorData>(NumChannels, bCreateTriggerPinsPerChannel, bCreateAudioPinsPerChannel);
 }
 
 #undef LOCTEXT_NAMESPACE

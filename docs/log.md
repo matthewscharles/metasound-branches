@@ -76,3 +76,4 @@
 | Date   | Activities                                                          |
 |--------|
 | 05/22 | - Update for UE5.8 |
+| 05/25 | - Add colours / styles for 5.8<br> - Restore ScaleDegreeToNote<br> - Make Dust configurable|
