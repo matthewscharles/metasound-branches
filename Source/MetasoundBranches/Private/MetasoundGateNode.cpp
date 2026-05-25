@@ -68,11 +68,12 @@ namespace Metasound
 					METASOUND_LOCTEXT("Custom", "Branches"),
 					METASOUND_LOCTEXT("CustomSub", "Math")
 				};
-				return Metadata;
+				METASOUND_BRANCHES_APPLY_NODE_STYLE(Metadata);
+                return Metadata;
 			};
 
 			static const FNodeClassMetadata Metadata = CreateMetadata();
-			return Metadata;
+                return Metadata;
 		}
 
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)

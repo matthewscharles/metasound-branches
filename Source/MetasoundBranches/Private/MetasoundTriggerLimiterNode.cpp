@@ -72,11 +72,12 @@ namespace Metasound
                     METASOUND_LOCTEXT("Category", "Branches"),
                     METASOUND_LOCTEXT("Category", "Triggers")
                 };
+                METASOUND_BRANCHES_APPLY_NODE_STYLE(Metadata);
                 return Metadata;
             };
 
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
-            return Metadata;
+                return Metadata;
         }
 
         METASOUND_DISABLE_LEGACY_IO()

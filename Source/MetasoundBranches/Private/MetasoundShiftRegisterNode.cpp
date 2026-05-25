@@ -157,6 +157,7 @@ public:
 				LOCTEXT("Modulation","Modulation")
 			};
 			M.Keywords = { LOCTEXT("ShiftRegisterKW", "shift,register") };
+			METASOUND_BRANCHES_APPLY_NODE_STYLE(M);
 			return M;
 		}();
 		return Metadata;

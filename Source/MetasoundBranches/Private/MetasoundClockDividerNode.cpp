@@ -124,7 +124,8 @@ public:
 			M.PromptIfMissing  = PluginNodeMissingPrompt;
 			M.DefaultInterface = ClockDivPrivate::GetVertexInterface(4,0,1);
 			M.CategoryHierarchy = { LOCTEXT("BranchesCat","Branches"), LOCTEXT("TriggerCat","Triggers") };
-			return M;
+			METASOUND_BRANCHES_APPLY_NODE_STYLE(M);
+            return M;
 		}();
 		return Meta;
 	}

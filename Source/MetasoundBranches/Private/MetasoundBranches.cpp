@@ -10,6 +10,7 @@
 #include "MetasoundDataTypeRegistrationMacro.h"
 #include "MetasoundFrontendRegistries.h"
 #include "MetasoundFrontendModuleRegistrationMacros.h"
+#include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 
 #define LOCTEXT_NAMESPACE "FMetasoundBranchesModule"
 
@@ -27,6 +28,11 @@ void FMetasoundBranchesModule::StartupModule()
             const FString FullIconPath = PluginContentDir / TEXT("Resources/Icons");
 
             MutableStyle->SetContentRoot(FullIconPath);
+
+            MutableStyle->Set(METASOUND_BRANCHES_COLOR_KEY_DEFAULT, FLinearColor(0.3f, 0.05f, 0.4f, 1.0f));
+
+            MutableStyle->Set(METASOUND_BRANCHES_ICON_KEY_DEFAULT,
+                new FSlateImageBrush(PluginContentDir / TEXT("Resources/Icon128.png"), FVector2D(20.f, 20.f)));
 
             MutableStyle->Set(TEXT("MetasoundEditor.Graph.Node.Custom.And"),
                 new FSlateImageBrush(MutableStyle->RootToContentDir(TEXT("node_math_and_40x.png")), FVector2D(40.f, 40.f)));

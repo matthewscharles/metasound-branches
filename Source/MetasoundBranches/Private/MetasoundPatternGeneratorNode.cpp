@@ -92,12 +92,13 @@ namespace Metasound
                     METASOUND_LOCTEXT("CustomSub", "Patterns")
                 };
                 
+                METASOUND_BRANCHES_APPLY_NODE_STYLE(Metadata);
                 return Metadata;
             };
             
             static const FNodeClassMetadata Metadata = CreateNodeClassMetadata();
             
-            return Metadata;
+                return Metadata;
         }
         
         METASOUND_DISABLE_LEGACY_IO()

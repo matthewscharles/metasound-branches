@@ -158,6 +158,7 @@ public:
             M.PromptIfMissing  = PluginNodeMissingPrompt;
             M.DefaultInterface = GetVertexInterface(2);  // preview as stereo
             M.CategoryHierarchy = { LOCTEXT("BranchesCat","Branches"), LOCTEXT("FilterCat","Filters") };
+            METASOUND_BRANCHES_APPLY_NODE_STYLE(M);
             return M;
         }();
         return Meta;
