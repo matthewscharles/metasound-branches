@@ -13,7 +13,8 @@ enum class EMetaSoundCATDivideInputBMode : uint8
 {
 	CAT UMETA(DisplayName = "CAT"),
 	MonoAudio UMETA(DisplayName = "Mono Audio"),
-	Float UMETA(DisplayName = "Float")
+	Float UMETA(DisplayName = "Float"),
+	FloatArray UMETA(DisplayName = "Float Array")
 };
 
 UCLASS()
