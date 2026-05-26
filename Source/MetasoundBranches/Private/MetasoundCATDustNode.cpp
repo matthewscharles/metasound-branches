@@ -167,7 +167,7 @@ namespace Metasound
 				METASOUND_LOCTEXT("CustomSub", "CAT")
 			};
 			Metadata.DefaultInterface = DeclareVertexInterface();
-			METASOUND_BRANCHES_APPLY_NODE_STYLE(Metadata);
+			METASOUND_BRANCHES_APPLY_CAT_NODE_STYLE(Metadata);
 			return Metadata;
 		}
 

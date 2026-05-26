@@ -30,6 +30,7 @@ void FMetasoundBranchesModule::StartupModule()
             MutableStyle->SetContentRoot(FullIconPath);
 
             MutableStyle->Set(METASOUND_BRANCHES_COLOR_KEY_DEFAULT, FLinearColor(0.3f, 0.05f, 0.4f, 1.0f));
+            MutableStyle->Set(METASOUND_BRANCHES_COLOR_KEY_CAT, FLinearColor(0.61f, 0.44f, 0.30f, 1.0f));
 
             MutableStyle->Set(METASOUND_BRANCHES_ICON_KEY_DEFAULT,
                 new FSlateImageBrush(PluginContentDir / TEXT("Resources/Icon128.png"), FVector2D(20.f, 20.f)));

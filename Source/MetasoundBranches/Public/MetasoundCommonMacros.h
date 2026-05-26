@@ -4,6 +4,7 @@
 
 #define METASOUND_BRANCHES_STYLE_SET_NAME TEXT("MetaSoundStyle")
 #define METASOUND_BRANCHES_COLOR_KEY_DEFAULT TEXT("MetasoundEditor.Graph.Node.Custom.Branches.Color.Default")
+#define METASOUND_BRANCHES_COLOR_KEY_CAT TEXT("MetasoundEditor.Graph.Node.Custom.Branches.Color.CAT")
 #define METASOUND_BRANCHES_ICON_KEY_DEFAULT TEXT("MetasoundEditor.Graph.Node.Custom.Branches.Icon.Default")
 
 #define METASOUND_BRANCHES_APPLY_NODE_STYLE(MetadataVar)                                          \
@@ -11,6 +12,14 @@
     {                                                                                             \
         (MetadataVar).DisplayStyle.StyleSet = FName(METASOUND_BRANCHES_STYLE_SET_NAME);          \
         (MetadataVar).DisplayStyle.Color = FName(METASOUND_BRANCHES_COLOR_KEY_DEFAULT);          \
+        (MetadataVar).DisplayStyle.Icon = FName(METASOUND_BRANCHES_ICON_KEY_DEFAULT);            \
+    } while (false)
+
+#define METASOUND_BRANCHES_APPLY_CAT_NODE_STYLE(MetadataVar)                                      \
+    do                                                                                            \
+    {                                                                                             \
+        (MetadataVar).DisplayStyle.StyleSet = FName(METASOUND_BRANCHES_STYLE_SET_NAME);          \
+        (MetadataVar).DisplayStyle.Color = FName(METASOUND_BRANCHES_COLOR_KEY_CAT);              \
         (MetadataVar).DisplayStyle.Icon = FName(METASOUND_BRANCHES_ICON_KEY_DEFAULT);            \
     } while (false)
 
