@@ -1,6 +1,6 @@
 // Copyright 2026 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundCATBiquadNode.h"
+#include "MetasoundBranchesCAT/Public/MetasoundCATBiquadNode.h"
 
 #include "DSP/Filter.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"

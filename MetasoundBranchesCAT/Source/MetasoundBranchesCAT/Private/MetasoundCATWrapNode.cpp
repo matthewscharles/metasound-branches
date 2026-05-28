@@ -1,6 +1,6 @@
 // Copyright 2026 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundCATWrapNode.h"
+#include "MetasoundBranchesCAT/Public/MetasoundCATWrapNode.h"
 
 #include "MetasoundAudioBuffer.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"

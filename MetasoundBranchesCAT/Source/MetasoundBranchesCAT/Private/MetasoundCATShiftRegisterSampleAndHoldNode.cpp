@@ -1,6 +1,6 @@
 // Copyright 2026 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundCATShiftRegisterSampleAndHoldNode.h"
+#include "MetasoundBranchesCAT/Public/MetasoundCATShiftRegisterSampleAndHoldNode.h"
 
 #include "MetasoundAudioBuffer.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"

@@ -25,7 +25,7 @@
             "PlatformAllowList":["Win64", "Mac"],
             "AdditionalDependencies": [
                 "MetasoundEditor"
-            ]    
+            ]
     }],
     "Content": true,
     "Plugins": [{

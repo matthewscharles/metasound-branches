@@ -1,6 +1,6 @@
 // Copyright 2026 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundCATBitcrusherNode.h"
+#include "MetasoundBranchesCAT/Public/MetasoundCATBitcrusherNode.h"
 
 #include "MetasoundAudioBuffer.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"

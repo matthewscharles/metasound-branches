@@ -1,6 +1,6 @@
 // Copyright 2026 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundCATSubtractNode.h"
+#include "MetasoundBranchesCAT/Public/MetasoundCATMultiplyNode.h"
 
 #include "MetasoundAudioBuffer.h"
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
@@ -14,58 +14,58 @@
 #include "Math/UnrealMathUtility.h"
 #include "TypeFamily/ChannelTypeFamily.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundBranches_CATSubtractNode"
+#define LOCTEXT_NAMESPACE "MetasoundBranches_CATMultiplyNode"
 
 namespace Metasound
 {
-	namespace CATSubtractVertexNames
+	namespace CATMultiplyVertexNames
 	{
 		METASOUND_PARAM(InputA, "A", "First CAT input.")
 		METASOUND_PARAM(InputB, "B", "Second input. Type is configurable.")
 		METASOUND_PARAM(InputBSlewEnabled, "Slew B", "Enable one-pole slew smoothing on input B.")
 		METASOUND_PARAM(InputBRiseTime, "B Rise Time", "Rise time in seconds for input B slew.")
 		METASOUND_PARAM(InputBFallTime, "B Fall Time", "Fall time in seconds for input B slew.")
-		METASOUND_PARAM(Output, "Output", "CAT subtract result.")
+		METASOUND_PARAM(Output, "Output", "CAT multiply result.")
 	}
 
-	namespace CATSubtractPrivate
+	namespace CATMultiplyPrivate
 	{
-		class FCATSubtractOperatorData final : public TOperatorData<FCATSubtractOperatorData>
+		class FCATMultiplyOperatorData final : public TOperatorData<FCATMultiplyOperatorData>
 		{
 		public:
 			static const FLazyName OperatorDataTypeName;
 
-			explicit FCATSubtractOperatorData(const FName& InCatAudioTypeName, const EMetaSoundCATSubtractInputBMode InInputBMode)
+			explicit FCATMultiplyOperatorData(const FName& InCatAudioTypeName, const EMetaSoundCATMultiplyInputBMode InInputBMode)
 				: CatAudioTypeName(InCatAudioTypeName)
 				, InputBMode(InInputBMode)
 			{
 			}
 
 			FName CatAudioTypeName;
-			EMetaSoundCATSubtractInputBMode InputBMode;
+			EMetaSoundCATMultiplyInputBMode InputBMode;
 		};
 
-		const FLazyName FCATSubtractOperatorData::OperatorDataTypeName = TEXT("FCATSubtractOperatorData");
+		const FLazyName FCATMultiplyOperatorData::OperatorDataTypeName = TEXT("FCATMultiplyOperatorData");
 
-		FVertexInterface GetVertexInterface(const FName& InCatFormat, const EMetaSoundCATSubtractInputBMode InInputBMode)
+		FVertexInterface GetVertexInterface(const FName& InCatFormat, const EMetaSoundCATMultiplyInputBMode InInputBMode)
 		{
-			using namespace CATSubtractVertexNames;
+			using namespace CATMultiplyVertexNames;
 
 			FInputVertexInterface Input;
 			Input.Add(FInputDataVertex(METASOUND_GET_PARAM_NAME(InputA), InCatFormat, METASOUND_GET_PARAM_METADATA(InputA), EVertexAccessType::Reference));
 
 			switch (InInputBMode)
 			{
-			case EMetaSoundCATSubtractInputBMode::CAT:
+			case EMetaSoundCATMultiplyInputBMode::CAT:
 				Input.Add(FInputDataVertex(METASOUND_GET_PARAM_NAME(InputB), InCatFormat, METASOUND_GET_PARAM_METADATA(InputB), EVertexAccessType::Reference));
 				break;
-			case EMetaSoundCATSubtractInputBMode::MonoAudio:
+			case EMetaSoundCATMultiplyInputBMode::MonoAudio:
 				Input.Add(TInputDataVertex<FAudioBuffer>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputB)));
 				break;
-			case EMetaSoundCATSubtractInputBMode::Float:
+			case EMetaSoundCATMultiplyInputBMode::Float:
 				Input.Add(TInputDataVertex<float>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputB), 1.0f));
 				break;
-			case EMetaSoundCATSubtractInputBMode::FloatArray:
+			case EMetaSoundCATMultiplyInputBMode::FloatArray:
 				Input.Add(TInputDataVertex<TArray<float>>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputB)));
 				break;
 			default:
@@ -84,13 +84,13 @@ namespace Metasound
 		}
 	}
 
-	class FCATSubtractOperator final : public TExecutableOperator<FCATSubtractOperator>
+	class FCATMultiplyOperator final : public TExecutableOperator<FCATMultiplyOperator>
 	{
 	public:
-		using FCATSubtractOperatorData = CATSubtractPrivate::FCATSubtractOperatorData;
+		using FCATMultiplyOperatorData = CATMultiplyPrivate::FCATMultiplyOperatorData;
 
-		FCATSubtractOperator(
-			const TSharedPtr<const FCATSubtractOperatorData>& InOperatorData,
+		FCATMultiplyOperator(
+			const TSharedPtr<const FCATMultiplyOperatorData>& InOperatorData,
 			const FOperatorSettings& InSettings,
 			FChannelAgnosticTypeReadRef&& InInputA,
 			FChannelAgnosticTypeReadRef&& InInputBCAT,
@@ -117,20 +117,20 @@ namespace Metasound
 
 		static const FVertexInterface& DeclareVertexInterface()
 		{
-			static const FVertexInterface Interface = CATSubtractPrivate::GetVertexInterface(TEXT("Cat:Stereo2Dot0"), EMetaSoundCATSubtractInputBMode::MonoAudio);
+			static const FVertexInterface Interface = CATMultiplyPrivate::GetVertexInterface(TEXT("Cat:Stereo2Dot0"), EMetaSoundCATMultiplyInputBMode::MonoAudio);
 			return Interface;
 		}
 
 		static FNodeClassMetadata GetNodeInfo()
 		{
 			FNodeClassMetadata Metadata;
-			Metadata.ClassName = { TEXT("Experimental"), TEXT("CATSubtract"), TEXT("Audio") };
+			Metadata.ClassName = { TEXT("Experimental"), TEXT("CATMultiply"), TEXT("Audio") };
 			Metadata.MajorVersion = 1;
 			Metadata.MinorVersion = 0;
-			Metadata.DisplayName = LOCTEXT("CATSubtractDisplayName", "CAT Subtract");
-			Metadata.Description = LOCTEXT("CATSubtractDescription", "Subtracts CAT, mono audio, float, or float array input from a CAT signal.");
+			Metadata.DisplayName = LOCTEXT("CATMultiplyDisplayName", "CAT Multiply");
+			Metadata.Description = LOCTEXT("CATMultiplyDescription", "Multiplies a CAT signal by CAT, mono audio, or float input.");
 			Metadata.Author = TEXT("Charles Matthews");
-			Metadata.PromptIfMissing = LOCTEXT("CATSubtractMissingPrompt", "Enable MetaSoundExperimental for CAT channel format schemas.");
+			Metadata.PromptIfMissing = LOCTEXT("CATMultiplyMissingPrompt", "Enable MetaSoundExperimental for CAT channel format schemas.");
 			Metadata.CategoryHierarchy = {
 				METASOUND_LOCTEXT("Custom", "Branches"),
 				METASOUND_LOCTEXT("CustomSub", "CAT")
@@ -144,9 +144,9 @@ namespace Metasound
 
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
 		{
-			using namespace CATSubtractVertexNames;
+			using namespace CATMultiplyVertexNames;
 
-			const FCATSubtractOperatorData* ConfigData = CastOperatorData<const FCATSubtractOperatorData>(InParams.Node.GetOperatorData().Get());
+			const FCATMultiplyOperatorData* ConfigData = CastOperatorData<const FCATMultiplyOperatorData>(InParams.Node.GetOperatorData().Get());
 			if (!ConfigData)
 			{
 				return MakeUnique<FNoOpOperator>();
@@ -158,7 +158,7 @@ namespace Metasound
 				return MakeUnique<FNoOpOperator>();
 			}
 
-			const TSharedPtr<const FCATSubtractOperatorData>& OperatorDataSharedPtr = StaticCastSharedPtr<const FCATSubtractOperatorData>(InParams.Node.GetOperatorData());
+			const TSharedPtr<const FCATMultiplyOperatorData>& OperatorDataSharedPtr = StaticCastSharedPtr<const FCATMultiplyOperatorData>(InParams.Node.GetOperatorData());
 
 			FChannelAgnosticTypeReadRef InA = InParams.InputData.GetOrCreateDefaultDataReadReference<FChannelAgnosticType>(METASOUND_GET_PARAM_NAME(InputA), InParams.OperatorSettings);
 
@@ -172,16 +172,16 @@ namespace Metasound
 
 			switch (ConfigData->InputBMode)
 			{
-			case EMetaSoundCATSubtractInputBMode::CAT:
+			case EMetaSoundCATMultiplyInputBMode::CAT:
 				InBCat = InParams.InputData.GetOrCreateDefaultDataReadReference<FChannelAgnosticType>(METASOUND_GET_PARAM_NAME(InputB), InParams.OperatorSettings);
 				break;
-			case EMetaSoundCATSubtractInputBMode::MonoAudio:
+			case EMetaSoundCATMultiplyInputBMode::MonoAudio:
 				InBMono = InParams.InputData.GetOrCreateDefaultDataReadReference<FAudioBuffer>(METASOUND_GET_PARAM_NAME(InputB), InParams.OperatorSettings);
 				break;
-			case EMetaSoundCATSubtractInputBMode::Float:
+			case EMetaSoundCATMultiplyInputBMode::Float:
 				InBFloat = InParams.InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InputB), InParams.OperatorSettings);
 				break;
-			case EMetaSoundCATSubtractInputBMode::FloatArray:
+			case EMetaSoundCATMultiplyInputBMode::FloatArray:
 				InBFloatArray = InParams.InputData.GetOrCreateDefaultDataReadReference<TArray<float>>(METASOUND_GET_PARAM_NAME(InputB), InParams.OperatorSettings);
 				break;
 			default:
@@ -191,7 +191,7 @@ namespace Metasound
 
 			FChannelAgnosticTypeWriteRef Out = FChannelAgnosticTypeWriteRef::CreateNew(InParams.OperatorSettings, ConcreteType->GetName());
 
-			return MakeUnique<FCATSubtractOperator>(
+			return MakeUnique<FCATMultiplyOperator>(
 				OperatorDataSharedPtr,
 				InParams.OperatorSettings,
 				MoveTemp(InA),
@@ -207,7 +207,7 @@ namespace Metasound
 
 		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace CATSubtractVertexNames;
+			using namespace CATMultiplyVertexNames;
 
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputA), InputA);
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputBSlewEnabled), InputBSlewEnabled);
@@ -216,16 +216,16 @@ namespace Metasound
 
 			switch (OperatorData->InputBMode)
 			{
-			case EMetaSoundCATSubtractInputBMode::CAT:
+			case EMetaSoundCATMultiplyInputBMode::CAT:
 				InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputB), InputBCAT);
 				break;
-			case EMetaSoundCATSubtractInputBMode::MonoAudio:
+			case EMetaSoundCATMultiplyInputBMode::MonoAudio:
 				InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputB), InputBMono);
 				break;
-			case EMetaSoundCATSubtractInputBMode::Float:
+			case EMetaSoundCATMultiplyInputBMode::Float:
 				InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputB), InputBFloat);
 				break;
-			case EMetaSoundCATSubtractInputBMode::FloatArray:
+			case EMetaSoundCATMultiplyInputBMode::FloatArray:
 				InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputB), InputBFloatArray);
 				break;
 			default:
@@ -236,7 +236,7 @@ namespace Metasound
 
 		virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace CATSubtractVertexNames;
+			using namespace CATMultiplyVertexNames;
 			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(Output), Output);
 		}
 
@@ -262,7 +262,7 @@ namespace Metasound
 
 			switch (OperatorData->InputBMode)
 			{
-			case EMetaSoundCATSubtractInputBMode::Float:
+			case EMetaSoundCATMultiplyInputBMode::Float:
 			{
 				BScratch.SetNumUninitialized(NumFrames);
 				const float Target = *InputBFloat;
@@ -295,12 +295,12 @@ namespace Metasound
 					TArrayView<float> Dst = Output->GetChannel(Channel);
 					for (int32 Frame = 0; Frame < NumFrames; ++Frame)
 					{
-						Dst[Frame] = SrcA[Frame] - BScratch[Frame];
+						Dst[Frame] = SrcA[Frame] * BScratch[Frame];
 					}
 				}
 				break;
 			}
-			case EMetaSoundCATSubtractInputBMode::MonoAudio:
+			case EMetaSoundCATMultiplyInputBMode::MonoAudio:
 			{
 				BScratch.SetNumUninitialized(NumFrames);
 				const float* SrcB = InputBMono->GetData();
@@ -334,12 +334,12 @@ namespace Metasound
 					TArrayView<float> Dst = Output->GetChannel(Channel);
 					for (int32 Frame = 0; Frame < NumFrames; ++Frame)
 					{
-						Dst[Frame] = SrcA[Frame] - BScratch[Frame];
+						Dst[Frame] = SrcA[Frame] * BScratch[Frame];
 					}
 				}
 				break;
 			}
-			case EMetaSoundCATSubtractInputBMode::CAT:
+			case EMetaSoundCATMultiplyInputBMode::CAT:
 			{
 				const int32 NumBChannels = FMath::Max(1, InputBCAT->NumChannels());
 				if (PrevBPerChannel.Num() != NumOutChannels)
@@ -373,19 +373,19 @@ namespace Metasound
 						{
 							State = Target;
 						}
-						Dst[Frame] = SrcA[Frame] - State;
+						Dst[Frame] = SrcA[Frame] * State;
 					}
 					PrevBPerChannel[Channel] = State;
 				}
 				bChannelSlewInitialized = true;
 				break;
 			}
-			case EMetaSoundCATSubtractInputBMode::FloatArray:
+			case EMetaSoundCATMultiplyInputBMode::FloatArray:
 			{
 				const TArray<float>& Values = *InputBFloatArray;
 				if (PrevBPerChannel.Num() != NumOutChannels)
 				{
-					PrevBPerChannel.Init(0.0f, NumOutChannels);
+					PrevBPerChannel.Init(1.0f, NumOutChannels);
 					bChannelSlewInitialized = false;
 				}
 
@@ -395,7 +395,7 @@ namespace Metasound
 					TArrayView<const float> SrcA = InputA->GetChannel(AChannel);
 					TArrayView<float> Dst = Output->GetChannel(Channel);
 
-					float Target = 0.0f;
+					float Target = 1.0f;
 					if (Values.Num() == 1)
 					{
 						Target = Values[0];
@@ -423,7 +423,7 @@ namespace Metasound
 						{
 							State = Target;
 						}
-						Dst[Frame] = SrcA[Frame] - State;
+						Dst[Frame] = SrcA[Frame] * State;
 					}
 					PrevBPerChannel[Channel] = State;
 				}
@@ -438,7 +438,7 @@ namespace Metasound
 		}
 
 	private:
-		TSharedPtr<const FCATSubtractOperatorData> OperatorData;
+		TSharedPtr<const FCATMultiplyOperatorData> OperatorData;
 		FOperatorSettings Settings;
 		FChannelAgnosticTypeReadRef InputA;
 		FChannelAgnosticTypeReadRef InputBCAT;
@@ -456,11 +456,11 @@ namespace Metasound
 		bool bChannelSlewInitialized = false;
 	};
 
-	using FCATSubtractNode = TNodeFacade<FCATSubtractOperator>;
-	METASOUND_REGISTER_NODE_AND_CONFIGURATION(FCATSubtractNode, FMetaSoundCATSubtractNodeConfiguration);
+	using FCATMultiplyNode = TNodeFacade<FCATMultiplyOperator>;
+	METASOUND_REGISTER_NODE_AND_CONFIGURATION(FCATMultiplyNode, FMetaSoundCATMultiplyNodeConfiguration);
 }
 
-TArray<FPropertyTextFName> UMetaSoundCATSubtractNodeOptionsHelper::GetSoundFileFormatChannelOptions()
+TArray<FPropertyTextFName> UMetaSoundCATMultiplyNodeOptionsHelper::GetSoundFileFormatChannelOptions()
 {
 	const TArray<TSharedRef<const Audio::FChannelTypeFamily>> AllFormats = Audio::GetChannelRegistry().GetAllChannelFormats();
 	TArray<FPropertyTextFName> FormatsOptions;
@@ -478,19 +478,19 @@ TArray<FPropertyTextFName> UMetaSoundCATSubtractNodeOptionsHelper::GetSoundFileF
 	return FormatsOptions;
 }
 
-FMetaSoundCATSubtractNodeConfiguration::FMetaSoundCATSubtractNodeConfiguration()
-	: OperatorData(MakeShared<Metasound::CATSubtractPrivate::FCATSubtractOperatorData>(CatAudioTypeName, InputBMode))
+FMetaSoundCATMultiplyNodeConfiguration::FMetaSoundCATMultiplyNodeConfiguration()
+	: OperatorData(MakeShared<Metasound::CATMultiplyPrivate::FCATMultiplyOperatorData>(CatAudioTypeName, InputBMode))
 {
 }
 
-TInstancedStruct<FMetasoundFrontendClassInterface> FMetaSoundCATSubtractNodeConfiguration::OverrideDefaultInterface(const FMetasoundFrontendClass& InClass) const
+TInstancedStruct<FMetasoundFrontendClassInterface> FMetaSoundCATMultiplyNodeConfiguration::OverrideDefaultInterface(const FMetasoundFrontendClass& InClass) const
 {
 	return TInstancedStruct<FMetasoundFrontendClassInterface>::Make(
 		FMetasoundFrontendClassInterface::GenerateClassInterface(
-			Metasound::CATSubtractPrivate::GetVertexInterface(CatAudioTypeName, InputBMode)));
+			Metasound::CATMultiplyPrivate::GetVertexInterface(CatAudioTypeName, InputBMode)));
 }
 
-TSharedPtr<const Metasound::IOperatorData> FMetaSoundCATSubtractNodeConfiguration::GetOperatorData() const
+TSharedPtr<const Metasound::IOperatorData> FMetaSoundCATMultiplyNodeConfiguration::GetOperatorData() const
 {
 	OperatorData->CatAudioTypeName = CatAudioTypeName;
 	OperatorData->InputBMode = InputBMode;

@@ -1,6 +1,6 @@
 // Copyright 2026 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundCATDustNode.h"
+#include "MetasoundBranchesCAT/Public/MetasoundCATDustNode.h"
 
 #include "DSP/BufferVectorOperations.h"
 #include "DSP/Vbap.h"

@@ -1,0 +1,41 @@
+{
+    "FileVersion": 3,
+    "version": 1,
+    "VersionName": "1.1",
+    "EngineVersion": "5.8.0",
+    "FriendlyName": "MetaSound Branches CAT",
+    "Description": "CAT multichannel nodes for MetaSound Branches.",
+    "Category": "Audio",
+    "CreatedBy": "Charles Matthews",
+    "CreatedByURL": "https://github.com/matthewscharles/",
+    "CanContainContent": false,
+    "IsBetaVersion": false,
+    "IsExperimentalVersion": false,
+    "Installed": false,
+    "SupportedTargetPlatforms": [
+        "Win64",
+        "Mac"
+    ],
+    "Modules": [
+        {
+            "Name": "MetasoundBranchesCAT",
+            "Type": "Runtime",
+            "LoadingPhase": "Default",
+            "PlatformAllowList": ["Win64", "Mac"],
+            "AdditionalDependencies": [
+                "MetasoundEditor",
+                "MetasoundBranches"
+            ]
+        }
+    ],
+    "Plugins": [
+        {
+            "Name": "Metasound",
+            "Enabled": true
+        },
+        {
+            "Name": "MetasoundBranches",
+            "Enabled": true
+        }
+    ]
+}

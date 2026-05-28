@@ -1,6 +1,6 @@
 // Copyright 2026 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundCATPhaseDisperserNode.h"
+#include "MetasoundBranchesCAT/Public/MetasoundCATPhaseDisperserNode.h"
 
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 #include "MetasoundChannelAgnosticType.h"

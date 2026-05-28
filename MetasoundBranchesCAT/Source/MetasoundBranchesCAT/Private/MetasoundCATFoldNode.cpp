@@ -1,6 +1,6 @@
 // Copyright 2026 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundCATFoldNode.h"
+#include "MetasoundBranchesCAT/Public/MetasoundCATFoldNode.h"
 
 #include "MetasoundAudioBuffer.h"
 #include "MetasoundBranches/Public/Fold.h"

@@ -1,6 +1,6 @@
 // Copyright 2026 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundCATLadderARNode.h"
+#include "MetasoundBranchesCAT/Public/MetasoundCATLadderARNode.h"
 
 #include "DSP/Filter.h"
 #include "MetasoundAudioBuffer.h"

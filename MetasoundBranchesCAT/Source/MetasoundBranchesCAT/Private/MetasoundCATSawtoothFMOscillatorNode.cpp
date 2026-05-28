@@ -1,6 +1,6 @@
 // Copyright 2026 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundCATSineFMOscillatorNode.h"
+#include "MetasoundBranchesCAT/Public/MetasoundCATSawtoothFMOscillatorNode.h"
 
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 #include "MetasoundChannelAgnosticType.h"
@@ -14,11 +14,11 @@
 #include "Math/UnrealMathUtility.h"
 #include "TypeFamily/ChannelTypeFamily.h"
 
-#define LOCTEXT_NAMESPACE "MetasoundBranches_CATSineFMOscillatorNode"
+#define LOCTEXT_NAMESPACE "MetasoundBranches_CATSawtoothFMOscillatorNode"
 
 namespace Metasound
 {
-	namespace CATSineFMOscillatorVertexNames
+	namespace CATSawtoothFMOscillatorVertexNames
 	{
 		METASOUND_PARAM(InputEnabled, "Enabled", "Enable or disable function output.")
 		METASOUND_PARAM(InputBipolar, "Bi Polar", "Output bipolar signal if true, unipolar if false.")
@@ -29,14 +29,14 @@ namespace Metasound
 		METASOUND_PARAM(OutputAudio, "Output", "Generated CAT function output.")
 	}
 
-	namespace CATSineFMOscillatorPrivate
+	namespace CATSawtoothFMOscillatorPrivate
 	{
-		class FCATSineFMOscillatorOperatorData final : public TOperatorData<FCATSineFMOscillatorOperatorData>
+		class FCATSawtoothFMOscillatorOperatorData final : public TOperatorData<FCATSawtoothFMOscillatorOperatorData>
 		{
 		public:
 			static const FLazyName OperatorDataTypeName;
 
-			explicit FCATSineFMOscillatorOperatorData(const FName& InCatAudioTypeName)
+			explicit FCATSawtoothFMOscillatorOperatorData(const FName& InCatAudioTypeName)
 				: CatAudioTypeName(InCatAudioTypeName)
 			{
 			}
@@ -44,11 +44,11 @@ namespace Metasound
 			FName CatAudioTypeName;
 		};
 
-		const FLazyName FCATSineFMOscillatorOperatorData::OperatorDataTypeName = TEXT("FCATSineFMOscillatorOperatorData");
+		const FLazyName FCATSawtoothFMOscillatorOperatorData::OperatorDataTypeName = TEXT("FCATSawtoothFMOscillatorOperatorData");
 
 		FVertexInterface GetVertexInterface(const FName& InCatFormat)
 		{
-			using namespace CATSineFMOscillatorVertexNames;
+			using namespace CATSawtoothFMOscillatorVertexNames;
 
 			FInputVertexInterface InputInterface(
 				TInputDataVertex<bool>(METASOUND_GET_PARAM_NAME_AND_METADATA(InputEnabled), true),
@@ -65,14 +65,14 @@ namespace Metasound
 		}
 	}
 
-	class FCATSineFMOscillatorOperator final : public TExecutableOperator<FCATSineFMOscillatorOperator>
+	class FCATSawtoothFMOscillatorOperator final : public TExecutableOperator<FCATSawtoothFMOscillatorOperator>
 	{
 	public:
-		using FCATSineFMOscillatorOperatorData = CATSineFMOscillatorPrivate::FCATSineFMOscillatorOperatorData;
+		using FCATSawtoothFMOscillatorOperatorData = CATSawtoothFMOscillatorPrivate::FCATSawtoothFMOscillatorOperatorData;
 
-		FCATSineFMOscillatorOperator(
+		FCATSawtoothFMOscillatorOperator(
 			const FOperatorSettings& InSettings,
-			const TSharedPtr<const FCATSineFMOscillatorOperatorData>& InOperatorData,
+			const TSharedPtr<const FCATSawtoothFMOscillatorOperatorData>& InOperatorData,
 			const FBoolReadRef& InEnabled,
 			const FBoolReadRef& InBipolar,
 			const FChannelAgnosticTypeReadRef& InPhase,
@@ -94,20 +94,20 @@ namespace Metasound
 
 		static const FVertexInterface& DeclareVertexInterface()
 		{
-			static const FVertexInterface Interface = CATSineFMOscillatorPrivate::GetVertexInterface(TEXT("Cat:Stereo2Dot0"));
+			static const FVertexInterface Interface = CATSawtoothFMOscillatorPrivate::GetVertexInterface(TEXT("Cat:Stereo2Dot0"));
 			return Interface;
 		}
 
 		static FNodeClassMetadata GetNodeInfo()
 		{
 			FNodeClassMetadata Metadata;
-			Metadata.ClassName = { TEXT("Experimental"), TEXT("CATSineFMOscillator"), TEXT("Audio") };
+			Metadata.ClassName = { TEXT("Experimental"), TEXT("CATSawtoothFMOscillator"), TEXT("Audio") };
 			Metadata.MajorVersion = 1;
 			Metadata.MinorVersion = 0;
-			Metadata.DisplayName = LOCTEXT("CATSineFMOscillatorDisplayName", "CAT Function (Cosine)");
-			Metadata.Description = LOCTEXT("CATSineFMOscillatorDescription", "Generate CAT cosine function output with audio-rate CAT phase control and feedback.");
+			Metadata.DisplayName = LOCTEXT("CATSawtoothFMOscillatorDisplayName", "CAT Function (Sawtooth)");
+			Metadata.Description = LOCTEXT("CATSawtoothFMOscillatorDescription", "Generate CAT sawtooth function output with audio-rate CAT phase control and feedback.");
 			Metadata.Author = TEXT("Charles Matthews");
-			Metadata.PromptIfMissing = LOCTEXT("CATSineFMOscillatorMissingPrompt", "Enable MetaSoundExperimental for CAT channel format schemas.");
+			Metadata.PromptIfMissing = LOCTEXT("CATSawtoothFMOscillatorMissingPrompt", "Enable MetaSoundExperimental for CAT channel format schemas.");
 			Metadata.CategoryHierarchy = {
 				METASOUND_LOCTEXT("Custom", "Branches"),
 				METASOUND_LOCTEXT("CustomSub", "CAT")
@@ -121,7 +121,7 @@ namespace Metasound
 
 		virtual void BindInputs(FInputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace CATSineFMOscillatorVertexNames;
+			using namespace CATSawtoothFMOscillatorVertexNames;
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputEnabled), InputEnabled);
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputBipolar), InputBipolar);
 			InOutVertexData.BindReadVertex(METASOUND_GET_PARAM_NAME(InputPhase), InputPhase);
@@ -132,15 +132,15 @@ namespace Metasound
 
 		virtual void BindOutputs(FOutputVertexInterfaceData& InOutVertexData) override
 		{
-			using namespace CATSineFMOscillatorVertexNames;
+			using namespace CATSawtoothFMOscillatorVertexNames;
 			InOutVertexData.BindWriteVertex(METASOUND_GET_PARAM_NAME(OutputAudio), OutputAudio);
 		}
 
 		static TUniquePtr<IOperator> CreateOperator(const FBuildOperatorParams& InParams, FBuildResults& OutErrors)
 		{
-			using namespace CATSineFMOscillatorVertexNames;
+			using namespace CATSawtoothFMOscillatorVertexNames;
 
-			const FCATSineFMOscillatorOperatorData* ConfigData = CastOperatorData<const FCATSineFMOscillatorOperatorData>(InParams.Node.GetOperatorData().Get());
+			const FCATSawtoothFMOscillatorOperatorData* ConfigData = CastOperatorData<const FCATSawtoothFMOscillatorOperatorData>(InParams.Node.GetOperatorData().Get());
 			if (!ConfigData)
 			{
 				return MakeUnique<FNoOpOperator>();
@@ -152,7 +152,7 @@ namespace Metasound
 				return MakeUnique<FNoOpOperator>();
 			}
 
-			const TSharedPtr<const FCATSineFMOscillatorOperatorData>& OperatorDataSharedPtr = StaticCastSharedPtr<const FCATSineFMOscillatorOperatorData>(InParams.Node.GetOperatorData());
+			const TSharedPtr<const FCATSawtoothFMOscillatorOperatorData>& OperatorDataSharedPtr = StaticCastSharedPtr<const FCATSawtoothFMOscillatorOperatorData>(InParams.Node.GetOperatorData());
 
 			TDataReadReference<bool> InEnabled = InParams.InputData.GetOrCreateDefaultDataReadReference<bool>(METASOUND_GET_PARAM_NAME(InputEnabled), InParams.OperatorSettings);
 			TDataReadReference<bool> InBipolar = InParams.InputData.GetOrCreateDefaultDataReadReference<bool>(METASOUND_GET_PARAM_NAME(InputBipolar), InParams.OperatorSettings);
@@ -162,7 +162,7 @@ namespace Metasound
 			FTriggerReadRef InReset = InParams.InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputReset), InParams.OperatorSettings);
 			FChannelAgnosticTypeWriteRef Out = FChannelAgnosticTypeWriteRef::CreateNew(InParams.OperatorSettings, ConcreteType->GetName());
 
-			return MakeUnique<FCATSineFMOscillatorOperator>(
+			return MakeUnique<FCATSawtoothFMOscillatorOperator>(
 				InParams.OperatorSettings,
 				OperatorDataSharedPtr,
 				InEnabled,
@@ -214,7 +214,6 @@ namespace Metasound
 			const float FeedbackAmount = *InputFeedbackFloat;
 			const bool bEnabled = *InputEnabled;
 			const bool bBipolar = *InputBipolar;
-			const float TwoPi = 2.0f * PI;
 
 			for (int32 Channel = 0; Channel < NumOutChannels; ++Channel)
 			{
@@ -240,17 +239,18 @@ namespace Metasound
 					const int32 FeedbackIndex = FMath::Min(Frame, FeedbackAudioData.Num() - 1);
 					const float FeedbackSignal = FeedbackAmount + FeedbackAudioData[FeedbackIndex];
 					const float FeedbackPhase = PhaseData[PhaseIndex] + (FeedbackSignal * FeedbackState);
-					const float CosineValue = FMath::Cos(FeedbackPhase * TwoPi);
+					const float WrappedPhase = FeedbackPhase - FMath::Floor(FeedbackPhase);
+					const float SawValue = bBipolar ? (2.0f * WrappedPhase - 1.0f) : WrappedPhase;
 
-					FeedbackState = CosineValue;
-					OutData[Frame] = bEnabled ? (bBipolar ? CosineValue : (CosineValue + 1.0f) * 0.5f) : 0.0f;
+					FeedbackState = SawValue;
+					OutData[Frame] = bEnabled ? SawValue : 0.0f;
 				}
 			}
 		}
 
 	private:
 		FOperatorSettings Settings;
-		TSharedPtr<const FCATSineFMOscillatorOperatorData> OperatorData;
+		TSharedPtr<const FCATSawtoothFMOscillatorOperatorData> OperatorData;
 		FBoolReadRef InputEnabled;
 		FBoolReadRef InputBipolar;
 		FChannelAgnosticTypeReadRef InputPhase;
@@ -261,11 +261,11 @@ namespace Metasound
 		TArray<float> FeedbackStatePerChannel;
 	};
 
-	using FCATSineFMOscillatorNode = TNodeFacade<FCATSineFMOscillatorOperator>;
-	METASOUND_REGISTER_NODE_AND_CONFIGURATION(FCATSineFMOscillatorNode, FMetaSoundCATSineFMOscillatorNodeConfiguration);
+	using FCATSawtoothFMOscillatorNode = TNodeFacade<FCATSawtoothFMOscillatorOperator>;
+	METASOUND_REGISTER_NODE_AND_CONFIGURATION(FCATSawtoothFMOscillatorNode, FMetaSoundCATSawtoothFMOscillatorNodeConfiguration);
 }
 
-TArray<FPropertyTextFName> UMetaSoundCATSineFMOscillatorNodeOptionsHelper::GetSoundFileFormatChannelOptions()
+TArray<FPropertyTextFName> UMetaSoundCATSawtoothFMOscillatorNodeOptionsHelper::GetSoundFileFormatChannelOptions()
 {
 	const TArray<TSharedRef<const Audio::FChannelTypeFamily>> AllFormats = Audio::GetChannelRegistry().GetAllChannelFormats();
 	TArray<FPropertyTextFName> FormatsOptions;
@@ -283,19 +283,19 @@ TArray<FPropertyTextFName> UMetaSoundCATSineFMOscillatorNodeOptionsHelper::GetSo
 	return FormatsOptions;
 }
 
-FMetaSoundCATSineFMOscillatorNodeConfiguration::FMetaSoundCATSineFMOscillatorNodeConfiguration()
-	: OperatorData(MakeShared<Metasound::CATSineFMOscillatorPrivate::FCATSineFMOscillatorOperatorData>(CatAudioTypeName))
+FMetaSoundCATSawtoothFMOscillatorNodeConfiguration::FMetaSoundCATSawtoothFMOscillatorNodeConfiguration()
+	: OperatorData(MakeShared<Metasound::CATSawtoothFMOscillatorPrivate::FCATSawtoothFMOscillatorOperatorData>(CatAudioTypeName))
 {
 }
 
-TInstancedStruct<FMetasoundFrontendClassInterface> FMetaSoundCATSineFMOscillatorNodeConfiguration::OverrideDefaultInterface(const FMetasoundFrontendClass& InClass) const
+TInstancedStruct<FMetasoundFrontendClassInterface> FMetaSoundCATSawtoothFMOscillatorNodeConfiguration::OverrideDefaultInterface(const FMetasoundFrontendClass& InClass) const
 {
 	return TInstancedStruct<FMetasoundFrontendClassInterface>::Make(
 		FMetasoundFrontendClassInterface::GenerateClassInterface(
-			Metasound::CATSineFMOscillatorPrivate::GetVertexInterface(CatAudioTypeName)));
+			Metasound::CATSawtoothFMOscillatorPrivate::GetVertexInterface(CatAudioTypeName)));
 }
 
-TSharedPtr<const Metasound::IOperatorData> FMetaSoundCATSineFMOscillatorNodeConfiguration::GetOperatorData() const
+TSharedPtr<const Metasound::IOperatorData> FMetaSoundCATSawtoothFMOscillatorNodeConfiguration::GetOperatorData() const
 {
 	OperatorData->CatAudioTypeName = CatAudioTypeName;
 	return OperatorData;

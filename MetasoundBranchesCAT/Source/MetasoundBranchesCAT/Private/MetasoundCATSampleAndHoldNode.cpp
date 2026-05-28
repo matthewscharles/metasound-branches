@@ -1,6 +1,6 @@
 // Copyright 2026 Charles Matthews. All Rights Reserved.
 
-#include "MetasoundBranches/Public/MetasoundCATSampleAndHoldNode.h"
+#include "MetasoundBranchesCAT/Public/MetasoundCATSampleAndHoldNode.h"
 
 #include "MetasoundBranches/Public/MetasoundCommonMacros.h"
 #include "MetasoundChannelAgnosticType.h"
